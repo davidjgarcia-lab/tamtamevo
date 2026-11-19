@@ -1,0 +1,7 @@
+{
+  "name": "TamTam.Editor",
+  "rootNamespace": "TamTam.EditorTools",
+  "references": ["TamTam.Core"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": false
+}

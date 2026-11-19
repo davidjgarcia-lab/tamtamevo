@@ -1,0 +1,7 @@
+{
+  "name": "TamTam.Core",
+  "rootNamespace": "TamTam.Core",
+  "references": [],
+  "noEngineReferences": true,
+  "autoReferenced": true
+}

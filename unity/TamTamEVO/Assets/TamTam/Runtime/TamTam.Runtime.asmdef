@@ -1,0 +1,6 @@
+{
+  "name": "TamTam.Runtime",
+  "rootNamespace": "TamTam",
+  "references": ["TamTam.Core", "Unity.2D.Animation.Runtime"],
+  "autoReferenced": true
+}
