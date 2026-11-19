@@ -1,5 +1,8 @@
-import { advanceCare, bathe, clean, feed, goToSleep, newCareState, pet, play, spendForActivity, wakeUp, DEFAULT_CARE_CONFIG, satisfaction, type CareConfig, type CareState } from "../care/needs";
+import { advanceCare, bathe, clean, feed, goToSleep, nap, newCareState, pet, play, spendForActivity, wakeUp, DEFAULT_CARE_CONFIG, satisfaction, type CareConfig, type CareState } from "../care/needs";
 import { FOODS } from "../game/content";
+import { lustre, type LustreTier } from "../appearance/appearance";
+import { hatchTamtam } from "../identity/tamtam";
+import { addAttributeXp } from "../progression/progression";
 
 /**
  * Life-cycle simulator with a simulated clock (PROGRESSION_TIMELINE.md).
@@ -42,13 +45,17 @@ export interface SimResult {
   avgSatisfaction: number;
   minNeed: number;
   gymSessions: number;
+  /** Lustre tier when the Tamtam becomes eligible for adulthood (no Arena in the simulation). */
+  lustreAtAdult: LustreTier | null;
+  lustreScoreAtAdult: number | null;
 }
 
 export function simulate(profile: Profile, maxDays = 14, cfg: CareConfig = DEFAULT_CARE_CONFIG): SimResult {
   const start = 0;
   const s: CareState = newCareState(start);
   const th = cfg.maturityThresholds;
-  const res: SimResult = { profile: profile.id, hoursToChild: null, hoursToJuvenile: null, hoursToAdult: null, avgSatisfaction: 0, minNeed: 100, gymSessions: 0 };
+  const res: SimResult = { profile: profile.id, hoursToChild: null, hoursToJuvenile: null, hoursToAdult: null, avgSatisfaction: 0, minNeed: 100, gymSessions: 0, lustreAtAdult: null, lustreScoreAtAdult: null };
+  let tt = hatchTamtam({ id: `sim-${profile.id}`, speciesId: "fire", formId: "fire_baby_chispin", requestedName: "Sim", bornAt: 0, personality: [], affinity: { primary: "fire", secondary: "fire" } });
   let total = 0; // cumulative maturity (simulator view, ignores per-stage reset)
   let satSum = 0;
   let satN = 0;
@@ -68,7 +75,11 @@ export function simulate(profile: Profile, maxDays = 14, cfg: CareConfig = DEFAU
       while (s.poops.length) clean(s, now, cfg);
       for (let i = 0; i < profile.petsPerVisit; i++) pet(s, now, cfg);
       for (let i = 0; i < profile.playsPerVisit; i++) play(s, now, cfg);
-      for (let i = 0; i < profile.gymPerVisit; i++) if (spendForActivity(s, now, 12, 6, 4, cfg)) res.gymSessions++;
+      if (s.needs.energy < 40) nap(s, now, cfg); // players nap a tired Tamtam (decision N12)
+      for (let i = 0; i < profile.gymPerVisit; i++) if (spendForActivity(s, now, 5, 6, 4, cfg)) {
+        res.gymSessions++;
+        tt = addAttributeXp(tt, "str", 60).tamtam;
+      }
       if (profile.batheOncePerDay && hour === profile.visits[0]) bathe(s, now, cfg);
       if (profile.putsToSleep && hour === profile.visits[profile.visits.length - 1]) goToSleep(s, now, cfg);
     }
@@ -79,7 +90,12 @@ export function simulate(profile: Profile, maxDays = 14, cfg: CareConfig = DEFAU
     res.minNeed = Math.min(res.minNeed, ...Object.values(s.needs));
     if (res.hoursToChild === null && total >= th.baby) res.hoursToChild = h;
     if (res.hoursToJuvenile === null && total >= th.child) res.hoursToJuvenile = h;
-    if (res.hoursToAdult === null && total >= th.juvenile) res.hoursToAdult = h;
+    if (res.hoursToAdult === null && total >= th.juvenile) {
+      res.hoursToAdult = h;
+      const l = lustre(s, tt);
+      res.lustreAtAdult = l.tier;
+      res.lustreScoreAtAdult = Math.round(l.score);
+    }
   }
   res.avgSatisfaction = Math.round(satSum / satN);
   res.minNeed = Math.round(res.minNeed);

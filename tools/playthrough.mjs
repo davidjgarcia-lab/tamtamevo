@@ -183,6 +183,18 @@ try {
   await shot("17-debug-after-24h");
   const hunger1 = await need("Hambre");
   check("E2E-14", "Debug +24 h hace bajar el hambre (con suelo 25)", hunger1 < hunger0 && hunger1 >= 25, `${hunger0}→${hunger1}`);
+  // Lustre comparison (debug).
+  await page.getByTestId("dev").click();
+  await page.getByTestId("dbg-lustre-lab").click();
+  await page.getByText("Lustre · comparativa").waitFor({ timeout: 5000 });
+  await page.waitForTimeout(2600);
+  await shot("20-lustre-lab");
+  check("E2E-21", "Comparativa de Lustre (5 niveles) se muestra", (await page.getByText("Legendario").count()) > 0);
+  await page.getByText("Cerrar", { exact: true }).click();
+  // Nap.
+  await page.getByTestId("care-nap").click();
+  await page.waitForTimeout(400);
+  check("E2E-20", "Siesta de 20 min disponible y con cooldown", await page.getByText(/^Siesta \d+m$/).isVisible());
   const cDebug = await coins();
   await page.getByTestId("dev").click();
   await page.getByTestId("debug-exit").click();

@@ -30,6 +30,8 @@ export interface CareConfig {
   maturity: { base: number; bonus: number; careLow: number; careHigh: number; playMinutesForMax: number };
   /** Maturity needed to become eligible for each stage transition. */
   maturityThresholds: { baby: number; child: number; juvenile: number };
+  /** Nap (decision N12): short rest that recovers energy without going to bed. */
+  nap: { minutes: number; energyGain: number; cooldownMin: number };
 }
 
 export const DEFAULT_CARE_CONFIG: CareConfig = {
@@ -44,6 +46,7 @@ export const DEFAULT_CARE_CONFIG: CareConfig = {
   maxPoops: 3,
   maturity: { base: 1, bonus: 0.4, careLow: 40, careHigh: 90, playMinutesForMax: 45 },
   maturityThresholds: { baby: 17, child: 67, juvenile: 168 },
+  nap: { minutes: 20, energyGain: 15, cooldownMin: 90 },
 };
 
 export interface CareState {
@@ -51,6 +54,12 @@ export interface CareState {
   updatedAt: number;
   lastInteractionAt: number;
   asleep: boolean;
+  /** While napping (timestamp the nap ends), or null. Optional for saves made before naps existed. */
+  napUntil?: number | null;
+  /** Lifetime care quality: ∫ satisfaction dt and hours accumulated (for Lustre). */
+  satIntegral?: number;
+  satHours?: number;
+  lastNapAt?: number | null;
   /** Timestamps at which poops will appear (future) — moved to `poops` when due. */
   pendingPoops: number[];
   poops: number[];
@@ -75,6 +84,8 @@ export function newCareState(now: number): CareState {
     maturity: 0,
     playLog: [],
     counters: {},
+    napUntil: null,
+    lastNapAt: null,
   };
 }
 
@@ -112,10 +123,11 @@ export function advanceCare(s: CareState, now: number, cfg: CareConfig = DEFAULT
   while (t < now && guard++ < 1_000_000) {
     const dampAt = s.lastInteractionAt + cfg.dampAfterHours * HOUR;
     const nextPoop = s.pendingPoops.length ? Math.min(...s.pendingPoops) : Infinity;
-    const rates = s.asleep ? cfg.asleep : cfg.awake;
+    const napping = !s.asleep && s.napUntil != null && t < s.napUntil;
+    const rates = s.asleep || napping ? (napping ? { ...cfg.asleep, energy: cfg.nap.energyGain / (cfg.nap.minutes / 60) } : cfg.asleep) : cfg.awake;
     const damp = t >= dampAt ? cfg.dampFactor : 1;
     // Wake-up event when energy fills up while asleep.
-    let wakeAt = Infinity;
+    let wakeAt = napping ? s.napUntil! : Infinity;
     if (s.asleep && rates.energy > 0) wakeAt = t + ((100 - s.needs.energy) / rates.energy) * HOUR;
     let next = Math.min(now, nextPoop, wakeAt);
     if (t < dampAt) next = Math.min(next, dampAt);
@@ -126,6 +138,8 @@ export function advanceCare(s: CareState, now: number, cfg: CareConfig = DEFAULT
     const dtH = (next - t) / HOUR;
     // Growth uses the state at the start of the segment (piecewise-constant rate).
     s.maturity += growthRate(s, t, cfg) * dtH;
+    s.satIntegral = (s.satIntegral ?? 0) + satisfaction(s.needs) * dtH;
+    s.satHours = (s.satHours ?? 0) + dtH;
     for (const n of NEED_IDS) {
       let r = rates[n];
       if (n === "hygiene") r -= s.poops.length * cfg.poopHygienePerHour;
@@ -146,6 +160,7 @@ export function advanceCare(s: CareState, now: number, cfg: CareConfig = DEFAULT
       for (const p of due) if (s.poops.length < cfg.maxPoops) s.poops.push(p);
     }
     if (s.asleep && s.needs.energy >= 100) s.asleep = false;
+    if (s.napUntil != null && t >= s.napUntil) s.napUntil = null;
   }
   s.updatedAt = now;
   s.playLog = s.playLog.filter((p) => p > now - 24 * HOUR);
@@ -155,7 +170,7 @@ export function advanceCare(s: CareState, now: number, cfg: CareConfig = DEFAULT
 
 export type CareReaction =
   | "eat" | "eat_favorite" | "refuse_full" | "bathe" | "clean" | "pet" | "pet_saturated"
-  | "play" | "too_tired" | "sleep" | "wake" | "already_asleep" | "dislike";
+  | "play" | "too_tired" | "sleep" | "wake" | "already_asleep" | "dislike" | "nap" | "not_sleepy";
 
 export interface FoodDef {
   id: string;
@@ -246,9 +261,27 @@ export function goToSleep(s: CareState, now: number, cfg: CareConfig = DEFAULT_C
   return "sleep";
 }
 
+/** 20-minute nap (+15 energy). Cooldown 90 min. Interrupted by any other activity. */
+export function nap(s: CareState, now: number, cfg: CareConfig = DEFAULT_CARE_CONFIG): CareReaction {
+  advanceCare(s, now, cfg);
+  if (s.asleep || (s.napUntil != null && now < s.napUntil)) return "already_asleep";
+  if (s.lastNapAt != null && now - s.lastNapAt < cfg.nap.cooldownMin * 60_000) return "not_sleepy";
+  s.napUntil = now + cfg.nap.minutes * 60_000;
+  s.lastNapAt = now;
+  touch(s, now);
+  return "nap";
+}
+
+/** Minutes until the next nap is allowed (0 = available now). */
+export function napCooldownLeft(s: CareState, now: number, cfg: CareConfig = DEFAULT_CARE_CONFIG): number {
+  if (s.lastNapAt == null) return 0;
+  return Math.max(0, Math.ceil((s.lastNapAt + cfg.nap.cooldownMin * 60_000 - now) / 60_000));
+}
+
 export function wakeUp(s: CareState, now: number, cfg: CareConfig = DEFAULT_CARE_CONFIG): CareReaction {
   advanceCare(s, now, cfg);
   s.asleep = false;
+  s.napUntil = null;
   touch(s, now);
   return "wake";
 }
@@ -257,6 +290,7 @@ export function wakeUp(s: CareState, now: number, cfg: CareConfig = DEFAULT_CARE
 export function spendForActivity(s: CareState, now: number, energy: number, hunger: number, playMinutes: number, cfg: CareConfig = DEFAULT_CARE_CONFIG): boolean {
   advanceCare(s, now, cfg);
   if (s.asleep || s.needs.energy < energy) return false;
+  s.napUntil = null;
   s.needs.energy = clamp(s.needs.energy - energy, 0, 100);
   s.needs.hunger = clamp(s.needs.hunger - hunger, 0, 100);
   s.needs.activity = clamp(s.needs.activity + 15, 0, 100);
@@ -265,8 +299,9 @@ export function spendForActivity(s: CareState, now: number, energy: number, hung
 }
 
 /** Dominant mood used to pick the idle animation and the expression. */
-export function mood(s: CareState): "asleep" | "hungry" | "sad" | "tired" | "dirty" | "happy" | "ok" {
+export function mood(s: CareState, now?: number): "asleep" | "napping" | "hungry" | "sad" | "tired" | "dirty" | "happy" | "ok" {
   if (s.asleep) return "asleep";
+  if (s.napUntil != null && (now === undefined || now < s.napUntil)) return "napping";
   if (s.needs.hunger < 35) return "hungry";
   if (s.needs.energy < 25) return "tired";
   if (s.needs.hygiene < 35 || s.poops.length >= 2) return "dirty";
@@ -278,4 +313,11 @@ export function mood(s: CareState): "asleep" | "hungry" | "sad" | "tired" | "dir
 export function stageEligible(s: CareState, stage: "baby" | "child" | "juvenile", cfg: CareConfig = DEFAULT_CARE_CONFIG): boolean {
   const need = stage === "baby" ? cfg.maturityThresholds.baby : stage === "child" ? cfg.maturityThresholds.child - cfg.maturityThresholds.baby : cfg.maturityThresholds.juvenile - cfg.maturityThresholds.child;
   return s.maturity >= need;
+}
+
+/** Lifetime average satisfaction (0–100); falls back to current satisfaction for brand-new Tamtams. */
+export function lifetimeCare(s: CareState): number {
+  const h = s.satHours ?? 0;
+  if (h < 1) return satisfaction(s.needs);
+  return (s.satIntegral ?? 0) / h;
 }

@@ -22,7 +22,22 @@ export interface DrawOp {
   stroke: SkPaint | null;
   faceSlot: "eyes" | "mouth" | "brows" | "prop" | null;
   faceStates: string[];
+  /** Sheen sweep: local bounds of the path (null = no sheen). */
+  sheenBounds: { x: number; y: number; w: number; h: number } | null;
 }
+
+/** Lustre-driven look (from @tamtam/core LOOK). */
+export interface Look {
+  saturation: number;
+  emissive: number;
+  sheen: number;
+  halo: 0 | 1 | 2;
+  particles: number;
+  sparkle: boolean;
+  /** Form-quality tier 0–4 that selects physical ornaments (default 2 = vivid). */
+  tier?: number;
+}
+export const DEFAULT_LOOK: Look = { saturation: 1, emissive: 1, sheen: 0.22, halo: 0, particles: 1, sparkle: false, tier: 2 };
 
 export interface CreatureResources {
   ops: DrawOp[];
@@ -31,6 +46,17 @@ export interface CreatureResources {
   shadow: SkPaint;
   particlePaints: Record<string, SkPaint>;
   shapes: Record<ParticleShape, SkPath>;
+  look: Look;
+  /** saveLayer paint with a saturation colour filter (null when saturation = 1). */
+  layer: SkPaint | null;
+  glowColor: string;
+  accentColor: string;
+}
+
+/** Luminance-preserving saturation matrix (4×5, row-major). */
+function saturationMatrix(s: number): number[] {
+  const r = 0.2126 * (1 - s), g = 0.7152 * (1 - s), b = 0.0722 * (1 - s);
+  return [r + s, g, b, 0, 0, r, g + s, b, 0, 0, r, g, b + s, 0, 0, 0, 0, 0, 1, 0];
 }
 
 const colorOf = (c: string, palette: Palette) => (c in palette ? palette[c as keyof Palette] : c);
@@ -81,17 +107,44 @@ export function svgPath(d: string): SkPath {
   return p;
 }
 
-export function buildResources(rig: CompiledRig, palette: Palette, emitters: EmitterDef[]): CreatureResources {
-  const ops: DrawOp[] = rig.parts.map((part) => {
-    return {
+export function buildResources(rig: CompiledRig, palette: Palette, emitters: EmitterDef[], look: Look = DEFAULT_LOOK): CreatureResources {
+  const ops: DrawOp[] = [];
+  const tier = look.tier ?? 2;
+  for (const part of rig.parts) {
+    if (tier < part.tierMin || tier > part.tierMax) continue;
+    const e = part.emissive ? look.emissive : 1;
+    // Glow parts (blurred) scale with the emissive level; solid emissive parts get a bloom pass when e > 1.
+    if (part.emissive && part.blur === 0 && e > 1 && part.fill) {
+      ops.push({
+        path: svgPath(part.d), bone: part.bone, stroke: null, faceSlot: null, faceStates: [], sheenBounds: null,
+        fill: makePaint(palette.glow, Math.min(0.9, 0.35 * (e - 0.6)), 5 * e),
+      });
+    }
+    const blur = part.emissive && part.blur > 0 ? part.blur * (0.6 + 0.4 * e) : part.blur;
+    const op: DrawOp = {
       path: svgPath(part.d),
       bone: part.bone,
-      fill: part.fill ? paintFor(part.fill, palette, part.blur) : null,
-      stroke: part.stroke ? paintFor(part.stroke, palette, part.blur, part.strokeWidth) : null,
+      fill: part.fill ? paintFor(part.fill, palette, blur) : null,
+      stroke: part.stroke ? paintFor(part.stroke, palette, blur, part.strokeWidth) : null,
       faceSlot: part.faceSlot,
       faceStates: part.faceStates,
+      sheenBounds: null,
     };
-  });
+    if (part.emissive && part.blur > 0 && op.fill && part.fill) {
+      const baseAlpha = part.fill.alpha ?? 1;
+      op.fill.setAlphaf(Math.min(1, baseAlpha * e));
+    }
+    if (part.sheen && look.sheen > 0) {
+      const b = svgPath(part.d).computeTightBounds();
+      op.sheenBounds = { x: b.x, y: b.y, w: b.width, h: b.height };
+    }
+    ops.push(op);
+  }
+  let layer: SkPaint | null = null;
+  if (Math.abs(look.saturation - 1) > 0.01) {
+    layer = Skia.Paint();
+    layer.setColorFilter(Skia.ColorFilter.MakeMatrix(saturationMatrix(look.saturation)));
+  }
 
   const particlePaints: Record<string, SkPaint> = {};
   for (const e of emitters) {
@@ -101,6 +154,10 @@ export function buildResources(rig: CompiledRig, palette: Palette, emitters: Emi
 
   return {
     ops,
+    look,
+    layer,
+    glowColor: palette.glow,
+    accentColor: palette.accent,
     shadowBone: Math.max(0, rig.breathBone),
     shadow: makePaint("#1A0A0A", 0.32, 4),
     particlePaints,

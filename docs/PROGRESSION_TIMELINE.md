@@ -15,6 +15,17 @@
 
 **Cumple D10:** de 5 a 7 días según cuidado y juego (test automático en `game.test.ts`).
 
+### 1.1 Con siestas y Gym barato (N12) y Lustre al llegar a adulto (re-simulado)
+| Perfil | → Adulto | Satisfacción media | Energía mínima | Sesiones de Gym | Lustre al ser adulto (sin Arena) |
+|--------|----------|--------------------|----------------|-----------------|----------------------------------|
+| Óptimo | 125 h | 84 | 5 | 72 | **Vivo (56)** |
+| Medio | 133 h | 63 | 15 | 36 | Común (33) |
+| Casual | 159 h | 38 | 25 | 0 | Apagado (20) |
+| Descuido | 166 h | 28 | 25 | 0 | Apagado (18) |
+| Medio + 3 días de ausencia | 149 h | 54 | 10 | 27 | Apagado (29, en el límite) |
+
+En la simulación el Lustre solo cuenta el Gym. Con más actividades (Academy, Garden…) y la Arena, el jugador óptimo llega a Radiante o Legendario.
+
 ## 2. Lectura
 - **Tiempo mínimo:** 120 h teóricas (g = 1 constante). El perfil óptimo real llega a 125 h porque por la noche la satisfacción baja un poco.
 - **Tiempo máximo razonable:** 168 h (g = 0). La única forma de superarlo es el estado Abatido o la Guardería, que congelan la Madurez (Abatido aún **no está implementado** en la simulación; ver GAMEPLAY_TEST_RESULTS).

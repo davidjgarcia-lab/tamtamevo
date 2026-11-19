@@ -10,6 +10,7 @@
 | Excremento | +3/h de pérdida de higiene por excremento · aparece 90–150 min después de comer · máx. 3 | |
 | Amortiguación por ausencia | ×0,5 tras 8 h sin interacción | No castigar ausencias |
 | Suelo | 25 (el tiempo nunca baja una necesidad de ahí) | |
+| Siesta | 20 min reales, +15 Energía, cooldown 90 min; cualquier actividad la interrumpe | Decisión N12 |
 | Mimos | +8 Cariño, +3 Felicidad · máx. 20 al día | Anti-spam |
 | Jugar | +15 Felicidad, +20 Actividad, −5 Energía (requiere Energía ≥ 15) | |
 | Baño | +60 Higiene, +4 Felicidad | |
@@ -31,7 +32,7 @@
 ## Gym — `content.ts` (`GYM`) + `rewards.ts` + `progression.ts`
 | Parámetro | Valor |
 |-----------|-------|
-| Coste | 12 Energía + 6 Hambre |
+| Coste | **5 / 8 / 10 Energía** (Gym nv. 1 / 2 / 3) + 6 Hambre |
 | Recompensa | 35 TC × calidad (0,5–1,5) × nivel (1 / 1,25 / 1,5) × Entusiasmo · tope 2× base |
 | XP de Fuerza | 60 × calidad × Entusiasmo de XP |
 | Repeticiones | 5 / 6 / 7 por nivel. La zona verde se estrecha 2,5% por repetición |
@@ -49,3 +50,6 @@ Primer huevo: 20 s de incubación (tutorial). Huevos normales: ECONOMY y EVOLUTI
 
 ## Evolución — `packages/core/src/evolution/engine.ts` (`FIRE_RULES`)
 Pesos de eje, careW, atributos, catalizadores y gates de la familia Fuego (ver CHARACTER_DESIGN_FIRST_TAMTAM §5).
+
+## Lustre y calidad de forma — `packages/core/src/appearance/appearance.ts`
+Pesos 0,45 cuidado / 0,20 actividades / 0,20 Arena / 0,15 vínculo · umbrales 30 / 50 / 70 / 88 · stats ×0,88 / 0,95 / 1,00 / 1,05 / 1,10 · habilidades ×0,85 / 0,95 / 1 / 1,1 / 1,15 (cooldown ×1,2 / 1,05 / 1 / 0,95 / 0,9) · render (`LOOK`): saturación, emisivo, sheen, halo, partículas y destellos por nivel.

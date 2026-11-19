@@ -1,5 +1,5 @@
 import {
-  advanceCare, bathe, clean, feed, goToSleep, newCareState, pet, play, spendForActivity, wakeUp,
+  advanceCare, bathe, clean, feed, goToSleep, nap, newCareState, pet, play, spendForActivity, wakeUp,
   DEFAULT_CARE_CONFIG, type CareConfig, type CareReaction, type CareState, type NeedId,
 } from "../care/needs";
 import { credit, debit, emptyWallet } from "../economy/wallet";
@@ -10,6 +10,7 @@ import { addAttributeXp, attributeArenaBonuses, upgradeActivity } from "../progr
 import { emptyRewardLog, grantActivityReward, type RewardLog } from "../rewards/rewards";
 import { purchase, type PlayerEconomyState } from "../shop/shop";
 import { FOODS, GYM, SLICE_CATALOG, STARTER_COINS, STARTER_ITEMS } from "./content";
+import { FORM_QUALITY, formQuality, lustre } from "../appearance/appearance";
 
 /**
  * Game state and actions of the first-Tamtam vertical slice.
@@ -114,7 +115,7 @@ export function tick(s: GameState, now: number, cfg: CareConfig = DEFAULT_CARE_C
   if (s.phase === "home") advanceCare(s.care, now, cfg);
 }
 
-export type CareKind = "bathe" | "clean" | "pet" | "play" | "sleep" | "wake";
+export type CareKind = "bathe" | "clean" | "pet" | "play" | "sleep" | "wake" | "nap";
 
 export function careAction(s: GameState, kind: CareKind, now: number): CareReaction {
   if (s.phase !== "home") throw new GameRuleError("no_tamtam");
@@ -125,6 +126,7 @@ export function careAction(s: GameState, kind: CareKind, now: number): CareReact
     case "play": return play(s.care, now);
     case "sleep": s.lightsOn = false; return goToSleep(s.care, now);
     case "wake": s.lightsOn = true; return wakeUp(s.care, now);
+    case "nap": return nap(s.care, now);
   }
 }
 
@@ -160,7 +162,7 @@ export function completeGymSession(s: GameState, input: { runId: string; quality
   if (s.economy.wallet.keys[key] !== undefined) {
     return { ok: true, coins: 0, xp: 0, strLevelsGained: 0, strPointGained: false, duplicate: true };
   }
-  if (!spendForActivity(s.care, input.now, GYM.energyCost, GYM.hungerCost, 4)) {
+  if (!spendForActivity(s.care, input.now, GYM.energyCostByLevel[level] ?? GYM.energyCost, GYM.hungerCost, 4)) {
     return { ok: false, reason: "too_tired", coins: 0, xp: 0, strLevelsGained: 0, strPointGained: false, duplicate: false };
   }
   const r = grantActivityReward(s.economy.wallet, s.rewardLog, {
@@ -215,16 +217,18 @@ export const FORM_BASE_STR: Record<string, number> = {
   fire_adult_fenixara: 105,
 };
 
-export function arenaStrength(s: Readonly<GameState>): { base: number; fromAttribute: number; fromTraining: number; fromFood: number; total: number } {
-  if (!s.tamtam) return { base: 0, fromAttribute: 0, fromTraining: 0, fromFood: 0, total: 0 };
-  const baseForm = FORM_BASE_STR[s.tamtam.formId] ?? 50;
+export function arenaStrength(s: Readonly<GameState>): { base: number; fromAttribute: number; fromTraining: number; fromFood: number; total: number; quality: string } {
+  if (!s.tamtam) return { base: 0, fromAttribute: 0, fromTraining: 0, fromFood: 0, total: 0, quality: "vivid" };
+  // Form quality (Lustre recorded at the Ritual) scales the form's base stat.
+  const quality = formQuality(s.tamtam);
+  const baseForm = (FORM_BASE_STR[s.tamtam.formId] ?? 50) * FORM_QUALITY[quality].statMul;
   const potential = 7; // placeholder until genetics lands in the slice (EVOLUTION_SYSTEM §6)
   const base = Math.round(baseForm * (0.4 + 0.012 * s.tamtam.level) * (1 + potential / 60));
   const pct = attributeArenaBonuses(s.tamtam).strPct;
   const fromAttribute = Math.round((base * pct) / 100);
   const fromTraining = s.gym.strTrainingPoints;
   const fromFood = s.buffs.includes("str_5_next_fight") ? Math.round(base * 0.05) : 0;
-  return { base, fromAttribute, fromTraining, fromFood, total: base + fromAttribute + fromTraining + fromFood };
+  return { base, fromAttribute, fromTraining, fromFood, total: base + fromAttribute + fromTraining + fromFood, quality };
 }
 
 // ── Developer debug actions (only used on the debug profile) ───────────────────
@@ -248,6 +252,12 @@ export function debugAttributeLevels(s: GameState, attr: "str" | "int" | "cre" |
     t = addAttributeXp(t, attr, 50 * (cur.level + 2) - cur.xp).tamtam;
   }
   s.tamtam = t;
+}
+
+/** Sets the lifetime care average (Lustre testing). */
+export function debugSetLifetimeCare(s: GameState, avg: number, hours = 100): void {
+  s.care.satIntegral = Math.min(100, Math.max(0, avg)) * hours;
+  s.care.satHours = hours;
 }
 
 export function debugLevelUp(s: GameState, levels: number): void {
@@ -275,6 +285,8 @@ export function debugNewEgg(s: GameState, now: number, tamtamId: string, alleleI
 export function debugForceEvolution(s: GameState, to: { formId: string; stage: Tamtam["stage"] }, now: number): void {
   if (!s.tamtam) throw new GameRuleError("no_tamtam");
   if (s.tamtam.formId === to.formId) throw new GameRuleError("already_in_form");
-  s.tamtam = applyEvolution(s.tamtam, to, now, 1);
+  // The Lustre at this moment is engraved into the new form (looks, stats and skills).
+  const tier = lustre(s.care, s.tamtam).tier;
+  s.tamtam = applyEvolution(s.tamtam, to, now, 1, tier);
   s.care.maturity = 0;
 }

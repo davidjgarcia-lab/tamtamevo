@@ -1,5 +1,5 @@
 import {
-  arenaStrength, ageInDays, DEFAULT_CARE_CONFIG, FOODS, history, itemStatus, placedCount, quantity, rename, satisfaction, SLICE_CATALOG,
+  arenaStrength, ageInDays, DEFAULT_CARE_CONFIG, FORM_QUALITY, formQuality, lifeMark, LUSTRE_NAMES, MARK_NAMES, lustre, SKILL_VARIANT_NAMES, FOODS, history, itemStatus, placedCount, quantity, rename, satisfaction, SLICE_CATALOG,
   validateName, xpToNext, type CatalogItem, type ShopCategory,
 } from "@tamtam/core";
 import { useState } from "react";
@@ -175,6 +175,25 @@ export function ProfileSheet({ onClose }: { onClose: () => void }) {
         <Bar label="Actividad" value={state.care.needs.activity} color="#5BC85B" />
         <Text style={k.desc}>Satisfacción media: {Math.round(satisfaction(state.care.needs))}</Text>
 
+        <Text style={k.section}>Lustre · {LUSTRE_NAMES[lustre(state.care, t).tier]}</Text>
+        {(() => {
+          const l = lustre(state.care, t);
+          return (
+            <>
+              <Bar label="Lustre" value={l.score} color="#FFB627" />
+              <Text style={k.desc}>
+                Cuidados {Math.round(l.care)} · Actividades {Math.round(l.activity)} · Arena {Math.round(l.arena)} · Vínculo {Math.round(l.bond)}
+                {l.toNext > 0 ? ` · faltan ${Math.ceil(l.toNext)} puntos para el siguiente nivel` : ""}
+              </Text>
+              <Text style={k.desc}>Marca de vida: {MARK_NAMES[lifeMark(t)]}.</Text>
+              <Text style={k.desc}>
+                Al evolucionar, el Lustre de ese momento se graba en la nueva forma: aspecto (adornos, halo, brillo), estadísticas de combate y habilidades. Calidad de la forma actual:{" "}
+                {t.formQuality ? LUSTRE_NAMES[t.formQuality] : "aún sin Ritual"} · stats ×{FORM_QUALITY[formQuality(t)].statMul} · habilidades {SKILL_VARIANT_NAMES[FORM_QUALITY[formQuality(t)].variant]}.
+              </Text>
+            </>
+          );
+        })()}
+
         <Text style={k.section}>Crecimiento</Text>
         <Bar label="Madurez" value={(Math.min(state.care.maturity, need) / need) * 100} color="#FF6B35" />
         <Text style={k.desc}>
@@ -190,7 +209,7 @@ export function ProfileSheet({ onClose }: { onClose: () => void }) {
 
         <Text style={k.section}>Fuerza en Arena</Text>
         <Text style={k.desc}>
-          FUE {arena.total} = base {arena.base} + atributo Fuerza {arena.fromAttribute} + Gym {arena.fromTraining} + comida {arena.fromFood}
+          FUE {arena.total} = base {arena.base} (calidad de forma ×{FORM_QUALITY[formQuality(t)].statMul}) + atributo Fuerza {arena.fromAttribute} + Gym {arena.fromTraining} + comida {arena.fromFood}
         </Text>
         <Text style={k.desc}>Sesiones de Gym: {state.gym.sessions} · cada 10 sesiones, +1 FUE permanente.</Text>
         <Text style={k.section}>Historial de evolución</Text>

@@ -1,7 +1,7 @@
 import { Canvas, createPicture, PaintStyle, Picture, Skia } from "@shopify/react-native-skia";
 import type { ChispinClipId } from "@tamtam/art";
 import {
-  buy, careAction, checkPlacement, cloneData, feedFood, mirror, mood, move, place, PlacementRejected, PurchaseError, SLICE_CATALOG, unplace,
+  buy, careAction, checkPlacement, cloneData, feedFood, lustre, mirror, mood, move, napCooldownLeft, place, PlacementRejected, PurchaseError, SLICE_CATALOG, unplace,
   type CareReaction, type CareKind, type CatalogItem, type Placement,
 } from "@tamtam/core";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -9,6 +9,7 @@ import { Pressable, StyleSheet, Text, View, type GestureResponderEvent, type Lay
 import { Easing, useDerivedValue, useSharedValue, withTiming } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { scheduleOnRN } from "react-native-worklets";
+import { composeLook } from "../creature/look";
 import { drawTamtam, useCreature } from "../creature/useCreature";
 import { newId, useGame } from "../game/GameProvider";
 import { buildRoomPicture, cellAt, drawFurniture, placementRect, roomGeom } from "../home/roomArt";
@@ -16,6 +17,7 @@ import { colors, fonts } from "../theme";
 import { Btn, Coin, Toast } from "../ui/kit";
 import { DebugPanel } from "./DebugPanel";
 import { GymScreen } from "./GymScreen";
+import { LustreLab } from "./LustreLab";
 import { FoodSheet, HistorySheet, InventoryTray, ProfileSheet, ShopSheet } from "./sheets";
 
 const REACTION: Record<CareReaction, { clip: ChispinClipId; ms: number; text: string | null }> = {
@@ -32,6 +34,8 @@ const REACTION: Record<CareReaction, { clip: ChispinClipId; ms: number; text: st
   sleep: { clip: "sleep", ms: 0, text: "Buenas noches." },
   wake: { clip: "celebrate", ms: 1100, text: "¡Buenos días!" },
   already_asleep: { clip: "sleep", ms: 0, text: "Está dormido. Despiértalo primero." },
+  nap: { clip: "sleep", ms: 0, text: "Siesta de 20 minutos (+15 energía)." },
+  not_sleepy: { clip: "angry", ms: 1200, text: "No tiene sueño todavía." },
 };
 
 const PLACE_ERR: Record<string, string> = {
@@ -49,10 +53,15 @@ export function HomeScreen() {
   const game = useGame();
   const { state, act, now } = game;
   const t = state.tamtam!;
-  const creature = useCreature(state.alleleId);
+  // Lustre: how polished the Tamtam looks right now (recomputed every tick; the look only changes with the tier).
+  const liveTier = lustre(state.care, t).tier;
+  const formTier = t.stage === "baby" ? liveTier : t.formQuality ?? liveTier;
+  const look = useMemo(() => composeLook(formTier, liveTier), [formTier, liveTier]);
+  const creature = useCreature(state.alleleId, look);
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [sheet, setSheet] = useState<null | "food" | "shop" | "profile" | "history" | "debug">(null);
   const [gym, setGym] = useState(false);
+  const [lab, setLab] = useState(false);
   const [mode, setMode] = useState<Mode>({ kind: "play" });
   const [toastText, setToastText] = useState<string | null>(null);
   const [reaction, setReaction] = useState<ChispinClipId | null>(null);
@@ -78,8 +87,8 @@ export function HomeScreen() {
   }, [g, posX]);
 
   // Which animation should play: reaction > walking > mood.
-  const m = mood(state.care);
-  const base: ChispinClipId = m === "asleep" ? "sleep" : m === "hungry" ? "hungry" : m === "sad" || m === "tired" || m === "dirty" ? "sad" : "idle";
+  const m = mood(state.care, now());
+  const base: ChispinClipId = m === "asleep" || m === "napping" ? "sleep" : m === "hungry" ? "hungry" : m === "sad" || m === "tired" || m === "dirty" ? "sad" : "idle";
   const clip: ChispinClipId = reaction ?? (walking ? "walk" : base);
   useEffect(() => {
     creature.play(clip);
@@ -327,10 +336,18 @@ export function HomeScreen() {
             <Btn small label="Comer" onPress={() => setSheet("food")} style={h.flex} testID="care-feed" />
             <Btn small label="Bañar" onPress={() => doCare("bathe")} style={h.flex} testID="care-bathe" />
             <Btn small label="Limpiar" onPress={() => doCare("clean")} style={h.flex} testID="care-clean" />
+            <Btn small label="Mimos" onPress={() => doCare("pet")} style={h.flex} testID="care-pet" />
           </View>
           <View style={h.row}>
-            <Btn small label="Mimos" onPress={() => doCare("pet")} style={h.flex} testID="care-pet" />
             <Btn small label="Jugar" onPress={() => doCare("play")} style={h.flex} testID="care-play" />
+            <Btn
+              small
+              label={napCooldownLeft(state.care, now()) > 0 ? `Siesta ${napCooldownLeft(state.care, now())}m` : "Siesta"}
+              disabled={state.care.asleep || napCooldownLeft(state.care, now()) > 0}
+              onPress={() => doCare("nap")}
+              style={h.flex}
+              testID="care-nap"
+            />
             <Btn small label={state.care.asleep ? "Despertar" : "Dormir"} onPress={() => doCare(state.care.asleep ? "wake" : "sleep")} style={h.flex} testID="care-sleep" />
           </View>
           <View style={h.row}>
@@ -385,7 +402,8 @@ export function HomeScreen() {
       )}
       {sheet === "profile" && <ProfileSheet onClose={() => setSheet(null)} />}
       {sheet === "history" && <HistorySheet onClose={() => setSheet(null)} />}
-      {sheet === "debug" && <DebugPanel onClose={() => setSheet(null)} toast={toast} />}
+      {sheet === "debug" && <DebugPanel onClose={() => setSheet(null)} toast={toast} onLustreLab={() => { setSheet(null); setLab(true); }} />}
+      {lab && <LustreLab alleleId={state.alleleId} onClose={() => setLab(false)} />}
       {gym && <GymScreen onClose={() => setGym(false)} />}
       <Toast text={toastText} />
     </SafeAreaView>

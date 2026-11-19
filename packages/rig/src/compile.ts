@@ -23,6 +23,10 @@ export interface CompiledPart {
   faceSlot: "eyes" | "mouth" | "brows" | "prop" | null;
   faceStates: string[];
   blur: number;
+  emissive: boolean;
+  sheen: boolean;
+  tierMin: number;
+  tierMax: number;
 }
 
 export interface CompiledSecondary {
@@ -107,6 +111,10 @@ export function compileRig(def: RigDef): CompiledRig {
       faceSlot: p.face?.slot ?? null,
       faceStates: p.face?.states ?? [],
       blur: p.blur ?? 0,
+      emissive: p.emissive ?? false,
+      sheen: p.sheen ?? false,
+      tierMin: p.tiers?.[0] ?? 0,
+      tierMax: p.tiers?.[1] ?? 4,
     }));
 
   const secondary = (def.secondary ?? []).map((s) => ({

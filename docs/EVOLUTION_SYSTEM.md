@@ -382,3 +382,38 @@ Cada forma tiene cuatro estados en el Códice:
 - Herencia: las frecuencias observadas en 100.000 nidadas simuladas coinciden con la Previsión de nidada (χ², p > 0.01).
 - Garantía de mutación: nunca más de 10 huevos seguidos sin mutación.
 - Versionado: cambiar pesos no altera criaturas ya evolucionadas.
+
+---
+
+## 11. Lustre y calidad de forma (decisiones del 2026-11-19)
+
+**Objetivo:** que casi cada Tamtam sea distinto (más de 300 posibilidades por familia) y que el jugador que cuida, limpia, entrena y combate obtenga formas **más bonitas y mejores**, mientras que el descuido produce formas **menos vistosas y más débiles**.
+
+### 11.1 Lustre (0–100) — `packages/core/src/appearance/appearance.ts`
+```
+Lustre = 0,45·Cuidado + 0,20·Actividades + 0,20·Arena + 0,15·Vínculo
+Cuidado     = 70% satisfacción media de toda la vida + 30% satisfacción actual
+Actividades = Σ niveles de atributos / 40     (Gym, Academy, Garden, Music, Workshop)
+Arena       = 60% rango + 40% % de victorias (ponderado por experiencia, 20 combates)
+Vínculo     = Cariño actual
+```
+Niveles: Apagado < 30 ≤ Común < 50 ≤ Vivo < 70 ≤ Radiante < 88 ≤ Legendario. Sin Arena el máximo es 80, así que **Legendario exige combatir**.
+
+### 11.2 Se graba en el Ritual
+En cada evolución, el Lustre de ese momento pasa a ser la **calidad de la nueva forma** (`formQuality`), que se mantiene hasta la siguiente evolución:
+
+| Calidad | Stats de combate | Habilidades de la forma | Extra |
+|---------|------------------|-------------------------|-------|
+| Apagado | ×0,88 | **Debilitada**: potencia ×0,85, cooldown ×1,2 | Adornos de descuido |
+| Común | ×0,95 | Normal (potencia ×0,95, cooldown ×1,05) | |
+| Vivo | ×1,00 | Normal | |
+| Radiante | ×1,05 | **Mejorada**: potencia ×1,1, cooldown ×0,95 | Adornos mágicos |
+| Legendario | ×1,10 | **Ascendida**: potencia ×1,15, cooldown ×0,9 | +1 hueco de pasiva en Arena |
+
+Además, en tiempo real, un Tamtam descuidado **ahora** pierde color y partículas hasta que se le vuelve a cuidar, sin perder la calidad grabada.
+
+### 11.3 Cuántas posibilidades hay
+Rama (A, B o secreta: 3) × calidad (5) × marca de vida (6: Guerrero, Sabio, Artista, Silvestre, Artesano o sin marca) × alelo de color (5) = **450 aspectos adultos por familia**, más mutaciones (×6 cuando se implementen) y el temperamento. El **tiempo** de crecimiento varía de forma continua entre 5 y 7 días (§2.1).
+
+### 11.4 Objetos evolutivos (N11)
+Se mantiene el diseño: un catalizador **inclina** la rama (+25) pero no anula una vida entera. La calidad y la marca **no se compran**: dependen de cómo se ha vivido. Esto evita el pay-to-win y hace que cada Tamtam cuente su propia historia.

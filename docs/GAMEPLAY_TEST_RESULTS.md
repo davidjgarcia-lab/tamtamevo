@@ -1,7 +1,7 @@
 # GAMEPLAY TEST RESULTS
 
 > Ejecución del 2026-11-19 · commit del vertical slice · entorno: contenedor Linux en la nube, Chromium headless (build web), Node 22.
-> Resumen: **102 tests unitarios y de integración PASSED** (rig 14, core 83, art 5) · **19/19 comprobaciones E2E PASSED** · 0 errores de consola.
+> Resumen: **111 tests unitarios y de integración PASSED** (rig 14, core 92, art 5) · **21/21 comprobaciones E2E PASSED** · 0 errores de consola. (Actualizado tras añadir siestas, Lustre y calidad de forma.)
 > Evidencia: `docs/media/slice/*.jpg`, vídeo `docs/media/vertical-slice-demo.mp4`, matriz `EVOLUTION_TEST_MATRIX.md`.
 
 ## 1. E2E (tools/playthrough.mjs, 390×844)
@@ -26,6 +26,8 @@
 | E2E-13 | Persistencia | Recargar la página | Nombre y saldo iguales | 125→125 | PASSED | — |
 | E2E-14 | Debug +24 h | Reloj simulado | Hambre baja con suelo 25 | 94→25 | PASSED | slice/17 |
 | E2E-15 | Debug aislado | +500 en debug y salir | Partida normal sin cambios | main 125, debug 625 | PASSED | — |
+| E2E-20 | Siesta | Botón Siesta | 20 min y cooldown visible | ✔ | PASSED | — |
+| E2E-21 | Lustre | Comparativa (debug) | 5 niveles visibles | ✔ | PASSED | media/lustre-tiers.jpg |
 | E2E-16 | Estabilidad | Toda la sesión | 0 errores | 0 | PASSED | — |
 
 ## 2. Unitarias e integración (selección por área; detalle en los archivos de test)
@@ -46,6 +48,8 @@
 | U-FOOD-02 | Alimentación | Comida odiada (−felicidad); comida especial (+energía, buff) | PASSED |
 | U-GYM-01..04 | Gym | Coste, monedas, XP, idempotencia, cansado, +FUE cada 10, 3 niveles | PASSED |
 | U-LOOP-01 | Integración | Monedas del Gym → compra rechazada si es cara → compra de silla y colocación en una transacción → reintento sin doble cobro | PASSED |
+| U-LUS-01..08 | Lustre | Descuido → Apagado; solo cuidados ≤ Radiante; Legendario requiere Arena; marca de vida; perfiles con niveles distintos; > 300 aspectos; calidad grabada al evolucionar (stats y nombre); variantes de habilidad | PASSED |
+| U-NAP-01..02 | Siesta | +15 en 20 min; cooldown 90 min; coste del Gym 5/8/10 | PASSED |
 | U-SIM-01 | Progresión | Bebé → elegible para adulto en 119–168 h en todos los perfiles activos | PASSED |
 | EVO-01..17 | Evolución | Matriz completa | PASSED |
 | U-RIG-* / U-ART-* | Animación | Compilación, FK, blink, cross-fade, partículas, paletas, estados faciales con arte, transformaciones finitas | PASSED |

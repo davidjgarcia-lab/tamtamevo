@@ -48,8 +48,9 @@ export function GymScreen({ onClose }: { onClose: () => void }) {
   });
 
   const start = () => {
-    if (state.care.needs.energy < GYM.energyCost || state.care.asleep) {
-      setMsg(state.care.asleep ? "Está dormido. Despiértalo primero." : `Necesita ${GYM.energyCost} de energía (tiene ${Math.round(state.care.needs.energy)}). Déjale dormir o dale un guiso de fuerza.`);
+    const cost = GYM.energyCostByLevel[level] ?? GYM.energyCost;
+    if (state.care.needs.energy < cost || state.care.asleep) {
+      setMsg(state.care.asleep ? "Está dormido. Despiértalo primero." : `Necesita ${cost} de energía (tiene ${Math.round(state.care.needs.energy)}). Una siesta de 20 minutos o un guiso de fuerza le ayudan.`);
       creature.play("sad");
       return;
     }
@@ -138,7 +139,7 @@ export function GymScreen({ onClose }: { onClose: () => void }) {
       {phase === "intro" && (
         <View style={g.panel}>
           <Text style={g.body}>
-            Mantén pulsado para cargar y suelta cuando la barra esté en la zona verde. {reps} repeticiones. Cuesta {GYM.energyCost} de energía.
+            Mantén pulsado para cargar y suelta cuando la barra esté en la zona verde. {reps} repeticiones. Cuesta {GYM.energyCostByLevel[level] ?? GYM.energyCost} de energía.
           </Text>
           {msg && <Text style={g.msg}>{msg}</Text>}
           <Btn label="Empezar entrenamiento" tone="coral" onPress={start} testID="gym-start" />

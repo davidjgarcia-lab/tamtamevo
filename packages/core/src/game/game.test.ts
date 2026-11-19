@@ -145,8 +145,22 @@ describe("gym", () => {
 
   it("refuses when too tired and lets the Tamtam recover", () => {
     const s = hatched();
-    s.care.needs.energy = 5;
+    s.care.needs.energy = 3;
     expect(completeGymSession(s, { runId: "g", quality: 1, now: T0 + H, tzOffsetMin: 60 })).toMatchObject({ ok: false, reason: "too_tired" });
+    // A 20-minute nap recovers 15 energy; then the gym (cost 5 at level 1) is possible again.
+    expect(careAction(s, "nap", T0 + H)).toBe("nap");
+    tick(s, T0 + H + 20 * 60_000);
+    expect(s.care.needs.energy).toBeGreaterThanOrEqual(17);
+    expect(s.care.napUntil).toBeNull();
+    expect(completeGymSession(s, { runId: "g2", quality: 1, now: T0 + H + 21 * 60_000, tzOffsetMin: 60 }).ok).toBe(true);
+  });
+
+  it("naps have a 90-minute cooldown and gym cost grows with level (5/8/10)", () => {
+    const s = hatched();
+    expect(careAction(s, "nap", T0 + H)).toBe("nap");
+    expect(careAction(s, "nap", T0 + H + 30 * 60_000)).toBe("not_sleepy");
+    expect(careAction(s, "nap", T0 + H + 91 * 60_000)).toBe("nap");
+    expect(GYM.energyCostByLevel).toEqual({ 1: 5, 2: 8, 3: 10 });
   });
 
   it("every 10 sessions raises STR and the Arena stat reflects it", () => {

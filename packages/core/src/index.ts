@@ -13,3 +13,4 @@ export * from "./game/content";
 export * from "./game/game";
 export * from "./sim/lifecycle";
 export * from "./evolution/engine";
+export * from "./appearance/appearance";

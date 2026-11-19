@@ -4,6 +4,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+### Decisiones N9, N11, N12 + magia y Lustre (2026-11-19)
+#### Añadido
+- **Lustre** (`core/appearance`): puntuación de cuidado, actividades, Arena y vínculo con 5 niveles; se **graba en cada evolución** como calidad de forma (stats ×0,88–1,10, habilidades Debilitada→Ascendida, pasiva extra en Legendario). Marca de vida por atributo dominante.
+- Efectos visuales: emisivo con bloom, halo (y luces en órbita), sheen animado, destellos, saturación y densidad de partículas según el nivel; adornos físicos por nivel en Chispín (hollín, pecas doradas, llamas extra, runa, corona).
+- Siestas de 20 min (+15 Energía, cada 90 min). Coste del Gym 5/8/10 según el nivel.
+- Debug: historial de cuidado forzable y comparativa de Lustre.
+- Marca: el juego se llama **TamTam Evolution** y la marca visual es **TamTam EVO**.
+
 ### Art Bible + vertical slice del primer Tamtam (2026-11-19)
 #### Añadido
 - `ART_BIBLE.md` (identidad, proporciones por etapa, anatomía modular, paletas de 8 familias, 14 expresiones, guía de documentación) y concept art generado con IA (`docs/media/concept/`, solo referencia).

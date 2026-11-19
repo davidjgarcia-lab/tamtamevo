@@ -1,6 +1,6 @@
-# CHARACTER ART BIBLE — TamTam Evolution
+# CHARACTER ART BIBLE — TamTam Evolution (marca visual: TamTam EVO)
 
-> Versión 1.0 · 2026-11-19 · Estado: **pendiente de aprobación**
+> Versión 1.1 · 2026-11-19 · Estado: **aprobada** (con la ampliación de efectos mágicos de §8)
 > Fuente de verdad visual para **toda** criatura (Tamtam), mueble y efecto. Si algo contradice ART_DIRECTION.md, prevalece este documento.
 > Referencias: las 5 imágenes del brief v3.0, usadas solo como **lenguaje visual** (ART_DIRECTION §11). Ningún diseño reproduce personajes, siluetas o caras de obras existentes.
 > Concept art de la primera especie: `docs/media/concept/` (generado con IA a partir de esta biblia y marcado como **CONCEPTO**, no como asset de juego).
@@ -179,3 +179,32 @@ Principios: **anticipación** antes de toda acción con impacto (8–15% de la d
 | Rig | `packages/art/src/<familia>/<forma>.ts` | Chispín (rig v2 en curso) |
 
 Las hojas de concepto generadas con IA son **referencias de diseño**: guían el redibujo vectorial del rig y **nunca** se usan como asset final en el juego.
+
+---
+
+## 8. Magia y calidad: emisivos, halos, sheen y Lustre
+
+Petición aprobada: los Tamtams deben tener **efectos de emisivo, halos, sheen** y detalles que les den calidad y magia. Esos efectos **se ganan**: dependen del **Lustre** (cómo se ha cuidado, entrenado, limpiado y combatido) y quedan **grabados en cada evolución**.
+
+### 8.1 Efectos (implementados en el renderer, `apps/mobile/src/creature/draw.ts`)
+| Efecto | Qué es | Regla de arte |
+|--------|--------|---------------|
+| **Emisivo + bloom** | Las partes marcadas `emissive` (llamas, ascuas, runas, pecas doradas) brillan; con intensidad > 1 se añade un pase de *bloom* difuminado | Solo partes elementales u ornamentales; nunca la piel base |
+| **Halo** | Gradiente radial + anillo difuso detrás del Tamtam; el Legendario añade luces en órbita | Color = emisivo de la familia |
+| **Sheen** | Banda de luz diagonal que recorre el cuerpo cada 3,2 s (recortada a la silueta) | Solo en masas grandes (cuerpo, caparazón, alas) |
+| **Destellos** | Estrellas de 4 puntas que parpadean alrededor | Radiante y Legendario |
+| **Saturación** | Filtro de color sobre la criatura | Apagado al 55%; Legendario al 114% |
+| **Densidad de partículas** | Multiplicador de todos los emisores | ×0,35 (Apagado) a ×1,7 (Legendario) |
+
+### 8.2 Niveles de Lustre y adornos físicos
+| Nivel | Puntuación | Aspecto | Adornos de la forma (ejemplo: Chispín) |
+|-------|------------|---------|----------------------------------------|
+| **Apagado** | < 30 | Desaturado, llama débil, pocas ascuas | Manchas de hollín (3) |
+| **Común** | 30–49 | Algo apagado | Manchas de hollín (2) |
+| **Vivo** | 50–69 | Aspecto base y limpio, sheen suave | — |
+| **Radiante** | 70–87 | Halo, destellos y sheen marcado | Pecas doradas emisivas y 2 lenguas de llama extra |
+| **Legendario** | ≥ 88 (requiere Arena) | Halo doble con luces en órbita, bloom fuerte | Runa luminosa en la barriga y corona de ascuas |
+
+Cada forma nueva debe diseñar sus adornos por nivel (`tiers: [min, max]` en las partes del rig). Regla: **las formas descuidadas son menos vistosas, no feas ni grotescas**. Siguen siendo adorables, pero sin magia.
+
+Comparativa real: `docs/media/lustre-tiers.jpg`.

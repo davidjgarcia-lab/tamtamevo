@@ -1,4 +1,4 @@
-# Tam Tam Evo
+# TamTam Evolution
 
 Juego móvil de crianza, evolución y combate automático de criaturas 2D ilustradas.
 

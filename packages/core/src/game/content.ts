@@ -84,7 +84,9 @@ export const STARTER_COINS = 300;
 
 /** Gym (ACTIVITIES_SYSTEM §2.A). */
 export const GYM = {
-  energyCost: 12,
+  /** Energy cost by gym level (decision N12: between 5 and 10). */
+  energyCostByLevel: { 1: 5, 2: 8, 3: 10 } as Record<number, number>,
+  energyCost: 5,
   hungerCost: 6,
   baseCoins: 35,
   baseXp: 60,

@@ -1,4 +1,4 @@
-# TAM TAM EVO — Game Design Document
+# TamTam Evolution — Game Design Document (marca: TamTam EVO)
 
 > Versión 0.3 · Brief v3.0 integrado · Estado: D1–D10 aprobadas; **N1–N10 pendientes** (§13.2)
 > Título: **Tam Tam Evo** (D1 aprobada). No se usa la marca "Tamagotchi" en ningún material.
@@ -245,3 +245,12 @@ Nivel de cuenta del 1 al 50, alimentado por todas las actividades. Desbloquea de
 | N8 | Roadmap combinado (casa, economía y actividades antes que evolución completa, minijuegos y Arena) | Ver ROADMAP. Es el orden del brief v3.0; las fases ya planificadas se mantienen después |
 | N9 | Nombre comercial: "Tam Tam Evo" (aprobado en D1) o "TamTam Evolution" (usado en el brief v3.0) | Necesito que elijas uno. Ambos son viables a nivel de marca |
 | N10 | Desbloqueo de gambits | Lo que llegue antes: rango de Arena o materia Estrategia |
+
+### 13.3 Resueltas el 2026-11-19 (tras el vertical slice)
+| ID | Resolución |
+|----|------------|
+| Art Bible | ✅ Aprobada, con efectos de **emisivo, halos, sheen** y magia (ART_BIBLE §8) |
+| N4 · N6 · N7 | ✅ Casa como Hogar · Energía como coste · Gym sustituye a las estaciones |
+| N9 | ✅ Nombre del juego: **TamTam Evolution**. Marca visual, logotipo e icono: **TamTam EVO** |
+| N11 | ✅ Variedad y calidad: sistema de **Lustre** grabado en cada evolución (aspecto, combate y habilidades) + marca de vida + rama + genética → 450 aspectos adultos por familia (EVOLUTION_SYSTEM §11). Los catalizadores inclinan, no imponen |
+| N12 | ✅ **Siestas de 20 min** (+15 Energía, cada 90 min) y **coste del Gym de 5 a 10** según el nivel (5 / 8 / 10) |

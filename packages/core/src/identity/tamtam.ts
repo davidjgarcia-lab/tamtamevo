@@ -19,8 +19,10 @@ export interface Tamtam {
   attributes: Record<AttributeId, { level: number; xp: number }>;
   level: number;
   xp: number;
-  evolutionHistory: { from: string; to: string; at: number; rulesetVersion: number }[];
+  evolutionHistory: { from: string; to: string; at: number; rulesetVersion: number; quality?: string }[];
   bonds: Record<string, number>;
+  /** Lustre tier recorded at the last Ritual — drives looks, stats and skills of the current form. */
+  formQuality?: "dull" | "plain" | "vivid" | "radiant" | "legendary";
 }
 
 export class NameRejected extends Error {
@@ -78,12 +80,19 @@ export function renameTamtam(t: Tamtam, requested: string, at: number, rules: Na
 }
 
 /** Evolution changes the form and stage — never the identity or the name. */
-export function applyEvolution(t: Tamtam, to: { formId: string; stage: Stage }, at: number, rulesetVersion: number): Tamtam {
+export function applyEvolution(
+  t: Tamtam,
+  to: { formId: string; stage: Stage },
+  at: number,
+  rulesetVersion: number,
+  quality?: Tamtam["formQuality"],
+): Tamtam {
   return {
     ...t,
     formId: to.formId,
     stage: to.stage,
-    evolutionHistory: [...t.evolutionHistory, { from: t.formId, to: to.formId, at, rulesetVersion }],
+    formQuality: quality ?? t.formQuality,
+    evolutionHistory: [...t.evolutionHistory, { from: t.formId, to: to.formId, at, rulesetVersion, quality }],
   };
 }
 

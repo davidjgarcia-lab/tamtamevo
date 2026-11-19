@@ -59,6 +59,12 @@ export interface PartDef {
   face?: { slot: FaceSlot; states: string[] };
   /** Gaussian blur sigma (soft glows). */
   blur?: number;
+  /** Light-emitting part: glow and bloom scale with the creature's Lustre (ART_BIBLE §8). */
+  emissive?: boolean;
+  /** Receives the animated sheen sweep (ART_BIBLE §8). */
+  sheen?: boolean;
+  /** Only drawn for form-quality tiers in [min, max] (0 dull … 4 legendary). ART_BIBLE §8. */
+  tiers?: [number, number];
 }
 
 /** Follow-through: a bone lags behind a driver bone's rotation (tails, flames, ears). */

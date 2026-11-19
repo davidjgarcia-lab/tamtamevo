@@ -1,5 +1,5 @@
 import {
-  debugAttributeLevels, debugCoins, debugForceEvolution, debugGrantAll, debugLevelUp, debugNewEgg, debugSetNeed, type NeedId,
+  debugAttributeLevels, debugCoins, debugForceEvolution, debugGrantAll, debugLevelUp, debugNewEgg, debugSetLifetimeCare, debugSetNeed, LUSTRE_NAMES, lustre, type NeedId,
 } from "@tamtam/core";
 import { fireColorAlleles } from "@tamtam/art";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -11,7 +11,7 @@ import { Btn, Sheet } from "../ui/kit";
  * Developer Debug Mode. Works on a separate save slot ("debug") with a simulated clock,
  * so nothing here affects the normal game.
  */
-export function DebugPanel({ onClose, toast }: { onClose: () => void; toast: (t: string) => void }) {
+export function DebugPanel({ onClose, toast, onLustreLab }: { onClose: () => void; toast: (t: string) => void; onLustreLab: () => void }) {
   const g = useGame();
   const { state, act, now } = g;
 
@@ -73,6 +73,14 @@ export function DebugPanel({ onClose, toast }: { onClose: () => void; toast: (t:
           <Btn small label="Fuerza +1" onPress={() => act((s) => debugAttributeLevels(s, "str", 1))} />
           <Btn small label="Fuerza +5" onPress={() => act((s) => debugAttributeLevels(s, "str", 5))} />
           <Btn small label="Inteligencia +5" onPress={() => act((s) => debugAttributeLevels(s, "int", 5))} />
+        </View>
+
+        <Text style={d.h}>Lustre {state.tamtam ? `· ${LUSTRE_NAMES[lustre(state.care, state.tamtam).tier]}` : ""}</Text>
+        <View style={d.row}>
+          <Btn small label="Historial de cuidado 15" onPress={() => act((s) => debugSetLifetimeCare(s, 15))} />
+          <Btn small label="… 60" onPress={() => act((s) => debugSetLifetimeCare(s, 60))} />
+          <Btn small label="… 100" onPress={() => act((s) => debugSetLifetimeCare(s, 100))} />
+          <Btn small label="Comparativa de Lustre" tone="gold" onPress={onLustreLab} testID="dbg-lustre-lab" />
         </View>
 
         <Text style={d.h}>Objetos</Text>
