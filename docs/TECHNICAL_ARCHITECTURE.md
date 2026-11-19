@@ -1,6 +1,6 @@
 # TECHNICAL ARCHITECTURE — Tam Tam Evo
 
-> Versión 0.1 · Fase 1 · Estado: **propuesta, pendiente de aprobación (D2, D3)**
+> Versión 0.2 · Fase 1 · Estado: **aprobado** (decisiones D1–D10, 2026-11-19)
 
 ---
 
@@ -96,7 +96,7 @@ Rig (JSON)                         Clip (JSON)                     Capas procedu
 tam-tam-evo/
 ├─ apps/mobile/            # Expo app (expo-router)
 │  ├─ app/                 # rutas: (tabs)/home, games, creatures, arena, profile
-│  ├─ src/scenes/          # escenas Skia: habitat, maze, bricks, meowdoku, serpentina, arena
+│  ├─ src/scenes/          # escenas Skia: habitat, maze, bricks, grid, trail, arena
 │  ├─ src/rig/             # runtime TamRig
 │  ├─ src/vfx/             # partículas y shaders
 │  ├─ src/services/        # GameService, SaveService, AudioService, NotificationService
@@ -135,8 +135,8 @@ tam-tam-evo/
 | Escena | Lógica | Render |
 |--------|--------|--------|
 | Hogar | IA de criaturas a 4 Hz en JS; animación en worklets | Skia Canvas, 60 fps |
-| Minijuegos | Paso fijo de 60 Hz (Laberinto, Rompebloques, Serpentina) en `useFrameCallback` (worklet) con core puro | Skia, 60/120 fps |
-| Meowdoku | Event-driven | UI RN + Skia para celebraciones |
+| Minijuegos | Paso fijo de 60 Hz (`maze`, `bricks`, `trail`) en `useFrameCallback` (worklet) con core puro | Skia, 60/120 fps |
+| `grid` | Event-driven | UI RN + Skia para celebraciones |
 | Arena | Simulación completa precalculada en ~5 ms (determinista) → reproducción interpolada a 20 Hz | Skia, 60 fps |
 
 > La Arena **precalcula** el combate entero (es determinista) y luego lo **reproduce** como una línea de tiempo de eventos. Ventajas: rendimiento estable, velocidad 2×, repeticiones gratuitas y el mismo resultado que el servidor.

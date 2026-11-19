@@ -1,6 +1,6 @@
 # EVOLUTION SYSTEM — Tam Tam Evo
 
-> Versión 0.1 · Fase 1 · Estado: **pendiente de revisión**
+> Versión 0.2 · Fase 1 · Estado: **aprobado** (decisiones D1–D10, 2026-11-19)
 > Alcance: evolución multifactorial, descubrimiento (Códice), genética, reproducción y huevos.
 > Principio rector: **determinista, configurable, legible.** Las mismas entradas producen siempre la misma evolución. El azar solo existe en la herencia genética, siempre con una semilla registrada y con probabilidades visibles para el jugador.
 
@@ -26,20 +26,37 @@
 
 ## 2. Etapas y transiciones
 
-| Transición | Requisitos mínimos | Tipo | Tiempo típico* |
-|------------|--------------------|------|----------------|
-| Bebé → Infantil | Nivel 5 · Edad en etapa ≥ 8 h · No Abatido | Lineal | ~8–12 h |
-| Infantil → Juvenil | Nivel 15 · Edad en etapa ≥ 36 h · CQ ≥ 40 · No Abatido | Lineal | ~1.5–2 días |
-| Juvenil → Adulto | Nivel 25 · Edad en etapa ≥ 72 h · CQ ≥ 50 · No Abatido | **Ramificada** | ~3–4 días |
+### 2.1 Madurez — ritmo de crecimiento (D10)
+De Bebé a Adulto se tarda **entre 5 y 7 días reales, según el cuidado y las horas de juego**. El reloj del crecimiento es la **Madurez (M)**, que se acumula de forma continua (también con la app cerrada, calculada por tramos como las necesidades):
 
-\* Con 3–4 sesiones diarias. Total de Bebé a Adulto: **unos 5–7 días** (ver decisión D10).
+```
+dM/dt = 1 + 0.4 · g(t)            // puntos de Madurez por hora real; rango [1.0, 1.4]
+g(t)  = 0.5 · C(t) + 0.5 · J(t)   // factor de crecimiento, 0–1
+C(t)  = clamp( (satisfacción(t) − 40) / 50, 0, 1 )        // cuidado: 1 con satisfacción ≥ 90
+J(t)  = clamp( minutos de juego activo en las últimas 24 h / 45, 0, 1 )   // juego: 1 con ≥ 45 min/día
+```
+- **Juego activo** = minutos con interacción real con esa criatura: cuidados, minijuegos, entrenamiento y Arena. Tener la app abierta sin tocar nada no cuenta (sin input en 30 s → no suma).
+- Durante el sueño programado, `C` usa la satisfacción normal y `J` conserva su último valor (dormir no frena el crecimiento).
 
-**Ritual de Evolución (D8).** Cuando una criatura cumple los requisitos, su icono brilla y aparece el botón **"Iniciar Ritual"**. El jugador elige el momento. Con esto se consigue:
+| Transición | Madurez necesaria | Ritmo máximo (g = 1) | Ritmo mínimo (g = 0) | Tipo |
+|------------|-------------------|----------------------|----------------------|------|
+| Bebé → Infantil | 17 | ~12 h | 17 h | Lineal |
+| Infantil → Juvenil | 50 (acum. 67) | ~36 h | 50 h | Lineal |
+| Juvenil → Adulto | 101 (acum. 168) | ~72 h | 101 h | **Ramificada** |
+| **Total** | **168** | **120 h = 5 días** | **168 h = 7 días** | |
+
+**Garantías:**
+- Con cuidado y juego excelentes: 5 días. Con lo mínimo: 7 días como máximo.
+- **Única excepción:** los estados **Abatido** (abandono grave, GAMEPLAY_SYSTEMS §2.4) y **Guardería** (pausa voluntaria) congelan la Madurez. En ambos casos es una pausa, nunca una pérdida.
+- El nivel y el CQ **no bloquean** las transiciones: influyen en la velocidad (vía `g`) y en la rama, pero nunca impiden crecer. Cada etapa tiene un tope de nivel (Bebé 10, Infantil 20, Juvenil 35, Adulto 50). La XP sobrante se guarda y se aplica tras el Ritual (hasta un máximo equivalente a una etapa).
+- La ficha de la criatura muestra una barra de Madurez con el **tiempo estimado al ritmo actual** ("Lista para el Ritual en ~14 h"), para que el jugador vea cómo sus cuidados aceleran el crecimiento.
+
+**Ritual de Evolución (D8).** Cuando una criatura alcanza la Madurez necesaria, su icono brilla y aparece el botón **"Iniciar Ritual"**. El jugador elige el momento. Con esto se consigue:
 1. Que la evolución sea un momento de celebración y no algo que ocurre mientras la app está cerrada.
 2. Que el jugador pueda, sabiéndolo, seguir influyendo en la rama antes de evolucionar.
 3. Evitar sorpresas negativas: el Pronóstico muestra la tendencia antes del Ritual.
 
-Si la criatura lleva 48 h elegible sin Ritual, se muestra un recordatorio. Nunca evoluciona automáticamente.
+El tiempo que pasa entre ser elegible y hacer el Ritual no cuenta en los 5–7 días, porque lo decide el jugador. Si la criatura lleva 48 h elegible sin Ritual, se muestra un recordatorio. Nunca evoluciona automáticamente.
 
 La evolución es **irreversible**. La Reliquia "Eco del Primer Latido" (temporadas) permitirá en el futuro un *reinicio de rama* único por criatura.
 
@@ -97,10 +114,10 @@ Cinco ejes acumulan puntos según lo que el jugador hace con **esa** criatura:
 | Entrenamiento Carrera | | +5 | | | |
 | Entrenamiento Defensa | +2 | | | | +3 |
 | Meditación | | | +1 | | +4 |
-| Laberinto Glotón (por partida, × rendimiento 0.5–1.5) | | +2 | +3 | | |
-| Rompebloques | | +4 | +1 | | |
-| Meowdoku | | | +5 | | |
-| Serpentina | +2 | +3 | | | |
+| Minijuego `maze` (por partida, × rendimiento 0.5–1.5) | | +2 | +3 | | |
+| Minijuego `bricks` | | +4 | +1 | | |
+| Minijuego `grid` | | | +5 | | |
+| Minijuego `trail` | +2 | +3 | | | |
 | Combate de Arena (+2 FUE si gana) | +3 | +1 | +1 | | |
 | Decorar el hábitat (al día) | | | | +1 | +1 |
 
@@ -117,6 +134,7 @@ Proporciones: `p_i = A_i / Σ A` (si `Σ A = 0` → `p_i = 0.2`).
 Para cada rama candidata `c` de la transición actual:
 
 ### Paso 1 — Gates (requisitos duros)
+Los gates solo deciden **qué rama** se elige; nunca impiden la evolución en sí (siempre hay una rama `default` elegible).
 Una rama es **elegible** si cumple **todos** sus gates:
 `minLevel`, `minCQ`, `maxCQ`, `requiredItem`, `requiredSkill`, `requiredGene`, `requiredFlag` (p. ej. "10 victorias en Arena"), `requiredAffinity`, `timeWindow` (hora local del Ritual, p. ej. "noche"; se evalúa en el momento del Ritual).
 
@@ -356,6 +374,7 @@ Cada forma tiene cuatro estados en el Códice:
 ---
 
 ## 10. Pruebas automatizadas requeridas (Fase 4)
+- Crecimiento: para cualquier trayectoria de cuidado y juego sin Abatido ni Guardería, el tiempo de Bebé a elegible-Adulto está en [120 h, 168 h] (property-based).
 - Determinismo: el mismo `EvolutionContext` → el mismo resultado (property-based, 10.000 casos).
 - Balance neutro: `|S(A) − S(B)| < 6` con ejes uniformes y CQ 70 en las 8 familias.
 - Alcanzabilidad: para cada rama existe un perfil de juego razonable (simulado) que la obtiene sin objetos.

@@ -1,6 +1,6 @@
 # ART DIRECTION — Tam Tam Evo
 
-> Versión 0.1 · Fase 1 (dirección) · Se desarrollará en la Fase 2 (identidad visual)
+> Versión 0.2 · Fase 1 · Estado: **aprobado** (decisiones D1–D10, 2026-11-19)
 > Estética obligatoria: **2D ilustrado, muy colorido y con animaciones fluidas.** No es pixel art ni 3D.
 
 ---
@@ -83,6 +83,12 @@ Ambas tienen licencia OFL (libres para uso comercial). Escala tipográfica base:
 - Set **original** con trazo redondeado de 2.5 px, relleno con 2 tonos y esquinas redondeadas, en rejilla de 24 px.
 - Iconos de pestañas: **Hogar** (casita-nido con huevo), **Juegos** (mando con forma de tambor), **Criaturas** (huella con estrella), **Arena** (dos tambores cruzados con banderín) y **Perfil** (medallón).
 - Iconos de cuidado: cuenco, burbuja de jabón, paño, pala, pelota, mano-corazón, luna y cojín.
+- **Iconos de minijuego (D9: son su única identidad, sin nombre):** tamaño grande (96 pt en el salón recreativo), animados en reposo y con color propio para distinguirse también en modo daltónico por forma:
+  - `maze`: laberinto cuadrado con una semilla de luz y un Gruñón asomando (verde neón).
+  - `bricks`: tres bloques apilados con la pelota rebotando (naranja caramelo).
+  - `grid`: cuadrícula 3×3 con emblemas de familia (azul acuarela).
+  - `trail`: estela ondulada de orbes con una cabecita al frente (violeta nocturno).
+  - Test: cada icono debe identificarse a 48 pt sin texto y en escala de grises.
 - **No se usan emojis** como iconos ni como criaturas (los emojis de los documentos son solo marcas de lectura).
 
 ---
@@ -136,7 +142,7 @@ Bamboleo creciente → grietas que brillan con el color heredado → pausa y sil
 - **La criatura como protagonista:** en Hogar ocupa más del 60% del área visible. La UI flota en los bordes y se oculta tras 5 s de inactividad (modo "contemplar").
 - **Componentes:** botones grandes con relieve suave (sombra inferior de 4 px que se aplana al pulsar), tarjetas redondeadas de 20 px, hojas inferiores (*bottom sheets*) para tienda, inventario y detalles, chips de elemento con icono + color.
 - **Sin estética de dashboard:** las necesidades se muestran en el anillo radial al tocar la criatura, no con barras permanentes.
-- **Minijuegos y Arena:** estilo propio por juego (el Laberinto con un tono de neón suave, Rompebloques con colores de caramelo, Meowdoku con papel y acuarela, Serpentina en un estanque nocturno y la Arena como un coliseo-festival con banderines y tambores), manteniendo tipografía, iconos y paleta base.
+- **Minijuegos y Arena:** estilo propio por juego (`maze` con un tono de neón suave, `bricks` con colores de caramelo, `grid` con papel y acuarela, `trail` en un estanque nocturno y la Arena como un coliseo-festival con banderines y tambores), manteniendo tipografía, iconos y paleta base.
 
 ---
 

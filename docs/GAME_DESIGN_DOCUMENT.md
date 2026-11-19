@@ -1,7 +1,7 @@
 # TAM TAM EVO — Game Design Document
 
-> Versión 0.1 · Fase 1 (Diseño) · Estado: **pendiente de revisión**
-> Título de trabajo: **Tam Tam Evo**. El brief menciona "Tamagotchi Evolution", pero *Tamagotchi* es una marca registrada de Bandai (ver Decisión D1 al final).
+> Versión 0.2 · Fase 1 (Diseño) · Estado: **aprobado** (D1–D10, 2026-11-19)
+> Título: **Tam Tam Evo** (D1 aprobada). No se usa la marca "Tamagotchi" en ningún material.
 
 Documentos relacionados:
 [ART_DIRECTION](ART_DIRECTION.md) · [CREATURE_DATABASE](CREATURE_DATABASE.md) · [EVOLUTION_SYSTEM](EVOLUTION_SYSTEM.md) · [GAMEPLAY_SYSTEMS](GAMEPLAY_SYSTEMS.md) · [TECHNICAL_ARCHITECTURE](TECHNICAL_ARCHITECTURE.md) · [ROADMAP](ROADMAP.md) · [CHANGELOG](CHANGELOG.md)
@@ -55,7 +55,7 @@ Mirar a la criatura → percibir una necesidad (expresión, burbuja, animación)
 - Progreso de incubación de huevos.
 
 ### 2.4 Bucle a largo plazo (semanas)
-- Llevar criaturas de Bebé a Adulto (unos 5–7 días por criatura con cuidado normal).
+- Llevar criaturas de Bebé a Adulto (entre 5 y 7 días según el cuidado y el tiempo de juego; ver EVOLUTION_SYSTEM §2).
 - Completar las 40 formas del Códice y las mutaciones.
 - Criar linajes con mejor potencial genético.
 - Subir de rango en la Arena (Bronce → Leyenda).
@@ -80,7 +80,7 @@ Mirar a la criatura → percibir una necesidad (expresión, burbuja, animación)
 | Pestaña | Contenido | Rol |
 |---------|-----------|-----|
 | **Hogar** | Hábitat ilustrado con las criaturas activas. Acciones de cuidado contextuales. | Centro emocional. La criatura ocupa al menos el 60% de la pantalla. |
-| **Juegos** | Salón recreativo con los 4 minijuegos y su Entusiasmo. | Fuente de recursos y de ejes de comportamiento. |
+| **Juegos** | Salón recreativo con los 4 minijuegos, representados **solo por iconos** (sin nombres), y su Entusiasmo. | Fuente de recursos y de ejes de comportamiento. |
 | **Criaturas** | Plantel activo (máx. 3), Santuario, Huevos, Códice, Genética. | Colección e investigación. |
 | **Arena** | Preparación, rival, combate, rangos e historial. | Competición. |
 | **Perfil** | Logros, medallas, estadísticas, ajustes, inventario. | Meta y configuración. |
@@ -104,7 +104,7 @@ La tienda y el inventario se abren desde Hogar como hojas contextuales. No hay u
 | Criaturas | 8 familias × 4 etapas, 2 adultos por familia (40 formas en el lanzamiento). | CREATURE_DATABASE |
 | Evolución | Multifactorial y determinista: requisitos (gates) + puntuación por rama. | EVOLUTION_SYSTEM |
 | Genética | Genoma con loci de color, rasgos, potencial y afinidad secundaria. Cría desde Juvenil. | EVOLUTION_SYSTEM §6 |
-| Minijuegos | Laberinto, Rompebloques, Meowdoku y Serpentina. | GAMEPLAY_SYSTEMS §4 |
+| Minijuegos | 4 juegos identificados solo por icono: laberinto (`maze`), bloques (`bricks`), cuadrícula lógica (`grid`) y serpiente (`trail`). | GAMEPLAY_SYSTEMS §4 |
 | Arena | Combate automático en tiempo real a 20 Hz, determinista, con estrategia configurable y 7 rangos. | GAMEPLAY_SYSTEMS §5 |
 | Economía | Chispas (común) y Astrolitos (especial, solo ganables). Sin pay-to-win. | GAMEPLAY_SYSTEMS §6 |
 
@@ -118,7 +118,7 @@ La tienda y el inventario se abren desde Hogar como hojas contextuales. No hay u
 3. **Eclosión guiada:** el jugador toca el huevo y se produce la primera animación de eclosión.
 4. **Nombre** de la criatura.
 5. **Tutorial de cuidados** integrado: la criatura tiene hambre, se le da de comer, se ensucia y se limpia.
-6. **Primer minijuego** (Serpentina, el más inmediato) con su recompensa.
+6. **Primer minijuego** (el de serpiente, `trail`, el más inmediato) con su recompensa.
 7. **Códice:** se muestra la silueta de su forma Infantil y una primera pista.
 
 Desbloqueos escalonados: Juegos (minuto 3), Criaturas (minuto 6), Arena (cuando la criatura llega a Infantil), Cría (al llegar a Juvenil).
@@ -201,17 +201,17 @@ Nivel de cuenta del 1 al 50, alimentado por todas las actividades. Desbloquea de
 
 ---
 
-## 13. Decisiones que requieren aprobación
+## 13. Decisiones aprobadas (2026-11-19)
 
-| ID | Decisión | Recomendación |
-|----|----------|---------------|
-| D1 | Nombre comercial (riesgo de marca con "Tamagotchi") | Usar **Tam Tam Evo** y no usar "Tamagotchi" en ningún sitio. |
-| D2 | Stack tecnológico | Expo (React Native) + TypeScript + Skia + Reanimated; Supabase después. |
-| D3 | Tecnología de animación | Rig vectorial modular propio sobre Skia. Rive como alternativa si se incorpora un animador. |
-| D4 | Producción del arte final | Claude produce el arte vectorial de producción-prototipo. Se recomienda presupuesto para un ilustrador en la Fase 7. |
-| D5 | Sin muerte de criaturas | Estado "Abatido" recuperable. |
-| D6 | Santuario para criaturas inactivas | Sí, con huecos ampliables por progresión. |
-| D7 | Modelo de monetización | F2P solo cosmético. |
-| D8 | Evolución manual ("Ritual") o automática | Ritual iniciado por el jugador cuando la criatura es elegible. |
-| D9 | Nombres de minijuegos | Laberinto Glotón, Rompebloques, Meowdoku y Serpentina (evitando "Maze Runner" y "Snake.io", que son títulos existentes). |
-| D10 | Ritmo de crecimiento | Bebé→Adulto en unos 5–7 días con cuidado normal. |
+| ID | Decisión | Resolución |
+|----|----------|------------|
+| D1 | Nombre comercial (riesgo de marca con "Tamagotchi") | ✅ Usar **Tam Tam Evo** y no usar "Tamagotchi" en ningún sitio. |
+| D2 | Stack tecnológico | ✅ Expo (React Native) + TypeScript + Skia + Reanimated; Supabase después. |
+| D3 | Tecnología de animación | ✅ Rig vectorial modular propio sobre Skia. Rive como alternativa si se incorpora un animador. |
+| D4 | Producción del arte final | ✅ Claude produce el arte vectorial de producción-prototipo. Se recomienda presupuesto para un ilustrador en la Fase 7. |
+| D5 | Sin muerte de criaturas | ✅ Estado "Abatido" recuperable. |
+| D6 | Santuario para criaturas inactivas | ✅ Sí, con huecos ampliables por progresión. |
+| D7 | Modelo de monetización | ✅ F2P solo cosmético. |
+| D8 | Evolución manual ("Ritual") o automática | ✅ Ritual iniciado por el jugador cuando la criatura es elegible. |
+| D9 | Nombres de minijuegos | ✅ **Sin nombres: solo iconos.** En la interfaz cada minijuego se identifica por un icono propio; ningún texto visible los nombra. Internamente se usan los IDs `maze`, `bricks`, `grid` y `trail`. |
+| D10 | Ritmo de crecimiento | ✅ Bebé→Adulto **entre 5 y 7 días según el cuidado y las horas de juego** (sistema de Madurez, EVOLUTION_SYSTEM §2). |

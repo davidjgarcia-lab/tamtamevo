@@ -1,6 +1,6 @@
 # GAMEPLAY SYSTEMS — Tam Tam Evo
 
-> Versión 0.1 · Fase 1 · Estado: **pendiente de revisión**
+> Versión 0.2 · Fase 1 · Estado: **aprobado** (decisiones D1–D10, 2026-11-19)
 > Cuidados, vida en el hábitat, entrenamiento, minijuegos, Arena, economía, logros.
 > Todos los números son **valores iniciales de balance**. Vivirán en `packages/content/balance.ts` y se ajustarán con telemetría y simulación.
 
@@ -129,13 +129,14 @@ IA de **utilidad** evaluada cada 2–4 s cuando la criatura no está en una inte
 ## 4. Minijuegos
 
 ### 4.0 Reglas comunes
+- **Sin nombres (D9):** en la interfaz cada minijuego se presenta solo con su **icono** (ver ART_DIRECTION §5). Los títulos de esta sección son descriptivos para el equipo; ningún texto visible al jugador los usa. IDs internos: `maze`, `bricks`, `grid`, `trail`.
 - La criatura activa elegida **es el avatar** del jugador (usa su rig y sus animaciones).
 - Cada juego tiene su propia interfaz con identidad del universo, controles táctiles, música, SFX y récords locales (por criatura y global).
 - La lógica de cada juego es un módulo puro en `packages/core/minigames/<juego>` con paso fijo y semilla (reproducible, testeable y preparado para validación de récords en el servidor en el futuro).
 - Recompensas al terminar: Chispas, XP, puntos de eje (EVOLUTION_SYSTEM §3E), Investigación y fragmentos de objetos.
 - **Habilidad de familia** (1 uso por partida o nivel) para que cada familia juegue un poco distinto: Fuego "Acelerón", Agua "Deslizar", Naturaleza "Brote" (escudo), Electricidad "Chispa" (aturde), Oscuridad "Fundirse" (intangible), Luz "Destello" (revela), Tierra "Excavar" (atraviesa un muro o bloque), Cosmos "Gravedad" (atrae objetos).
 
-### 4.1 A · LABERINTO GLOTÓN (inspiración: laberintos arcade de persecución)
+### 4.1 A · Laberinto — `maze` (inspiración: laberintos arcade de persecución)
 - **Objetivo:** recorrer el laberinto comiendo todas las *Semillas de Luz* sin que te atrapen los **Gruñones** (criaturas de humo gris).
 - **Controles:** swipe con *buffer* de giro (el giro se ejecuta en la siguiente intersección válida). Joystick virtual opcional.
 - **Enemigos (4 conductas):** *Perseguidor* (va a tu casilla), *Emboscador* (va 4 casillas por delante), *Patrullero* (circuito fijo + persecución cercana) y *Errático* (elige con RNG con semilla). Fases alternas de dispersión y caza.
@@ -143,7 +144,7 @@ IA de **utilidad** evaluada cada 2–4 s cuando la criatura no está en una inte
 - **Niveles:** 30 diseñados a mano en 3 mundos (Jardín, Cuevas, Nubes) y un modo Infinito procedural (generador de laberintos con bucles; validación de conectividad).
 - **Puntuación:** semilla 10, fruta 100–500, Gruñón comido 200·2ⁿ dentro del mismo Latido, bonus de tiempo y de "sin golpes". 3 vidas.
 
-### 4.2 B · ROMPEBLOQUES (inspiración: arkanoid / breakout)
+### 4.2 B · Bloques — `bricks` (inspiración: arkanoid / breakout)
 - **Objetivo:** romper todos los bloques con la *Pelota-Tam* rebotando en un cojín que sostiene tu criatura.
 - **Controles:** arrastre horizontal relativo (el dedo no tapa el cojín). Tap para lanzar.
 - **Física:** propia y determinista (círculo contra AABB con barrido continuo para evitar *tunneling*). El ángulo de salida depende del punto de impacto en el cojín (±60°). La velocidad sube un 2% cada 10 golpes.
@@ -152,7 +153,7 @@ IA de **utilidad** evaluada cada 2–4 s cuando la criatura no está en una inte
 - **Niveles:** 40 en 4 mundos (uno por grupo de islas) con jefes cada 10 (un bloque-jefe animado con patrón propio) y modo Infinito.
 - **Puntuación:** por bloque, combos sin tocar el cojín (×1.1 acumulable) y bonus de nivel limpio.
 
-### 4.3 C · MEOWDOKU (inspiración: sudoku)
+### 4.3 C · Cuadrícula lógica — `grid` (inspiración: sudoku)
 - **Concepto:** sudoku en el que los números son **emblemas del universo** (8 insignias de familia + el tambor Tam-Tam en 9×9). Hay un modo alternativo con números para accesibilidad.
 - **Tamaños y dificultades:** 4×4 *Gatito* (tutorial), 6×6 *Fácil*, 9×9 *Normal*, *Difícil* y *Experto*.
 - **Generador:** soluciones completas por backtracking aleatorio con semilla → retirada de pistas manteniendo **solución única** → calificación de dificultad según las técnicas necesarias para resolverlo (singles desnudos y ocultos → pares e intersecciones → X-Wing…). Se descartan y regeneran los puzles que no encajan con la dificultad pedida.
@@ -162,7 +163,7 @@ IA de **utilidad** evaluada cada 2–4 s cuando la criatura no está en una inte
 - **Récords:** mejor tiempo por dificultad, puzles sin pistas, racha y **Puzle del Día** (semilla = fecha, igual para todos → base para futuras clasificaciones).
 - **Ritmo:** la criatura reacciona en una esquina (piensa, celebra cada caja completada).
 
-### 4.4 D · SERPENTINA (inspiración: snake / .io)
+### 4.4 D · Serpiente — `trail` (inspiración: snake / .io)
 - **Concepto:** tu criatura encabeza una *estela* de orbes de su color. Come energía para crecer y haz que los rivales choquen contra tu estela.
 - **Controles:** joystick flotante de dirección (giro con radio máximo) y botón **Turbo** (consume longitud).
 - **Arena:** mapa circular grande con cámara que sigue y hace zoom según la longitud. Obstáculos: rocas, zarzas (−longitud) y portales.
@@ -334,7 +335,7 @@ Objetivo: el gasto en cuidados básicos (~120/día) es muy inferior a los ingres
 ### 6.4 Nidos Errantes (adquisición determinista de familias)
 | Familia | Hito |
 |---------|------|
-| Electricidad | Superar el Mundo 1 de Rompebloques **o** nivel de Cuidador 5 |
+| Electricidad | Superar el Mundo 1 de `bricks` **o** nivel de Cuidador 5 |
 | Tierra | Tener la primera criatura Juvenil |
 | Luz | Alcanzar Plata en la Arena |
 | Oscuridad | Registrar 8 formas en el Códice |

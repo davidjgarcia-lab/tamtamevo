@@ -10,7 +10,7 @@
 
 | Fase | Nombre | Estimación | Acumulado | Estado |
 |------|--------|-----------|-----------|--------|
-| 1 | Game Design Document | 1 sem | 1 | 🟡 Entregada, pendiente de revisión |
+| 1 | Game Design Document | 1 sem | 1 | ✅ Aprobada |
 | 2 | Identidad visual + spike de animación | 3 sem | 4 | ⚪ Pendiente |
 | 3 | Prototipo funcional (Hogar, primera mascota, cuidados, persistencia) | 4 sem | 8 | ⚪ |
 | 4 | Evolución, 8 familias, genética y reproducción | 7 sem | 15 | ⚪ |
@@ -25,7 +25,7 @@
 
 ## Fase 1 — Game Design Document ✅ (entregada)
 **Entregables:** GDD, Arquitectura Técnica, Dirección de Arte, Base de Datos de Criaturas, Sistema de Evolución, Sistemas de Juego, Roadmap y Changelog.
-**Criterio de salida:** tu aprobación de las decisiones D1–D10 (GDD §13).
+**Criterio de salida:** tu aprobación de las decisiones D1–D10 (GDD §13). ✅ Aprobadas el 2026-11-19.
 
 ## Fase 2 — Identidad visual y spike técnico de animación
 **Entregables:** ver ART_DIRECTION §10. Además:
@@ -57,13 +57,14 @@
 - [ ] Es posible llegar de huevo a adulto en una partida real acelerada (modo debug ×100).
 
 ## Fase 5 — Minijuegos
-**Alcance:** Laberinto Glotón (30 niveles + infinito), Rompebloques (40 niveles + infinito), Meowdoku (5 dificultades, generador con solución única, Puzle del Día) y Serpentina (IA de 4 personalidades). Recompensas, Entusiasmo, fragmentos, récords y habilidades de familia.
+**Alcance:** `maze` (30 niveles + infinito), `bricks` (40 niveles + infinito), `grid` (5 dificultades, generador con solución única, Puzle del Día) y `trail` (IA de 4 personalidades). Recompensas, Entusiasmo, fragmentos, récords y habilidades de familia.
 
 **Criterios de aceptación:**
 - [ ] 60 fps en los 4 juegos en gama media.
-- [ ] Meowdoku: 10.000 puzles generados con solución única verificada.
-- [ ] Rompebloques: sin *tunneling* a velocidad máxima (test de física).
+- [ ] `grid`: 10.000 puzles generados con solución única verificada.
+- [ ] `bricks`: sin *tunneling* a velocidad máxima (test de física).
 - [ ] Cada juego tiene música, SFX, tutorial y pantalla de resultados.
+- [ ] Ningún texto visible nombra los minijuegos; los 4 iconos superan el test de identificación (D9).
 
 ## Fase 6 — Arena
 **Alcance:** simulación determinista, IA de utilidad, estrategias y gambits, habilidades y estados, equipo y crafteo, generador de rivales, escalera de 100 Cuidadores IA, rangos y PC, medallas, historial y repeticiones, simulador de balance en CI.
@@ -91,17 +92,17 @@ Cuentas de desarrollador, fichas de tienda (capturas, vídeo, textos ES/EN), cla
 
 | Área | Funcionalidad | Estado |
 |------|---------------|--------|
-| Diseño | GDD y documentos de sistemas | ✅ Terminado (pendiente de revisión) |
+| Diseño | GDD y documentos de sistemas | ✅ Terminado y aprobado |
 | Arte | Identidad visual | ⚪ Pendiente |
 | Técnico | Monorepo y CI | ⚪ Pendiente |
 | Técnico | Runtime TamRig | ⚪ Pendiente |
 | Juego | Cuidados y tiempo real | ⚪ Pendiente |
 | Juego | Evolución | ⚪ Pendiente |
 | Juego | Genética y cría | ⚪ Pendiente |
-| Juego | Laberinto Glotón | ⚪ Pendiente |
-| Juego | Rompebloques | ⚪ Pendiente |
-| Juego | Meowdoku | ⚪ Pendiente |
-| Juego | Serpentina | ⚪ Pendiente |
+| Juego | Minijuego `maze` | ⚪ Pendiente |
+| Juego | Minijuego `bricks` | ⚪ Pendiente |
+| Juego | Minijuego `grid` | ⚪ Pendiente |
+| Juego | Minijuego `trail` | ⚪ Pendiente |
 | Juego | Arena | ⚪ Pendiente |
 | Juego | Economía y tienda | ⚪ Pendiente |
 | Meta | Códice, logros y objetivos | ⚪ Pendiente |

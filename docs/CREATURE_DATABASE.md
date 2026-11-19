@@ -1,6 +1,6 @@
 # CREATURE DATABASE — Tam Tam Evo
 
-> Versión 0.1 · Fase 1 · Estado: **pendiente de revisión**
+> Versión 0.2 · Fase 1 · Estado: **aprobado** (decisiones D1–D10, 2026-11-19)
 > Fuente de verdad para el diseño de criaturas. Los datos de este documento se trasladarán a `packages/content` (TypeScript + validación Zod) en la Fase 4.
 
 ---
@@ -331,7 +331,7 @@ La afinidad **secundaria** (heredada, ver EVOLUTION_SYSTEM §6) añade ±5% de r
 **Personalidad.** Soñadores, sabios y distraídos. Se quedan mirando al cielo. Les fascinan los rompecabezas.
 **Rasgos físicos comunes.** Cuerpo con **interior de nebulosa visible** (textura animada de galaxia dentro de la silueta), pequeños planetas u orbes que orbitan, y ojos como constelaciones.
 **Hábitat.** Observatorio flotante con telescopio, cúpula de estrellas, planetas en miniatura y auroras.
-**Necesidades especiales.** Necesidades más estables (decaen un 15% más lento), pero piden **estímulo mental**: si no juegan a Meowdoku o al Laberinto en 24 h, se aburren (−felicidad). Comida: polvo de estrellas, gominolas de cometa.
+**Necesidades especiales.** Necesidades más estables (decaen un 15% más lento), pero piden **estímulo mental**: si no juegan a `grid` o a `maze` en 24 h, se aburren (−felicidad). Comida: polvo de estrellas, gominolas de cometa.
 **Animaciones distintivas.** Levitar al estar contentos, orbes que cambian de órbita según el humor y "constelar" (dibuja figuras en el aire al recibir caricias).
 
 | Etapa | ID | Nombre | Diseño / silueta |
