@@ -4,6 +4,8 @@ import {
   Skia,
   StrokeCap,
   StrokeJoin,
+  TileMode,
+  vec,
   type SkPaint,
   type SkPath,
 } from "@shopify/react-native-skia";
@@ -18,7 +20,7 @@ export interface DrawOp {
   bone: number;
   fill: SkPaint | null;
   stroke: SkPaint | null;
-  faceSlot: "eyes" | "mouth" | null;
+  faceSlot: "eyes" | "mouth" | "brows" | "prop" | null;
   faceStates: string[];
 }
 
@@ -31,8 +33,26 @@ export interface CreatureResources {
   shapes: Record<ParticleShape, SkPath>;
 }
 
-const resolve = (ref: PaintRef, palette: Palette): { color: string; alpha: number } =>
-  "tint" in ref ? { color: palette[ref.tint], alpha: ref.alpha ?? 1 } : { color: ref.color, alpha: ref.alpha ?? 1 };
+const colorOf = (c: string, palette: Palette) => (c in palette ? palette[c as keyof Palette] : c);
+
+function paintFor(ref: PaintRef, palette: Palette, blur: number, stroke?: number): SkPaint {
+  if ("gradient" in ref) {
+    const p = makePaint("#000000", 1, blur, stroke);
+    p.setShader(
+      Skia.Shader.MakeLinearGradient(
+        vec(ref.from[0], ref.from[1]),
+        vec(ref.to[0], ref.to[1]),
+        ref.gradient.map((c) => Skia.Color(colorOf(c, palette))),
+        null,
+        TileMode.Clamp,
+      ),
+    );
+    p.setAlphaf(ref.alpha ?? 1);
+    return p;
+  }
+  const color = "tint" in ref ? palette[ref.tint] : ref.color;
+  return makePaint(color, ref.alpha ?? 1, blur, stroke);
+}
 
 function makePaint(color: string, alpha: number, blur: number, stroke?: number): SkPaint {
   const p = Skia.Paint();
@@ -63,13 +83,11 @@ export function svgPath(d: string): SkPath {
 
 export function buildResources(rig: CompiledRig, palette: Palette, emitters: EmitterDef[]): CreatureResources {
   const ops: DrawOp[] = rig.parts.map((part) => {
-    const fill = part.fill ? resolve(part.fill, palette) : null;
-    const stroke = part.stroke ? resolve(part.stroke, palette) : null;
     return {
       path: svgPath(part.d),
       bone: part.bone,
-      fill: fill ? makePaint(fill.color, fill.alpha, part.blur) : null,
-      stroke: stroke ? makePaint(stroke.color, stroke.alpha, part.blur, part.strokeWidth) : null,
+      fill: part.fill ? paintFor(part.fill, palette, part.blur) : null,
+      stroke: part.stroke ? paintFor(part.stroke, palette, part.blur, part.strokeWidth) : null,
       faceSlot: part.faceSlot,
       faceStates: part.faceStates,
     };

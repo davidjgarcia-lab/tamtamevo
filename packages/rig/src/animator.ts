@@ -23,6 +23,8 @@ export interface Frame {
   world: number[];
   eyes: string;
   mouth: string;
+  brows: string;
+  prop: string;
   clipT: number;
 }
 
@@ -70,6 +72,8 @@ export function evaluateFrame(
     world: worldMatrices(rig, pose),
     eyes: sampleFace(clip.eyes, ct, "open"),
     mouth: sampleFace(clip.mouth, ct, "smile"),
+    brows: sampleFace(clip.brows, ct, "neutral"),
+    prop: sampleFace(clip.prop, ct, "none"),
     clipT: ct,
   };
 }

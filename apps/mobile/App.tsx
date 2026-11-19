@@ -6,16 +6,28 @@ import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
 import { View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { RigLabScreen } from "./src/screens/RigLabScreen";
+import { GameProvider, useGame } from "./src/game/GameProvider";
+import { EggScreen, NamingScreen } from "./src/screens/BirthScreens";
+import { HomeScreen } from "./src/screens/HomeScreen";
 import { colors } from "./src/theme";
+
+function Router() {
+  const { state } = useGame();
+  if (state.phase === "egg") return <EggScreen />;
+  if (state.phase === "naming") return <NamingScreen />;
+  return <HomeScreen />;
+}
 
 export default function App() {
   const [loaded] = useFonts({ Fredoka_600SemiBold, Fredoka_700Bold, Nunito_600SemiBold, Nunito_800ExtraBold });
-  if (!loaded) return <View style={{ flex: 1, backgroundColor: colors.cream }} />;
+  const blank = <View style={{ flex: 1, backgroundColor: colors.cream }} />;
+  if (!loaded) return blank;
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" />
-      <RigLabScreen />
+      <GameProvider fallback={blank}>
+        <Router />
+      </GameProvider>
     </SafeAreaProvider>
   );
 }

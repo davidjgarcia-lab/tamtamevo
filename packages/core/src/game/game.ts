@@ -1,0 +1,280 @@
+import {
+  advanceCare, bathe, clean, feed, goToSleep, newCareState, pet, play, spendForActivity, wakeUp,
+  DEFAULT_CARE_CONFIG, type CareConfig, type CareReaction, type CareState, type NeedId,
+} from "../care/needs";
+import { credit, debit, emptyWallet } from "../economy/wallet";
+import { applyEvolution, hatchTamtam, renameTamtam, type Tamtam } from "../identity/tamtam";
+import { addItem, emptyInventory, quantity, removeItem } from "../inventory/inventory";
+import { emptyRoom, mirrorItem, moveItem, placeItem, removePlacement, type Placement, type RoomLayout } from "../home/placement";
+import { addAttributeXp, attributeArenaBonuses, upgradeActivity } from "../progression/progression";
+import { emptyRewardLog, grantActivityReward, type RewardLog } from "../rewards/rewards";
+import { purchase, type PlayerEconomyState } from "../shop/shop";
+import { FOODS, GYM, SLICE_CATALOG, STARTER_COINS, STARTER_ITEMS } from "./content";
+
+/**
+ * Game state and actions of the first-Tamtam vertical slice.
+ * Every action is a pure mutation of a draft — run it inside Store.transact.
+ */
+
+export const SCHEMA_VERSION = 1;
+
+export interface GameState {
+  schemaVersion: number;
+  createdAt: number;
+  phase: "egg" | "naming" | "home";
+  egg: { tamtamId: string; speciesId: string; formId: string; laidAt: number; hatchAt: number; alleleId: string } | null;
+  tamtam: Tamtam | null;
+  alleleId: string;
+  care: CareState;
+  economy: PlayerEconomyState;
+  room: RoomLayout;
+  rewardLog: RewardLog;
+  gym: { sessions: number; strTrainingPoints: number };
+  buffs: string[];
+  lightsOn: boolean;
+}
+
+export const FIRST_EGG_INCUBATION_MS = 20_000;
+
+export function newGame(now: number, ids: { tamtamId: string }, alleleId = "brasa"): GameState {
+  const wallet = emptyWallet();
+  credit(wallet, { key: "grant:starter", currency: "tamcoin", amount: STARTER_COINS, kind: "reward", source: "welcome", ts: now });
+  const inventory = emptyInventory();
+  for (const [id, n] of Object.entries(STARTER_ITEMS)) addItem(inventory, id, n, now);
+  const room = emptyRoom();
+  const economy: PlayerEconomyState = { wallet, inventory, caretakerLevel: 1, activityLevels: { gym: 1, academy: 0, garden: 0, music: 0, workshop: 0 } };
+  const starter: Placement[] = [
+    { uid: "p-bed", itemId: "furn_bed_nest", layer: "floor", x: 0, y: 0, mirrored: false, rotated: false },
+    { uid: "p-rug", itemId: "furn_rug_round", layer: "rug", x: 4, y: 2, mirrored: false, rotated: false },
+    { uid: "p-lamp", itemId: "furn_lamp_mushroom", layer: "floor", x: 3, y: 0, mirrored: false, rotated: false },
+    { uid: "p-poster", itemId: "furn_poster_volcano", layer: "wall", x: 1, y: 1, mirrored: false, rotated: false },
+    { uid: "p-gym", itemId: "gym_dumbbells", layer: "floor", x: 10, y: 0, mirrored: false, rotated: false },
+  ];
+  for (const p of starter) placeItem(room, SLICE_CATALOG, inventory, p);
+  return {
+    schemaVersion: SCHEMA_VERSION,
+    createdAt: now,
+    phase: "egg",
+    egg: { tamtamId: ids.tamtamId, speciesId: "fire", formId: "fire_baby_chispin", laidAt: now, hatchAt: now + FIRST_EGG_INCUBATION_MS, alleleId },
+    tamtam: null,
+    alleleId,
+    care: newCareState(now),
+    economy,
+    room,
+    rewardLog: emptyRewardLog(),
+    gym: { sessions: 0, strTrainingPoints: 0 },
+    buffs: [],
+    lightsOn: true,
+  };
+}
+
+export class GameRuleError extends Error {
+  constructor(public readonly code: string) {
+    super(code);
+  }
+}
+
+/** Egg progress in [0, 1]. */
+export function eggProgress(s: Readonly<GameState>, now: number): number {
+  if (!s.egg) return 1;
+  return Math.min(1, Math.max(0, (now - s.egg.laidAt) / (s.egg.hatchAt - s.egg.laidAt)));
+}
+
+export function hatch(s: GameState, now: number): void {
+  if (s.phase !== "egg" || !s.egg) throw new GameRuleError("not_an_egg");
+  if (now < s.egg.hatchAt) throw new GameRuleError("not_ready");
+  s.phase = "naming";
+}
+
+export function nameNewTamtam(s: GameState, requestedName: string, now: number): Tamtam {
+  if (s.phase !== "naming" || !s.egg) throw new GameRuleError("not_naming");
+  const t = hatchTamtam({
+    id: s.egg.tamtamId,
+    speciesId: s.egg.speciesId,
+    formId: s.egg.formId,
+    requestedName,
+    bornAt: now,
+    personality: ["playful", "glutton"],
+    affinity: { primary: "fire", secondary: "fire" },
+  });
+  s.tamtam = t;
+  s.alleleId = s.egg.alleleId;
+  s.egg = null;
+  s.phase = "home";
+  s.care = newCareState(now);
+  return t;
+}
+
+export function rename(s: GameState, requested: string, now: number): void {
+  if (!s.tamtam) throw new GameRuleError("no_tamtam");
+  s.tamtam = renameTamtam(s.tamtam, requested, now);
+}
+
+export function tick(s: GameState, now: number, cfg: CareConfig = DEFAULT_CARE_CONFIG): void {
+  if (s.phase === "home") advanceCare(s.care, now, cfg);
+}
+
+export type CareKind = "bathe" | "clean" | "pet" | "play" | "sleep" | "wake";
+
+export function careAction(s: GameState, kind: CareKind, now: number): CareReaction {
+  if (s.phase !== "home") throw new GameRuleError("no_tamtam");
+  switch (kind) {
+    case "bathe": return bathe(s.care, now);
+    case "clean": return clean(s.care, now);
+    case "pet": return pet(s.care, now);
+    case "play": return play(s.care, now);
+    case "sleep": s.lightsOn = false; return goToSleep(s.care, now);
+    case "wake": s.lightsOn = true; return wakeUp(s.care, now);
+  }
+}
+
+/** Feeds a food from the inventory. Refused food is not consumed. */
+export function feedFood(s: GameState, foodId: string, now: number): CareReaction {
+  if (s.phase !== "home" || !s.tamtam) throw new GameRuleError("no_tamtam");
+  const food = FOODS[foodId];
+  if (!food) throw new GameRuleError("unknown_food");
+  if (quantity(s.economy.inventory, foodId) < 1) throw new GameRuleError("no_food");
+  const r = feed(s.care, food, s.tamtam.speciesId, now);
+  if (r === "refuse_full" || r === "already_asleep") return r;
+  removeItem(s.economy.inventory, foodId, 1);
+  if (food.buff && !s.buffs.includes(food.buff)) s.buffs.push(food.buff);
+  return r;
+}
+
+export interface GymResult {
+  ok: boolean;
+  reason?: "too_tired";
+  coins: number;
+  xp: number;
+  strLevelsGained: number;
+  strPointGained: boolean;
+  duplicate: boolean;
+}
+
+/** Completes one gym session. `runId` makes the reward idempotent. */
+export function completeGymSession(s: GameState, input: { runId: string; quality: number; now: number; tzOffsetMin: number }): GymResult {
+  if (s.phase !== "home" || !s.tamtam) throw new GameRuleError("no_tamtam");
+  const level = s.economy.activityLevels.gym;
+  if (level < 1) throw new GameRuleError("no_gym");
+  const key = `reward:activity:gym:${input.runId}`;
+  if (s.economy.wallet.keys[key] !== undefined) {
+    return { ok: true, coins: 0, xp: 0, strLevelsGained: 0, strPointGained: false, duplicate: true };
+  }
+  if (!spendForActivity(s.care, input.now, GYM.energyCost, GYM.hungerCost, 4)) {
+    return { ok: false, reason: "too_tired", coins: 0, xp: 0, strLevelsGained: 0, strPointGained: false, duplicate: false };
+  }
+  const r = grantActivityReward(s.economy.wallet, s.rewardLog, {
+    runId: input.runId,
+    tamtamId: s.tamtam.id,
+    source: "activity:gym",
+    baseCoins: GYM.baseCoins,
+    quality: input.quality,
+    levelMultiplier: GYM.levelMultiplier[level] ?? 1,
+    baseXp: GYM.baseXp,
+    ts: input.now,
+    tzOffsetMin: input.tzOffsetMin,
+  });
+  const up = addAttributeXp(s.tamtam, "str", r.xp);
+  s.tamtam = up.tamtam;
+  s.gym.sessions += 1;
+  const point = s.gym.sessions % GYM.sessionsPerStrPoint === 0;
+  if (point) s.gym.strTrainingPoints += 1;
+  return { ok: true, coins: r.coins, xp: r.xp, strLevelsGained: up.gained, strPointGained: point, duplicate: false };
+}
+
+export function upgradeGym(s: GameState, key: string, now: number): number {
+  if (!s.tamtam) throw new GameRuleError("no_tamtam");
+  return upgradeActivity(s.economy, "gym", s.tamtam.attributes.str.level, { key, ts: now }).level;
+}
+
+export function buy(s: GameState, itemId: string, key: string, now: number, qty = 1) {
+  const item = SLICE_CATALOG.get(itemId);
+  if (!item) throw new GameRuleError("unknown_item");
+  return purchase(s.economy, item, { key, qty, ts: now });
+}
+
+export function place(s: GameState, p: Placement): void {
+  placeItem(s.room, SLICE_CATALOG, s.economy.inventory, p);
+}
+export function move(s: GameState, uid: string, x: number, y: number): void {
+  moveItem(s.room, SLICE_CATALOG, s.economy.inventory, uid, x, y);
+}
+export function mirror(s: GameState, uid: string): void {
+  mirrorItem(s.room, SLICE_CATALOG, s.economy.inventory, uid);
+}
+export function unplace(s: GameState, uid: string): void {
+  removePlacement(s.room, uid);
+}
+
+/** Arena stat preview for the current form: shows how the Gym feeds the Arena (ACTIVITIES_SYSTEM §6). */
+export const FORM_BASE_STR: Record<string, number> = {
+  fire_baby_chispin: Math.round(90 * 0.55),
+  fire_child_fogarin: Math.round(90 * 0.75),
+  fire_juvenile_brasko: 90,
+  fire_adult_volcaurio: 120,
+  fire_adult_fenixara: 105,
+};
+
+export function arenaStrength(s: Readonly<GameState>): { base: number; fromAttribute: number; fromTraining: number; fromFood: number; total: number } {
+  if (!s.tamtam) return { base: 0, fromAttribute: 0, fromTraining: 0, fromFood: 0, total: 0 };
+  const baseForm = FORM_BASE_STR[s.tamtam.formId] ?? 50;
+  const potential = 7; // placeholder until genetics lands in the slice (EVOLUTION_SYSTEM §6)
+  const base = Math.round(baseForm * (0.4 + 0.012 * s.tamtam.level) * (1 + potential / 60));
+  const pct = attributeArenaBonuses(s.tamtam).strPct;
+  const fromAttribute = Math.round((base * pct) / 100);
+  const fromTraining = s.gym.strTrainingPoints;
+  const fromFood = s.buffs.includes("str_5_next_fight") ? Math.round(base * 0.05) : 0;
+  return { base, fromAttribute, fromTraining, fromFood, total: base + fromAttribute + fromTraining + fromFood };
+}
+
+// ── Developer debug actions (only used on the debug profile) ───────────────────
+
+export function debugSetNeed(s: GameState, need: NeedId, value: number): void {
+  s.care.needs[need] = Math.min(100, Math.max(0, value));
+}
+
+let debugSeq = 0;
+export function debugCoins(s: GameState, delta: number, now: number): void {
+  const key = `debug:${now}:${++debugSeq}`;
+  if (delta > 0) credit(s.economy.wallet, { key, currency: "tamcoin", amount: delta, kind: "adjustment", source: "debug", ts: now });
+  else if (delta < 0) debit(s.economy.wallet, { key, currency: "tamcoin", amount: Math.min(-delta, s.economy.wallet.balances.tamcoin), kind: "adjustment", source: "debug", ts: now });
+}
+
+export function debugAttributeLevels(s: GameState, attr: "str" | "int" | "cre" | "nat" | "man", levels: number): void {
+  if (!s.tamtam) return;
+  let t = s.tamtam;
+  for (let i = 0; i < levels; i++) {
+    const cur = t.attributes[attr];
+    t = addAttributeXp(t, attr, 50 * (cur.level + 2) - cur.xp).tamtam;
+  }
+  s.tamtam = t;
+}
+
+export function debugLevelUp(s: GameState, levels: number): void {
+  if (s.tamtam) s.tamtam = { ...s.tamtam, level: Math.min(50, s.tamtam.level + levels) };
+}
+
+export function debugGrantAll(s: GameState, now: number): void {
+  for (const item of SLICE_CATALOG.values()) {
+    const missing = item.maxOwned - quantity(s.economy.inventory, item.id);
+    const n = item.stackable ? Math.min(missing, item.category === "food" ? 5 : missing) : missing;
+    if (n > 0) addItem(s.economy.inventory, item.id, n, now);
+  }
+}
+
+export function debugNewEgg(s: GameState, now: number, tamtamId: string, alleleId: string): void {
+  s.phase = "egg";
+  s.tamtam = null;
+  s.egg = { tamtamId, speciesId: "fire", formId: "fire_baby_chispin", laidAt: now, hatchAt: now + FIRST_EGG_INCUBATION_MS, alleleId };
+}
+
+/**
+ * Forces the stage change in data (for testing the evolution pipeline). The vertical slice
+ * only has artwork for the baby form, so the app keeps rendering Chispín and flags it.
+ */
+export function debugForceEvolution(s: GameState, to: { formId: string; stage: Tamtam["stage"] }, now: number): void {
+  if (!s.tamtam) throw new GameRuleError("no_tamtam");
+  if (s.tamtam.formId === to.formId) throw new GameRuleError("already_in_form");
+  s.tamtam = applyEvolution(s.tamtam, to, now, 1);
+  s.care.maturity = 0;
+}

@@ -8,3 +8,8 @@ export * from "./shop/shop";
 export * from "./home/placement";
 export * from "./rewards/rewards";
 export * from "./progression/progression";
+export * from "./care/needs";
+export * from "./game/content";
+export * from "./game/game";
+export * from "./sim/lifecycle";
+export * from "./evolution/engine";

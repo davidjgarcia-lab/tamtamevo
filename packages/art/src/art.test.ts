@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { compileClip, compileRig, contrast, derivePalette, evaluateFrame } from "@tamtam/rig";
 import { chispinClips, chispinEmitters, chispinRig, fireColorAlleles } from "./index";
 
-const REQUIRED_CLIPS = ["idle", "walk", "eat", "pet", "sleep"];
+const REQUIRED_CLIPS = ["idle", "walk", "eat", "pet", "sleep", "celebrate", "train", "bathe", "sad", "hungry", "angry"];
 
 describe("Chispín", () => {
   const rig = compileRig(chispinRig);
@@ -14,11 +14,13 @@ describe("Chispín", () => {
   });
 
   it("only uses face states that have artwork", () => {
-    const drawn = { eyes: new Set<string>(["open"]), mouth: new Set<string>(["smile"]) };
+    const drawn = { eyes: new Set<string>(["open"]), mouth: new Set<string>(["smile"]), brows: new Set<string>(["neutral"]), prop: new Set<string>(["none"]) };
     for (const p of chispinRig.parts) p.face?.states.forEach((s) => drawn[p.face!.slot].add(s));
     for (const c of chispinClips) {
       for (const k of c.face?.eyes ?? []) expect(drawn.eyes.has(k.v), `${c.id} eyes "${k.v}"`).toBe(true);
       for (const k of c.face?.mouth ?? []) expect(drawn.mouth.has(k.v), `${c.id} mouth "${k.v}"`).toBe(true);
+      for (const k of c.face?.brows ?? []) expect(drawn.brows.has(k.v), `${c.id} brows "${k.v}"`).toBe(true);
+      for (const k of c.face?.prop ?? []) expect(drawn.prop.has(k.v), `${c.id} prop "${k.v}"`).toBe(true);
     }
   });
 

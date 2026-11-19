@@ -4,6 +4,18 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+### Art Bible + vertical slice del primer Tamtam (2026-11-19)
+#### Añadido
+- `ART_BIBLE.md` (identidad, proporciones por etapa, anatomía modular, paletas de 8 familias, 14 expresiones, guía de documentación) y concept art generado con IA (`docs/media/concept/`, solo referencia).
+- Chispín v2: cejas, cuernitos de brasa, cola con ascua, cuerpo con degradado y 11 clips (6 nuevos: celebrar, entrenar con mancuerna, bañarse, triste, hambriento, enfado). El rig admite rellenos con degradado y los slots `brows` y `prop`.
+- **Prototipo jugable**: huevo → eclosión → nombre → casa con muebles → cuidados → comida → Gym (3 niveles) → monedero, historial y tienda ("Probar en mi casa") → decorar → ficha (FUE de Arena) → guardado.
+- **Developer Debug Mode**: partida separada, reloj simulado, monedas, necesidades, atributos, objetos, evolución forzada y huevos.
+- `packages/core`: simulación de cuidados en tiempo real (`care/needs.ts`), contenido y reglas del slice (`game/*`), motor de evolución con reglas de Fuego (`evolution/engine.ts`) y simulador de ciclo de vida (`sim/lifecycle.ts`).
+- Tests: 102 unitarios y de integración, 19 comprobaciones E2E (`tools/playthrough.mjs`), matriz de evolución de 27 escenarios + 5.000 aleatorios.
+- Documentos: CHARACTER_DESIGN_FIRST_TAMTAM, CHARACTER_ANIMATION_GUIDE, EVOLUTION_TEST_MATRIX, GAMEPLAY_TEST_PLAN, QA_TEST_PLAN, GAMEPLAY_TEST_RESULTS, PROGRESSION_TIMELINE, BALANCE_CONFIG, FIRST_TAMTAM_VERTICAL_SLICE y REUSABLE_CREATURE_TEMPLATE.
+#### Corregido
+- Toques en la habitación en web, cierre del panel debug, precisión del crecimiento, `structuredClone` y recorte de la ventana (GAMEPLAY_TEST_RESULTS §5).
+
 ### Brief v3.0 — Documentación y núcleo de lógica (2026-11-19)
 #### Añadido
 - `HOME_SYSTEM.md`, `ECONOMY_SYSTEM.md` y `ACTIVITIES_SYSTEM.md`.

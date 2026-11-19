@@ -36,9 +36,14 @@ export type TintKey =
   | "eye"
   | "glow";
 
-export type PaintRef = { tint: TintKey; alpha?: number } | { color: string; alpha?: number };
+export type PaintRef =
+  | { tint: TintKey; alpha?: number }
+  | { color: string; alpha?: number }
+  /** Linear gradient in the part's local space (volume shading, ART_BIBLE §1). */
+  | { gradient: (TintKey | string)[]; from: [number, number]; to: [number, number]; alpha?: number };
 
-export type FaceSlot = "eyes" | "mouth";
+/** State slots: facial features and held props share the same visibility mechanism. */
+export type FaceSlot = "eyes" | "mouth" | "brows" | "prop";
 
 export interface PartDef {
   id: string;

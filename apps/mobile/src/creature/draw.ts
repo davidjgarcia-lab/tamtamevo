@@ -36,7 +36,8 @@ export function drawCreature(canvas: SkCanvas, res: CreatureResources, frame: Fr
   for (let i = 0; i < res.ops.length; i++) {
     const op = res.ops[i]!;
     if (op.faceSlot !== null) {
-      const state = op.faceSlot === "eyes" ? frame.eyes : frame.mouth;
+      const state =
+        op.faceSlot === "eyes" ? frame.eyes : op.faceSlot === "mouth" ? frame.mouth : op.faceSlot === "brows" ? frame.brows : frame.prop;
       if (op.faceStates.indexOf(state) < 0) continue;
     }
     const o = op.bone * 6;

@@ -2,8 +2,8 @@ import type { Currency } from "../economy/wallet";
 
 /** Shop catalogue model (ECONOMY_SYSTEM §4, HOME_SYSTEM §4). */
 
-export type ShopCategory = "decoration" | "furniture" | "lighting" | "surfaces" | "equipment" | "special" | "upgrades";
-export const SHOP_CATEGORIES: readonly ShopCategory[] = ["decoration", "furniture", "lighting", "surfaces", "equipment", "special", "upgrades"];
+export type ShopCategory = "food" | "decoration" | "furniture" | "lighting" | "surfaces" | "equipment" | "special" | "upgrades";
+export const SHOP_CATEGORIES: readonly ShopCategory[] = ["food", "decoration", "furniture", "lighting", "surfaces", "equipment", "special", "upgrades"];
 
 export type Rarity = "common" | "uncommon" | "rare" | "epic";
 

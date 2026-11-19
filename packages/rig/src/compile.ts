@@ -20,7 +20,7 @@ export interface CompiledPart {
   fill: PaintRef | null;
   stroke: PaintRef | null;
   strokeWidth: number;
-  faceSlot: "eyes" | "mouth" | null;
+  faceSlot: "eyes" | "mouth" | "brows" | "prop" | null;
   faceStates: string[];
   blur: number;
 }
@@ -57,6 +57,8 @@ export interface CompiledClip {
   tracks: (CompiledTrack | null)[];
   eyes: FaceKey[];
   mouth: FaceKey[];
+  brows: FaceKey[];
+  prop: FaceKey[];
   breath: number;
   breathRate: number;
   blink: boolean;
@@ -159,6 +161,8 @@ export function compileClip(rig: CompiledRig, def: ClipDef): CompiledClip {
     tracks,
     eyes: def.face?.eyes ?? [],
     mouth: def.face?.mouth ?? [],
+    brows: def.face?.brows ?? [],
+    prop: def.face?.prop ?? [],
     breath: def.breath ?? 1,
     breathRate: def.breathRate ?? 0.45,
     blink: def.blink ?? true,
