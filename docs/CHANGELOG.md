@@ -4,6 +4,23 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+### Fase 2 — Spike técnico de animación (2026-11-19)
+#### Añadido
+- Monorepo pnpm: `apps/mobile` (Expo SDK 58, React Native 0.88, Skia 2.14, Reanimated 4.7), `packages/rig` y `packages/art`.
+- **TamRig** (`packages/rig`), runtime de animación esqueletal vectorial:
+  - Huesos jerárquicos y clips por keyframes con easing.
+  - Cross-fade entre clips de 0,25 s.
+  - Capas procedurales: respiración, parpadeo determinista y follow-through con retardo y reacción a la velocidad (llamas, colas).
+  - Expresiones faciales por estado.
+  - Partículas sin estado.
+  - Paletas genéticas derivadas en OKLCH.
+  - Todo es TypeScript puro ejecutable como worklet en el hilo de UI.
+- **Chispín** (`packages/art`): 14 huesos, 40 partes vectoriales con canales de tinte, 5 clips (reposo, caminar, comer, caricia y dormir), emisores de partículas por clip (ascuas, polvo, migas, corazones y Zzz) y 5 alelos de color de la familia Fuego.
+- Hábitat de Fuego en versión spike (cueva basáltica, río de lava y cristales de obsidiana) en 4 capas.
+- Pantalla "Rig Lab" (herramienta de desarrollo): cambio de animación, acariciar tocando a la criatura, cambio de alelo de color y contador de FPS.
+- 19 tests (Vitest) y `tools/screenshots.mjs` para QA visual con Playwright en 4 resoluciones.
+- Vídeo y capturas en `docs/media/`.
+
 ### Fase 1 — Aprobación (2026-11-19)
 #### Cambiado
 - Decisiones D1–D8 aprobadas tal como se propusieron.

@@ -11,7 +11,7 @@
 | Fase | Nombre | Estimación | Acumulado | Estado |
 |------|--------|-----------|-----------|--------|
 | 1 | Game Design Document | 1 sem | 1 | ✅ Aprobada |
-| 2 | Identidad visual + spike de animación | 3 sem | 4 | ⚪ Pendiente |
+| 2 | Identidad visual + spike de animación | 3 sem | 4 | 🔵 En curso (spike terminado) |
 | 3 | Prototipo funcional (Hogar, primera mascota, cuidados, persistencia) | 4 sem | 8 | ⚪ |
 | 4 | Evolución, 8 familias, genética y reproducción | 7 sem | 15 | ⚪ |
 | 5 | Cuatro minijuegos | 6 sem | 21 | ⚪ |
@@ -33,8 +33,8 @@
 - Lámina de siluetas de las 40 formas.
 
 **Criterios de aceptación:**
-- [ ] Chispín se percibe vivo (respiración, parpadeo, física secundaria) y no como una imagen estática.
-- [ ] 60 fps con 3 criaturas + partículas en un dispositivo de gama media.
+- [x] Chispín se percibe vivo (respiración, parpadeo, física secundaria) y no como una imagen estática. *(spike, 2026-11-19; ver `docs/media/chispin-spike.mp4`)*
+- [ ] 60 fps con 3 criaturas + partículas en un dispositivo de gama media. *(pendiente de medir en un dispositivo real: el entorno de desarrollo en la nube no tiene GPU)*
 - [ ] Las 40 siluetas superan el test de identificación a 64 px.
 - [ ] Tu aprobación del estilo. Si no convence → plan B con Rive (D3).
 
@@ -94,8 +94,8 @@ Cuentas de desarrollador, fichas de tienda (capturas, vídeo, textos ES/EN), cla
 |------|---------------|--------|
 | Diseño | GDD y documentos de sistemas | ✅ Terminado y aprobado |
 | Arte | Identidad visual | ⚪ Pendiente |
-| Técnico | Monorepo y CI | ⚪ Pendiente |
-| Técnico | Runtime TamRig | ⚪ Pendiente |
+| Técnico | Monorepo | ✅ Terminado (CI pendiente) |
+| Técnico | Runtime TamRig | 🔵 Spike funcional (5 clips, partículas, tintado genético) |
 | Juego | Cuidados y tiempo real | ⚪ Pendiente |
 | Juego | Evolución | ⚪ Pendiente |
 | Juego | Genética y cría | ⚪ Pendiente |

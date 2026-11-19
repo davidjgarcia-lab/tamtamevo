@@ -204,7 +204,13 @@ leaderboards(season_id, player_id, pc, rank)
 
 ---
 
-## 9. Dependencias previstas (a confirmar con versiones actuales al empezar la Fase 3)
+## 9. Dependencias
+
+**Instaladas (Fase 2):** Expo SDK 58, React Native 0.88, React 19.3, `@shopify/react-native-skia` 2.14, `react-native-reanimated` 4.7, `react-native-worklets` 0.13, `react-native-gesture-handler` 3.3, `expo-font` + Fredoka/Nunito, TypeScript 6 y Vitest 4. Gestor de paquetes: **pnpm** (workspaces, `node-linker=hoisted` para compatibilidad con Metro).
+
+> Nota de entorno: en la nube, `expo install` se ejecuta con `EXPO_OFFLINE=1` (las versiones compatibles salen del propio paquete `expo`), porque la API de versiones de Expo no es accesible.
+
+**Previstas:**
 `expo`, `expo-router`, `react-native-reanimated`, `react-native-gesture-handler`, `@shopify/react-native-skia`, `expo-sqlite`, `react-native-mmkv`, `zustand`, `zod`, `i18next`, `expo-audio`, `expo-haptics`, `expo-notifications`; desarrollo: `typescript`, `vitest`, `fast-check`, `eslint` (+ reglas de límites de import), `turbo`, `playwright`, `maestro`.
 
 ## 10. Riesgos técnicos
