@@ -13,7 +13,7 @@ import { composeLook } from "../creature/look";
 import { drawTamtam, useCreature } from "../creature/useCreature";
 import { newId, useGame } from "../game/GameProvider";
 import { buildRoomPicture, cellAt, drawFurniture, placementRect, roomGeom } from "../home/roomArt";
-import { colors, fonts } from "../theme";
+import { brand, colors, fonts } from "../theme";
 import { Btn, Coin, Toast } from "../ui/kit";
 import { DebugPanel } from "./DebugPanel";
 import { GymScreen } from "./GymScreen";
@@ -293,8 +293,8 @@ export function HomeScreen() {
   const onLayout = (e: LayoutChangeEvent) => setSize({ w: Math.round(e.nativeEvent.layout.width), h: Math.round(e.nativeEvent.layout.height) });
   const needs = state.care.needs;
   const pills: [string, number, string][] = [
-    ["Hambre", needs.hunger, "#FF8A3D"], ["Higiene", needs.hygiene, "#2EC4F1"], ["Felicidad", needs.happiness, "#FFB627"],
-    ["Cariño", needs.affection, "#FF5E7E"], ["Energía", needs.energy, "#7A5DB0"], ["Actividad", needs.activity, "#5BC85B"],
+    ["Hambre", needs.hunger, brand.orange], ["Higiene", needs.hygiene, brand.cyan], ["Felicidad", needs.happiness, brand.gold],
+    ["Cariño", needs.affection, brand.pink], ["Energía", needs.energy, brand.violet], ["Actividad", needs.activity, brand.mint],
   ];
 
   return (
@@ -412,18 +412,18 @@ export function HomeScreen() {
 
 const h = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.cream },
-  debugBanner: { backgroundColor: "#2A2238", color: "#FFE08A", textAlign: "center", fontFamily: fonts.bodyBold, fontSize: 11, paddingVertical: 3 },
+  debugBanner: { backgroundColor: brand.violet, color: brand.cloud, textAlign: "center", fontFamily: fonts.bodyBold, fontSize: 11, paddingVertical: 3 },
   top: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 12, paddingTop: 6 },
-  ribbon: { flex: 1, backgroundColor: colors.coral, borderRadius: 16, borderWidth: 2, borderBottomWidth: 5, borderColor: colors.coralDark, paddingHorizontal: 14, paddingVertical: 4 },
-  name: { fontFamily: fonts.displayBold, fontSize: 22, color: "#FFFFFF" },
-  sub: { fontFamily: fonts.body, fontSize: 11, color: "#FFE3E8", marginTop: -2 },
-  wallet: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: colors.card, borderRadius: 16, borderWidth: 2, borderBottomWidth: 5, borderColor: colors.line, paddingHorizontal: 12, height: 48 },
+  ribbon: { flex: 1, backgroundColor: brand.violet, borderRadius: 18, borderWidth: 1.5, borderBottomWidth: 4, borderColor: "#6E2BD6", paddingHorizontal: 14, paddingVertical: 4 },
+  name: { fontFamily: fonts.displayBold, fontSize: 24, color: brand.cloud, lineHeight: 30 },
+  sub: { fontFamily: fonts.body, fontSize: 11, color: "#E6DCFF", marginTop: -4 },
+  wallet: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: colors.card, borderRadius: 18, borderWidth: 1.5, borderBottomWidth: 4, borderColor: colors.line, paddingHorizontal: 12, height: 48 },
   coins: { fontFamily: fonts.displayBold, fontSize: 18, color: colors.ink, fontVariant: ["tabular-nums"] },
   pills: { flexDirection: "row", flexWrap: "wrap", gap: 4, paddingHorizontal: 12, paddingTop: 8 },
-  pill: { width: "32.4%", height: 22, borderRadius: 11, backgroundColor: "#EADFCF", overflow: "hidden", justifyContent: "center" },
+  pill: { width: "32.4%", height: 22, borderRadius: 11, backgroundColor: brand.panel, overflow: "hidden", justifyContent: "center" },
   pillFill: { ...StyleSheet.absoluteFill, right: undefined, opacity: 0.85 },
-  pillText: { fontFamily: fonts.bodyBold, fontSize: 11, color: colors.ink, paddingLeft: 8 },
-  stage: { flex: 1, margin: 10, borderRadius: 24, overflow: "hidden", backgroundColor: "#F6E3C8" },
+  pillText: { fontFamily: fonts.bodyBold, fontSize: 11, color: brand.cloud, paddingLeft: 8, textShadowColor: "rgba(10,7,24,0.7)", textShadowRadius: 3 },
+  stage: { flex: 1, margin: 10, borderRadius: 24, overflow: "hidden", backgroundColor: brand.panel, borderWidth: 1.5, borderColor: brand.line },
   panel: { paddingHorizontal: 12, paddingBottom: 6, gap: 6 },
   panelTitle: { fontFamily: fonts.display, fontSize: 14, color: colors.ink, textAlign: "center" },
   row: { flexDirection: "row", gap: 6 },

@@ -5,7 +5,8 @@ import { Platform } from "react-native";
 if (Platform.OS === "web") {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { LoadSkiaWeb } = require("@shopify/react-native-skia/lib/module/web");
-  LoadSkiaWeb({ locateFile: (file: string) => `/${file}` }).then(() => {
+  // Relative path so the build also works when hosted under a sub-path (artifact, previews).
+  LoadSkiaWeb({ locateFile: (file: string) => `./${file}` }).then(() => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     registerRootComponent(require("./App").default);
   });

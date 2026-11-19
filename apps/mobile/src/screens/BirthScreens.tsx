@@ -1,16 +1,17 @@
 import { Canvas, createPicture, Picture, Skia, BlurStyle } from "@shopify/react-native-skia";
 import { DEFAULT_NAMES, eggProgress, hatch, nameNewTamtam, validateName, type NameError } from "@tamtam/core";
 import { useEffect, useMemo, useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { useDerivedValue, useFrameCallback, useSharedValue } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { drawTamtam, useCreature } from "../creature/useCreature";
 import { useGame } from "../game/GameProvider";
-import { colors, fonts } from "../theme";
+import { brand, colors, fonts } from "../theme";
 import { Btn } from "../ui/kit";
 
 const EGG = "M 0 -60 C 30 -60 46 -18 46 10 C 46 40 26 58 0 58 C -26 58 -46 40 -46 10 C -46 -18 -30 -60 0 -60 Z";
 const SPOTS = ["M -20 -20 a 9 7 0 1 0 0.1 0 Z", "M 18 0 a 11 9 0 1 0 0.1 0 Z", "M -8 26 a 8 6 0 1 0 0.1 0 Z", "M 14 -34 a 6 5 0 1 0 0.1 0 Z"];
+const SWIRL = "M 2 22 C 14 22 16 8 6 4 C -6 0 -14 12 -8 22 C -2 32 16 32 22 20 C 28 6 18 -8 4 -10";
 const CRACKS = [
   "M -30 -6 L -18 -14 L -8 -2 L 4 -16 L 14 -4 L 28 -12",
   "M -4 -16 L -10 -30 L 0 -40",
@@ -42,6 +43,7 @@ export function EggScreen() {
   const paths = useMemo(() => ({
     egg: Skia.Path.MakeFromSVGString(EGG)!,
     spots: SPOTS.map((d) => Skia.Path.MakeFromSVGString(d)!),
+    swirl: Skia.Path.MakeFromSVGString(SWIRL)!,
     cracks: CRACKS.map((d) => Skia.Path.MakeFromSVGString(d)!),
   }), []);
 
@@ -54,7 +56,7 @@ export function EggScreen() {
       const cs = crackStart.value;
       const ct = cs < 0 ? 0 : t - cs;
       const glow = Skia.Paint();
-      glow.setColor(Skia.Color("#FFB25E"));
+      glow.setColor(Skia.Color("#B983FF"));
       glow.setAlphaf(0.25 + 0.45 * p + (p >= 1 ? 0.2 * Math.sin(t * 6) : 0));
       glow.setMaskFilter(Skia.MaskFilter.MakeBlur(BlurStyle.Normal, 40, true));
       const scale = Math.min(w, h) / 220;
@@ -67,29 +69,45 @@ export function EggScreen() {
       const amp = (3 + 12 * p) * burst * burst + (cs >= 0 ? 10 : 0);
       c.rotate(Math.sin(t * (8 + p * 6)) * amp, 0, 50);
       const shadow = Skia.Paint();
-      shadow.setColor(Skia.Color("#2A0E1E"));
+      shadow.setColor(Skia.Color("#05030D"));
       shadow.setAlphaf(0.25);
       c.drawOval(Skia.XYWHRect(-40, 52, 80, 14), shadow);
       const shell = Skia.Paint();
       shell.setAntiAlias(true);
-      shell.setColor(Skia.Color("#FFF1DC"));
+      shell.setColor(Skia.Color("#FFE9D6"));
       c.drawPath(paths.egg, shell);
       const spot = Skia.Paint();
       spot.setAntiAlias(true);
-      spot.setColor(Skia.Color("#FF8A4C"));
+      spot.setColor(Skia.Color("#7B5BD0"));
+      spot.setAlphaf(0.6);
       for (const sp of paths.spots) c.drawPath(sp, spot);
       const shade = Skia.Paint();
-      shade.setColor(Skia.Color("#E9B98A"));
+      shade.setColor(Skia.Color("#C9A7E8"));
       shade.setAlphaf(0.45);
       c.save();
       c.clipPath(paths.egg, 1, true);
       c.drawCircle(26, 30, 50, shade);
       c.restore();
+      // Brand swirl (cyan, emissive) — the egg of the app icon.
+      const sw = Skia.Paint();
+      sw.setAntiAlias(true);
+      sw.setStyle(1);
+      sw.setStrokeCap(1);
+      sw.setStrokeWidth(6);
+      sw.setColor(Skia.Color("#00D4FF"));
+      sw.setAlphaf(0.45 + 0.35 * p + (p >= 1 ? 0.2 * Math.sin(t * 6) : 0));
+      sw.setMaskFilter(Skia.MaskFilter.MakeBlur(BlurStyle.Normal, 3, true));
+      c.drawPath(paths.swirl, sw);
+      const sw2 = sw.copy();
+      sw2.setMaskFilter(null);
+      sw2.setStrokeWidth(3.5);
+      sw2.setColor(Skia.Color("#8FF0FF"));
+      c.drawPath(paths.swirl, sw2);
       const line = Skia.Paint();
       line.setAntiAlias(true);
       line.setStyle(1);
       line.setStrokeWidth(4);
-      line.setColor(Skia.Color("#5A1426"));
+      line.setColor(Skia.Color("#2A1A3E"));
       c.drawPath(paths.egg, line);
       const hl = Skia.Paint();
       hl.setColor(Skia.Color("#FFFFFF"));
@@ -101,11 +119,11 @@ export function EggScreen() {
         crack.setStyle(1);
         crack.setStrokeWidth(3.2);
         crack.setStrokeCap(1);
-        crack.setColor(Skia.Color("#5A1426"));
+        crack.setColor(Skia.Color("#2A1A3E"));
         const n = Math.min(paths.cracks.length, Math.floor(ct / 0.25) + 1);
         for (let k = 0; k < n; k++) c.drawPath(paths.cracks[k]!, crack);
         const light = Skia.Paint();
-        light.setColor(Skia.Color("#FFE08A"));
+        light.setColor(Skia.Color("#8FF0FF"));
         light.setAlphaf(Math.min(1, ct / 0.9));
         light.setMaskFilter(Skia.MaskFilter.MakeBlur(BlurStyle.Normal, 10, true));
         c.drawCircle(0, -8, 20 + ct * 60, light);
@@ -125,6 +143,7 @@ export function EggScreen() {
 
   return (
     <SafeAreaView style={st.root}>
+      <Image source={require("../../assets/brand/logo-640.png")} style={st.brandLogo} resizeMode="contain" accessibilityLabel="TamTam Evolution" />
       <Text style={st.kicker}>Un nido luminoso ha caído en tu casa</Text>
       <Text style={st.title}>{ready ? "¡Se mueve!" : "Incubando…"}</Text>
       <Pressable
@@ -213,7 +232,7 @@ export function NamingScreen() {
             }}
             onBlur={() => setTouched(true)}
             placeholder="p. ej. Brasa"
-            placeholderTextColor="#A99BB3"
+            placeholderTextColor={brand.textDim}
             maxLength={40}
             style={[st.input, touched && !result.ok && name !== "" && st.inputError]}
             accessibilityLabelledBy="nameLabel"
@@ -236,19 +255,20 @@ export function NamingScreen() {
 }
 
 const st = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#2A0E1E" },
-  kicker: { textAlign: "center", marginTop: 16, fontFamily: fonts.body, color: "#FFC9A3", fontSize: 14 },
-  title: { textAlign: "center", fontFamily: fonts.displayBold, fontSize: 30, color: "#FFF4E2", marginTop: 2 },
+  root: { flex: 1, backgroundColor: brand.core },
+  brandLogo: { width: 150, height: 100, alignSelf: "center", marginTop: 10 },
+  kicker: { textAlign: "center", marginTop: 16, fontFamily: fonts.body, color: brand.cyan, fontSize: 14, letterSpacing: 0.3 },
+  title: { textAlign: "center", fontFamily: fonts.displayBold, fontSize: 34, color: brand.cloud, marginTop: 2 },
   stage: { flex: 1, minHeight: 220 },
   footer: { padding: 24, gap: 10 },
-  track: { height: 14, borderRadius: 7, backgroundColor: "#4A1D2E", overflow: "hidden" },
-  fill: { height: 14, backgroundColor: "#FFB627", borderRadius: 7 },
-  hint: { textAlign: "center", color: "#FFE3C7", fontFamily: fonts.body, fontSize: 14 },
-  form: { backgroundColor: colors.cream, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 20, gap: 8 },
+  track: { height: 14, borderRadius: 7, backgroundColor: brand.panel, overflow: "hidden" },
+  fill: { height: 14, backgroundColor: brand.cyan, borderRadius: 7 },
+  hint: { textAlign: "center", color: brand.textSoft, fontFamily: fonts.body, fontSize: 14 },
+  form: { backgroundColor: brand.panel, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, gap: 8 },
   label: { fontFamily: fonts.bodyBold, color: colors.inkSoft, fontSize: 13 },
-  input: { height: 54, borderRadius: 16, borderWidth: 2, borderColor: colors.line, backgroundColor: "#FFFFFF", paddingHorizontal: 16, fontSize: 20, fontFamily: fonts.display, color: colors.ink },
-  inputError: { borderColor: "#D9405F" },
+  input: { height: 54, borderRadius: 14, borderWidth: 2, borderColor: colors.line, backgroundColor: brand.core, paddingHorizontal: 16, fontSize: 20, fontFamily: fonts.display, color: colors.ink },
+  inputError: { borderColor: brand.pink },
   help: { fontFamily: fonts.body, color: colors.inkSoft, fontSize: 13 },
-  helpError: { color: "#C0304F" },
+  helpError: { color: brand.pink },
   row: { flexDirection: "row", gap: 10, marginTop: 6 },
 });

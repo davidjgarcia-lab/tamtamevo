@@ -58,7 +58,7 @@ export function cellAt(g: RoomGeom, room: RoomLayout, layer: "floor" | "wall" | 
   return x >= 0 && y >= 0 && x < room.floor.cols && y < room.floor.rows ? { x, y } : null;
 }
 
-const INK = "#4A2027";
+const INK = "#2A1A3E";
 
 function paint(color: string, alpha = 1, opts: { stroke?: number; blur?: number } = {}) {
   const p = Skia.Paint();
@@ -197,12 +197,15 @@ export function buildRoomPicture(room: RoomLayout, g: RoomGeom, opts: { night: b
     const { w, h } = g;
     const u = g.floorCellH;
     // Wall with wallpaper stripes.
-    c.drawRect(Skia.XYWHRect(0, 0, w, g.wallBottom), grad(0, 0, 0, g.wallBottom, ["#F9DDB9", room.finishes.wallColor]));
-    for (let i = 0; i < 14; i++) c.drawRect(Skia.XYWHRect(i * (w / 14) + w / 56, 0, w / 56, g.wallBottom), paint("#F0C79A", 0.35));
+    // Brand home: deep violet wall with soft stripes and a warm lamp-lit lower half (Art Direction §06).
+    const wallEnd = room.finishes.wallColor.toUpperCase() === "#F6E3C8" ? "#2E2560" : room.finishes.wallColor;
+    c.drawRect(Skia.XYWHRect(0, 0, w, g.wallBottom), grad(0, 0, 0, g.wallBottom, ["#4A3A86", wallEnd]));
+    for (let i = 0; i < 14; i++) c.drawRect(Skia.XYWHRect(i * (w / 14) + w / 56, 0, w / 56, g.wallBottom), paint("#6B58B8", 0.22));
+    c.drawOval(Skia.XYWHRect(-w * 0.2, g.wallBottom - g.h * 0.18, w * 1.4, g.h * 0.36), paint("#FF8A00", 0.12, { blur: 40 }));
     // Window with the fire-island view.
     const win = room.windowCells;
     const wx = g.wallX0 + win.x * g.wallCell, wy = g.wallTop + win.y * g.wallCell, ww = win.w * g.wallCell, wh = win.h * g.wallCell;
-    c.drawRRect(rr(wx - 6, wy - 6, ww + 12, wh + 12, 14), paint("#B36A3E"));
+    c.drawRRect(rr(wx - 6, wy - 6, ww + 12, wh + 12, 14), paint("#7B5BD0"));
     c.save();
     c.clipRRect(rr(wx, wy, ww, wh, 10), ClipOp.Intersect, true);
     c.drawRect(Skia.XYWHRect(wx, wy, ww, wh), grad(0, wy, 0, wy + wh, opts.night ? ["#120B2E", "#3A1C4A"] : ["#7FC8F8", "#FFD6A5"]));
@@ -212,9 +215,11 @@ export function buildRoomPicture(room: RoomLayout, g: RoomGeom, opts: { night: b
     if (opts.night) for (let i = 0; i < 7; i++) c.drawCircle(wx + ww * ((i * 29) % 100) / 100, wy + wh * ((i * 17) % 30) / 100, 1.6, paint("#FFF6C8"));
     c.restore();
     c.drawRRect(rr(wx - 6, wy - 6, ww + 12, wh + 12, 14), paint(INK, 1, { stroke: 3 }));
-    c.drawRect(Skia.XYWHRect(wx + ww / 2 - 3, wy, 6, wh), paint("#B36A3E"));
+    c.drawRect(Skia.XYWHRect(wx + ww / 2 - 3, wy, 6, wh), paint("#7B5BD0"));
+    // Window glow (cyan rim light, brand accent).
+    c.drawRRect(rr(wx - 6, wy - 6, ww + 12, wh + 12, 14), paint("#00D4FF", 0.35, { stroke: 3, blur: 4 }));
     // Skirting board.
-    c.drawRect(Skia.XYWHRect(0, g.wallBottom - 10, w, 10), paint("#B36A3E"));
+    c.drawRect(Skia.XYWHRect(0, g.wallBottom - 10, w, 10), paint("#5A3E8A"));
     // Floor planks.
     c.drawRect(Skia.XYWHRect(0, g.floorTop, w, h - g.floorTop), grad(0, g.floorTop, 0, h, ["#C98C5A", "#A86B40"]));
     for (let r = 1; r < 6; r++) c.drawLine(0, g.floorTop + ((h - g.floorTop) * r) / 6, w, g.floorTop + ((h - g.floorTop) * r) / 6, paint("#8E5733", 0.35, { stroke: 1.5 }));

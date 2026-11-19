@@ -1,15 +1,16 @@
 import { type ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
-import { colors, fonts } from "../theme";
+import { brand, colors, fonts, radius } from "../theme";
 
 export function Btn({
   label, onPress, tone = "light", disabled, small, icon, style, testID,
 }: {
-  label: string; onPress: () => void; tone?: "light" | "coral" | "dark" | "gold"; disabled?: boolean; small?: boolean; icon?: ReactNode; style?: StyleProp<ViewStyle>; testID?: string;
+  label: string; onPress: () => void; tone?: "light" | "coral" | "dark" | "gold" | "mint" | "pink"; disabled?: boolean; small?: boolean; icon?: ReactNode; style?: StyleProp<ViewStyle>; testID?: string;
 }) {
-  const bg = { light: colors.card, coral: colors.coral, dark: colors.ink, gold: "#FFB627" }[tone];
-  const border = { light: colors.line, coral: colors.coralDark, dark: "#14101C", gold: "#D98E00" }[tone];
-  const fg = tone === "light" || tone === "gold" ? colors.ink : "#FFFFFF";
+  // Brand buttons (Manual §06): primary = cyan, secondary = violet, reward = gold, positive = mint, alert = pink.
+  const bg = { light: brand.panelHi, coral: brand.cyan, dark: brand.violet, gold: brand.gold, mint: brand.mint, pink: brand.pink }[tone];
+  const border = { light: brand.line, coral: "#00A9CC", dark: "#6E2BD6", gold: "#E3AE3C", mint: "#2FB592", pink: "#D9327C" }[tone];
+  const fg = tone === "light" || tone === "dark" ? brand.cloud : brand.core;
   return (
     <Pressable
       testID={testID}
@@ -54,7 +55,7 @@ export function Sheet({ title, onClose, children, tall }: { title: string; onClo
 
 export function Coin({ size = 18 }: { size?: number }) {
   return (
-    <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: "#FFB627", borderWidth: 2, borderColor: "#B86E00", alignItems: "center", justifyContent: "center" }}>
+    <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: brand.gold, borderWidth: 2, borderColor: "#C98A1E", alignItems: "center", justifyContent: "center" }}>
       <View style={{ width: size * 0.36, height: size * 0.36, borderRadius: size, borderWidth: 1.5, borderColor: "#B86E00" }} />
     </View>
   );
@@ -82,24 +83,24 @@ export function Bar({ value, color, label }: { value: number; color: string; lab
 }
 
 export const s = StyleSheet.create({
-  btn: { minHeight: 48, borderRadius: 16, borderWidth: 2, borderBottomWidth: 5, paddingHorizontal: 14, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 },
-  small: { minHeight: 40, borderRadius: 12, paddingHorizontal: 10 },
-  pressed: { transform: [{ translateY: 2 }], borderBottomWidth: 3 },
+  btn: { minHeight: 48, borderRadius: radius.button, borderWidth: 1.5, borderBottomWidth: 4, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 },
+  small: { minHeight: 44, borderRadius: radius.button, paddingHorizontal: 10 },
+  pressed: { transform: [{ translateY: 2 }, { scale: 0.98 }], borderBottomWidth: 2 },
   disabled: { opacity: 0.45 },
-  btnText: { fontFamily: fonts.display, fontSize: 15 },
-  btnTextSmall: { fontSize: 13 },
-  backdrop: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(26,14,30,0.45)", justifyContent: "flex-end" },
-  sheet: { backgroundColor: colors.cream, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 16, paddingBottom: 28, maxHeight: "78%" },
+  btnText: { fontFamily: fonts.display, fontSize: 16, letterSpacing: 0.2 },
+  btnTextSmall: { fontSize: 14 },
+  backdrop: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(10,7,24,0.62)", justifyContent: "flex-end" },
+  sheet: { backgroundColor: brand.panel, borderTopLeftRadius: radius.modal, borderTopRightRadius: radius.modal, padding: 16, paddingBottom: 28, maxHeight: "78%", borderTopWidth: 1, borderColor: brand.line },
   tall: { maxHeight: "92%" },
   sheetHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 },
-  sheetTitle: { fontFamily: fonts.displayBold, fontSize: 22, color: colors.ink },
-  close: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", backgroundColor: colors.card, borderWidth: 2, borderColor: colors.line },
+  sheetTitle: { fontFamily: fonts.displayBold, fontSize: 26, color: brand.cloud },
+  close: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", backgroundColor: brand.panelHi, borderWidth: 1.5, borderColor: brand.line },
   closeText: { fontSize: 16, color: colors.ink, fontFamily: fonts.bodyBold },
-  toast: { position: "absolute", top: 110, alignSelf: "center", backgroundColor: colors.ink, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 999, maxWidth: "88%" },
-  toastText: { color: "#FFF4E2", fontFamily: fonts.body, fontSize: 14, textAlign: "center" },
+  toast: { position: "absolute", top: 110, alignSelf: "center", backgroundColor: brand.violet, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 999, maxWidth: "88%", borderWidth: 1, borderColor: "#B98BFF" },
+  toastText: { color: brand.cloud, fontFamily: fonts.bodyBold, fontSize: 14, textAlign: "center" },
   barRow: { flexDirection: "row", alignItems: "center", gap: 8, marginVertical: 3 },
   barLabel: { width: 82, fontFamily: fonts.body, fontSize: 13, color: colors.inkSoft },
-  barTrack: { flex: 1, height: 12, borderRadius: 6, backgroundColor: "#EADFCF", overflow: "hidden" },
+  barTrack: { flex: 1, height: 12, borderRadius: 6, backgroundColor: brand.core, overflow: "hidden" },
   barFill: { height: 12, borderRadius: 6 },
   barValue: { width: 30, textAlign: "right", fontFamily: fonts.bodyBold, fontSize: 12, color: colors.ink },
 });

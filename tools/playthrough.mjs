@@ -13,17 +13,21 @@ let playwright;
 try { playwright = require("playwright"); } catch { playwright = require(join(execSync("npm root -g").toString().trim(), "playwright")); }
 const { chromium } = playwright;
 
-const root = resolve(import.meta.dirname, "../apps/mobile/dist");
+const root = resolve(process.env.DIST ?? resolve(import.meta.dirname, "../apps/mobile/dist"));
+// PREFIX lets us serve the build under a sub-path (e.g. /tamtam/) to check that every path is relative.
+const prefix = process.env.PREFIX ?? "/";
 const out = resolve(process.argv[2] ?? "playthrough");
 mkdirSync(out, { recursive: true });
-const types = { ".html": "text/html", ".js": "text/javascript", ".wasm": "application/wasm", ".ttf": "font/ttf", ".png": "image/png" };
+const types = { ".html": "text/html", ".js": "text/javascript", ".wasm": "application/wasm", ".ttf": "font/ttf", ".png": "image/png", ".ico": "image/x-icon" };
 const server = createServer(async (req, res) => {
-  const url = decodeURIComponent((req.url ?? "/").split("?")[0]);
+  let url = decodeURIComponent((req.url ?? "/").split("?")[0]);
+  if (!url.startsWith(prefix)) { res.writeHead(404).end(); return; }
+  url = "/" + url.slice(prefix.length);
   const file = join(root, url === "/" ? "index.html" : url);
   try { const b = await readFile(file); res.writeHead(200, { "content-type": types[extname(file)] ?? "application/octet-stream" }); res.end(b); }
   catch { res.writeHead(404).end(); }
 }).listen(0);
-const base = `http://localhost:${server.address().port}/`;
+const base = `http://localhost:${server.address().port}${prefix}`;
 
 const results = [];
 const check = (id, name, ok, detail = "") => { results.push({ id, name, ok, detail }); console.log(`${ok ? "PASS" : "FAIL"} ${id} ${name} ${detail}`); };

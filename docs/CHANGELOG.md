@@ -4,6 +4,16 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+### Marca aplicada + launcher + carga + prototipo publicado (2026-11-19)
+#### Añadido
+- `BRAND_SYSTEM.md`: aplicación del Manual de Marca y del Art Direction (tokens, logo, icono, tipografía, componentes, arranque).
+- Recursos de marca en `apps/mobile/assets/brand/`: logo transparente, icono de app 1024², icono adaptativo Android, favicon y splash.
+- **Launcher**: icono, icono adaptativo y splash nativo (`expo-splash-screen`) en app.json. Nombre en el dispositivo: **TamTam EVO**.
+- **Pantalla de carga** con logo, halo, progreso real, tagline y consejos, más un **preloader web** para la descarga del motor.
+- UI con la marca: fondo Violeta núcleo, paneles, botones cian, violeta, oro, menta y rosa, tipografía Baloo 2 + Inter. Habitación violeta con luz cálida. Huevo con la espiral cian del icono.
+- Almacenamiento seguro: si el navegador bloquea localStorage, el juego sigue funcionando en memoria.
+- `tools/build-artifact.mjs` (build web portable con rutas relativas) y prueba E2E bajo una subruta. **Prototipo publicado como artefacto.**
+
 ### Decisiones N9, N11, N12 + magia y Lustre (2026-11-19)
 #### Añadido
 - **Lustre** (`core/appearance`): puntuación de cuidado, actividades, Arena y vínculo con 5 niveles; se **graba en cada evolución** como calidad de forma (stats ×0,88–1,10, habilidades Debilitada→Ascendida, pasiva extra en Legendario). Marca de vida por atributo dominante.

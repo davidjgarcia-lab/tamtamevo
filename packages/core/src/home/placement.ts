@@ -52,7 +52,7 @@ export function emptyRoom(): RoomLayout {
     schemaVersion: 1,
     floor: { cols: 12, rows: 4 },
     wall: { cols: 12, rows: 6 },
-    finishes: { wallColor: "#F6E3C8", flooring: "floor_wood_basic" },
+    finishes: { wallColor: "#2E2560", flooring: "floor_wood_basic" },
     placements: [],
     windowView: "fire",
     windowCells: { x: 4, y: 1, w: 3, h: 3 },

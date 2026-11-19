@@ -5,7 +5,7 @@ import {
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useGame } from "../game/GameProvider";
-import { colors, fonts } from "../theme";
+import { brand, colors, fonts } from "../theme";
 import { Bar, Btn, Coin, Sheet } from "../ui/kit";
 
 const RARITY: Record<string, string> = { common: "Común", uncommon: "Poco común", rare: "Raro", epic: "Épico" };
@@ -112,7 +112,7 @@ export function HistorySheet({ onClose }: { onClose: () => void }) {
               <Text style={k.txLabel}>{label(e.source)}</Text>
               <Text style={k.txDate}>{new Date(e.ts).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" })}</Text>
             </View>
-            <Text style={[k.txAmount, { color: e.amount > 0 ? "#2E8B57" : "#C0304F" }]}>
+            <Text style={[k.txAmount, { color: e.amount > 0 ? brand.mint : brand.pink }]}>
               {e.amount > 0 ? "+" : ""}
               {e.amount}
             </Text>
@@ -167,12 +167,12 @@ export function ProfileSheet({ onClose }: { onClose: () => void }) {
         )}
 
         <Text style={k.section}>Necesidades</Text>
-        <Bar label="Hambre" value={state.care.needs.hunger} color="#FF8A3D" />
-        <Bar label="Higiene" value={state.care.needs.hygiene} color="#2EC4F1" />
-        <Bar label="Felicidad" value={state.care.needs.happiness} color="#FFB627" />
-        <Bar label="Cariño" value={state.care.needs.affection} color="#FF5E7E" />
-        <Bar label="Energía" value={state.care.needs.energy} color="#7A5DB0" />
-        <Bar label="Actividad" value={state.care.needs.activity} color="#5BC85B" />
+        <Bar label="Hambre" value={state.care.needs.hunger} color={brand.orange} />
+        <Bar label="Higiene" value={state.care.needs.hygiene} color={brand.cyan} />
+        <Bar label="Felicidad" value={state.care.needs.happiness} color={brand.gold} />
+        <Bar label="Cariño" value={state.care.needs.affection} color={brand.pink} />
+        <Bar label="Energía" value={state.care.needs.energy} color={brand.violet} />
+        <Bar label="Actividad" value={state.care.needs.activity} color={brand.mint} />
         <Text style={k.desc}>Satisfacción media: {Math.round(satisfaction(state.care.needs))}</Text>
 
         <Text style={k.section}>Lustre · {LUSTRE_NAMES[lustre(state.care, t).tier]}</Text>
@@ -180,7 +180,7 @@ export function ProfileSheet({ onClose }: { onClose: () => void }) {
           const l = lustre(state.care, t);
           return (
             <>
-              <Bar label="Lustre" value={l.score} color="#FFB627" />
+              <Bar label="Lustre" value={l.score} color={brand.gold} />
               <Text style={k.desc}>
                 Cuidados {Math.round(l.care)} · Actividades {Math.round(l.activity)} · Arena {Math.round(l.arena)} · Vínculo {Math.round(l.bond)}
                 {l.toNext > 0 ? ` · faltan ${Math.ceil(l.toNext)} puntos para el siguiente nivel` : ""}
@@ -204,7 +204,7 @@ export function ProfileSheet({ onClose }: { onClose: () => void }) {
 
         <Text style={k.section}>Atributos aprendidos</Text>
         {ATTR.map((a) => (
-          <Bar key={a.id} label={`${a.label} ${t.attributes[a.id].level}`} value={(t.attributes[a.id].xp / xpToNext(t.attributes[a.id].level)) * 100} color="#3A6FE0" />
+          <Bar key={a.id} label={`${a.label} ${t.attributes[a.id].level}`} value={(t.attributes[a.id].xp / xpToNext(t.attributes[a.id].level)) * 100} color={brand.blue} />
         ))}
 
         <Text style={k.section}>Fuerza en Arena</Text>
@@ -243,8 +243,8 @@ const k = StyleSheet.create({
   txRow: { flexDirection: "row", alignItems: "center", paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.line },
   txLabel: { fontFamily: fonts.display, fontSize: 15, color: colors.ink },
   txDate: { fontFamily: fonts.body, fontSize: 12, color: colors.inkSoft },
-  txAmount: { fontFamily: fonts.displayBold, fontSize: 17, fontVariant: ["tabular-nums"] },
+  txAmount: { fontFamily: fonts.displayBold, fontSize: 18, fontVariant: ["tabular-nums"] },
   section: { fontFamily: fonts.displayBold, fontSize: 17, color: colors.ink, marginTop: 8 },
-  input: { height: 48, borderRadius: 14, borderWidth: 2, borderColor: colors.line, backgroundColor: "#FFF", paddingHorizontal: 14, fontSize: 18, fontFamily: fonts.display, color: colors.ink },
-  err: { color: "#C0304F", fontFamily: fonts.body, fontSize: 13 },
+  input: { height: 48, borderRadius: 14, borderWidth: 2, borderColor: colors.line, backgroundColor: brand.core, paddingHorizontal: 14, fontSize: 18, fontFamily: fonts.display, color: colors.ink },
+  err: { color: brand.pink, fontFamily: fonts.body, fontSize: 13 },
 });

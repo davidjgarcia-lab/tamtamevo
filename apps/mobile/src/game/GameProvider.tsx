@@ -1,4 +1,4 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import RNAsyncStorage from "@react-native-async-storage/async-storage";
 import { deserialize, MemoryStore, newGame, SCHEMA_VERSION, serialize, tick, type GameState } from "@tamtam/core";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { AppState } from "react-native";
@@ -11,6 +11,39 @@ import { AppState } from "react-native";
  */
 
 export type Profile = "main" | "debug";
+
+/**
+ * Storage that never throws: some web sandboxes (embedded previews) block localStorage.
+ * Falls back to memory so the game still runs (progress then lasts for the session only).
+ */
+const memory = new Map<string, string>();
+export let persistentStorage = true;
+const AsyncStorage = {
+  async getItem(k: string): Promise<string | null> {
+    try {
+      return await RNAsyncStorage.getItem(k);
+    } catch {
+      persistentStorage = false;
+      return memory.get(k) ?? null;
+    }
+  },
+  async setItem(k: string, v: string): Promise<void> {
+    try {
+      await RNAsyncStorage.setItem(k, v);
+    } catch {
+      persistentStorage = false;
+      memory.set(k, v);
+    }
+  },
+  async removeItem(k: string): Promise<void> {
+    try {
+      await RNAsyncStorage.removeItem(k);
+    } catch {
+      persistentStorage = false;
+      memory.delete(k);
+    }
+  },
+};
 
 const KEY = (p: Profile) => `tamtam:save:${p}:v${SCHEMA_VERSION}`;
 const OFFSET_KEY = "tamtam:debug:offset";

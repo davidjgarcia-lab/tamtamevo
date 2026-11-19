@@ -6,7 +6,7 @@ import { useDerivedValue } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { drawTamtam, useCreature } from "../creature/useCreature";
 import { newId, useGame } from "../game/GameProvider";
-import { colors, fonts } from "../theme";
+import { brand, colors, fonts } from "../theme";
 import { Btn, Coin } from "../ui/kit";
 
 type Phase = "intro" | "playing" | "result";
@@ -193,23 +193,23 @@ export function GymScreen({ onClose }: { onClose: () => void }) {
 }
 
 const g = StyleSheet.create({
-  root: { ...StyleSheet.absoluteFill, backgroundColor: "#24324A" },
+  root: { ...StyleSheet.absoluteFill, backgroundColor: "#1C1738" },
   head: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 16, paddingTop: 8 },
-  kicker: { fontFamily: fonts.body, color: "#B9D3F0", fontSize: 13 },
+  kicker: { fontFamily: fonts.bodyBold, color: brand.orange, fontSize: 13 },
   title: { fontFamily: fonts.displayBold, color: "#FFFFFF", fontSize: 26 },
   stats: { flexDirection: "row", gap: 8, paddingHorizontal: 16, marginTop: 8 },
-  stat: { fontFamily: fonts.bodyBold, fontSize: 12, color: "#24324A", backgroundColor: "#DCEBFA", borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, overflow: "hidden" },
+  stat: { fontFamily: fonts.bodyBold, fontSize: 12, color: brand.cloud, backgroundColor: brand.panel, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, overflow: "hidden" },
   stage: { flex: 1 },
-  feedback: { position: "absolute", top: 24, alignSelf: "center", fontFamily: fonts.displayBold, fontSize: 28, color: "#FFE08A" },
-  panel: { backgroundColor: colors.cream, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 18, gap: 12 },
+  feedback: { position: "absolute", top: 24, alignSelf: "center", fontFamily: fonts.displayBold, fontSize: 32, color: brand.gold },
+  panel: { backgroundColor: brand.panel, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 18, gap: 12 },
   body: { fontFamily: fonts.body, fontSize: 14, color: colors.inkSoft, lineHeight: 20 },
   msg: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.coralDark },
-  meter: { height: 28, borderRadius: 14, backgroundColor: "#EADFCF", overflow: "hidden", borderWidth: 2, borderColor: colors.line },
-  zone: { position: "absolute", top: 0, bottom: 0, backgroundColor: "#5BC85B" },
-  needle: { position: "absolute", top: -2, bottom: -2, width: 6, marginLeft: -3, backgroundColor: colors.ink, borderRadius: 3 },
+  meter: { height: 28, borderRadius: 14, backgroundColor: brand.core, overflow: "hidden", borderWidth: 2, borderColor: colors.line },
+  zone: { position: "absolute", top: 0, bottom: 0, backgroundColor: brand.mint },
+  needle: { position: "absolute", top: -2, bottom: -2, width: 6, marginLeft: -3, backgroundColor: brand.cloud, borderRadius: 3 },
   hold: { height: 72, borderRadius: 22, backgroundColor: colors.coral, borderWidth: 2, borderBottomWidth: 6, borderColor: colors.coralDark, alignItems: "center", justifyContent: "center" },
   holdPressed: { transform: [{ translateY: 3 }], borderBottomWidth: 3 },
-  holdText: { fontFamily: fonts.displayBold, fontSize: 20, color: "#FFFFFF" },
+  holdText: { fontFamily: fonts.displayBold, fontSize: 22, color: brand.core },
   resultTitle: { fontFamily: fonts.displayBold, fontSize: 22, color: colors.ink },
   rewardRow: { flexDirection: "row", alignItems: "center", gap: 10, flexWrap: "wrap" },
   reward: { fontFamily: fonts.display, fontSize: 16, color: colors.ink },

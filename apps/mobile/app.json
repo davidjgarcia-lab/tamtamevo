@@ -1,31 +1,43 @@
 {
   "expo": {
     "name": "TamTam EVO",
-    "slug": "tam-tam-evo",
+    "slug": "tamtam-evolution",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "icon": "./assets/brand/icon.png",
+    "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#22144A",
+        "foregroundImage": "./assets/brand/adaptive-foreground.png"
       },
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png",
+      "favicon": "./assets/brand/favicon.png",
       "bundler": "metro",
-      "output": "single"
+      "output": "single",
+      "name": "TamTam EVO",
+      "shortName": "TamTam EVO",
+      "themeColor": "#17132B",
+      "backgroundColor": "#17132B"
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/brand/splash-logo.png",
+          "imageWidth": 240,
+          "resizeMode": "contain",
+          "backgroundColor": "#17132B"
+        }
+      ]
     ],
-    "backgroundColor": "#FFF8EC"
+    "backgroundColor": "#17132B",
+    "description": "TamTam Evolution — Un mundo de criaturas que crecen contigo."
   }
 }

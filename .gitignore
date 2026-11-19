@@ -8,3 +8,4 @@ apps/mobile/ios/
 apps/mobile/android/
 apps/mobile/public/canvaskit.wasm
 coverage/
+apps/mobile/dist-artifact/
