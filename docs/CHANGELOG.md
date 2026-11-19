@@ -4,6 +4,21 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+### Brief v3.0 — Documentación y núcleo de lógica (2026-11-19)
+#### Añadido
+- `HOME_SYSTEM.md`, `ECONOMY_SYSTEM.md` y `ACTIVITIES_SYSTEM.md`.
+- Análisis de las 5 imágenes de referencia y reglas de estilo derivadas (ART_DIRECTION §11–12).
+- Identidad individual del Tamtam y reglas de nombre (CREATURE_DATABASE §12).
+- Término de atributos en la fórmula de evolución (específico por rama).
+- `packages/core`, lógica pura con 51 tests: identidad y nombres, monedero sobre libro mayor (atómico, idempotente y auditable), inventario, catálogo y tienda, colocación de muebles, recompensas con Entusiasmo, atributos y mejoras de objetos funcionales, y snapshots versionados.
+#### Cambiado
+- Las criaturas pasan a llamarse **Tamtams** y la moneda común **Tamcoins** (pendiente de N5).
+- Hogar = casa decorable (pendiente de N4). Las secciones sustituidas de GAMEPLAY_SYSTEMS están marcadas.
+- ROADMAP combinado en 12 fases (pendiente de N8), con unos 12 meses estimados hasta la 1.0.
+#### No implementado todavía
+- Ninguna pantalla nueva (eclosión con nombre, ficha, tienda, editor de casa, actividades).
+- Persistencia SQLite; las actividades jugables; las animaciones nuevas.
+
 ### Fase 2 — Spike técnico de animación (2026-11-19)
 #### Añadido
 - Monorepo pnpm: `apps/mobile` (Expo SDK 58, React Native 0.88, Skia 2.14, Reanimated 4.7), `packages/rig` y `packages/art`.

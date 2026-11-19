@@ -144,6 +144,7 @@ S(c) =  100 · Σ_i ( w[c,i] · p_i )                 // Decisiones (ejes)
       + careW[c] · 20 · (CQ − 50) / 50              // Cuidados   (±20·careW)
       + gen(c)                                      // Genética   (T: ±12, Potencial: +6, Afinidad: +4)
       + item(c)                                     // Objetos    (catalizador +25, afinidad +10)
+      + 10 · Σ_j u[c,j] · (atributo_j / 20)         // Atributos de desarrollo (v3.0, ≤ 10; ACTIVITIES_SYSTEM §5)
       + bias[c]                                     // Ajuste de diseño (normalmente 0)
 ```
 - `w[c,i]` ∈ [0, 1] son los pesos de eje de la rama (tabla §5).
@@ -294,7 +295,7 @@ Con esto, en el peor caso hay **una mutación cada 10 huevos**. El tipo de mutac
 - Felicidad ≥ 70 en ambas.
 - **Lazo** entre ambas ≥ nivel 3 (de 5). El Lazo crece al convivir en el hábitat y al jugar juntas (GAMEPLAY_SYSTEMS §3).
 - Cooldown de 48 h por criatura tras criar.
-- Coste: 150 Chispas (ritual del nido).
+- Coste: 150 Tamcoins (ritual del nido).
 - Se permiten parejas de la misma familia y de familias distintas.
 
 ### 7.2 Rareza del huevo

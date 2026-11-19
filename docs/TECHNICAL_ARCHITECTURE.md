@@ -118,6 +118,25 @@ tam-tam-evo/
 
 ---
 
+## 3.3 Módulos del brief v3.0 (estado real)
+
+| Módulo solicitado | Ubicación | Estado |
+|-------------------|-----------|--------|
+| CreatureIdentity | `packages/core/src/identity/tamtam.ts` | ✅ Lógica y tests (nacimiento, renombrado, evolución sin cambiar el nombre, edad) |
+| CreatureNaming | `packages/core/src/identity/naming.ts` | ✅ Lógica y tests (NFC, grafemas, Unicode, bloqueo, nombres por defecto) |
+| Wallet / Economy | `packages/core/src/economy/wallet.ts` | ✅ Libro mayor, idempotencia, saldo no negativo, auditoría e historial |
+| Inventory | `packages/core/src/inventory/inventory.ts` | ✅ |
+| Shop | `packages/core/src/shop/{catalog,shop}.ts` | ✅ Catálogo validado, estados de artículo, compra y venta atómicas e idempotentes |
+| HomeCustomization / FurniturePlacement | `packages/core/src/home/placement.ts` | ✅ Reglas por capas, rejilla, colisiones, reflejo, giro, color, huecos de superficie y celdas transitables |
+| Activities (recompensas) | `packages/core/src/rewards/rewards.ts` | ✅ Entusiasmo diario (reinicio 04:00), calidad, tope e idempotencia |
+| Progression / Skills (atributos y mejoras) | `packages/core/src/progression/progression.ts` | ✅ Curva de XP, bonus de Arena con tope y mejoras de objetos funcionales |
+| Persistencia transaccional | `packages/core/src/store/store.ts` | 🟡 `MemoryStore` + snapshots versionados. **Falta** el adaptador SQLite (Fase 3) |
+| Crafting | — | ⚪ Fase 6 (recetas de Workshop sobre `consumeItems`) |
+| CreatureInteractions | — | ⚪ Fase 5 (IA de mobiliario y Lazo) |
+| UI de todo lo anterior | `apps/mobile` | ⚪ Ninguna pantalla nueva todavía |
+
+Todas las reglas son **funciones puras sobre un borrador**, aplicadas con `Store.transact` (todo o nada). Las claves de idempotencia viven en el libro mayor, así que sobreviven a un reinicio y a la sincronización futura.
+
 ## 4. Persistencia y offline
 
 - **expo-sqlite** (transaccional, con WAL) como almacenamiento principal. MMKV solo para preferencias de UI.

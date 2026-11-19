@@ -327,7 +327,7 @@ La afinidad **secundaria** (heredada, ver EVOLUTION_SYSTEM §6) añade ±5% de r
 
 ## 8. ASTRÁLIDOS — Familia del Cosmos 🌌 *(insignia: anillo orbital con estrella)*
 
-**Historia.** No nacieron en ninguna isla: cayeron del cielo como estrellas fugaces. Son los únicos Tamis que *recuerdan* el primer latido del Tam-Tam y, según la leyenda, podrían reavivarlo.
+**Historia.** No nacieron en ninguna isla: cayeron del cielo como estrellas fugaces. Son los únicos Tamtams que *recuerdan* el primer latido del Tam-Tam y, según la leyenda, podrían reavivarlo.
 **Personalidad.** Soñadores, sabios y distraídos. Se quedan mirando al cielo. Les fascinan los rompecabezas.
 **Rasgos físicos comunes.** Cuerpo con **interior de nebulosa visible** (textura animada de galaxia dentro de la silueta), pequeños planetas u orbes que orbitan, y ojos como constelaciones.
 **Hábitat.** Observatorio flotante con telescopio, cúpula de estrellas, planetas en miniatura y auroras.
@@ -365,7 +365,7 @@ La afinidad **secundaria** (heredada, ver EVOLUTION_SYSTEM §6) añade ±5% de r
 
 ## 9. Habilidades universales (aprendibles por cualquier familia)
 
-Se desbloquean con entrenamiento, logros o Manuales comprados con Chispas. Cada criatura equipa en Arena **1 básico (fijo) + 3 habilidades activas + 1 pasiva**.
+Se desbloquean con entrenamiento, logros o Manuales comprados con Tamcoins. Cada criatura equipa en Arena **1 básico (fijo) + 3 habilidades activas + 1 pasiva**.
 
 | ID | Nombre | Cómo se aprende | ENE | CD | Efecto |
 |----|--------|-----------------|-----|----|--------|
@@ -416,3 +416,38 @@ export const form: CreatureForm = {
 ```
 
 Checklist de una nueva forma: silueta única (prueba en negro sobre blanco a 64 px), arte de partes, al menos las 11 animaciones básicas, sonido, regla de evolución, 3 pistas de Códice, habilidades, prueba de balance en simulador (§ GAMEPLAY_SYSTEMS 5.9).
+
+---
+
+## 12. Identidad individual del Tamtam (v3.0)
+
+**Especie ≠ individuo.** La *especie* es la familia (p. ej. Brasálidos) y la *forma* es su etapa actual (Chispín → Fogarín → …). El **Tamtam** es el individuo: conserva su identidad, nombre e historial a través de todas sus formas.
+
+```ts
+interface TamtamIdentity {
+  id: string;                    // UUID, permanente (también para intercambios futuros)
+  speciesId: FamilyId;           // "fire" (Brasálidos)
+  formId: FormId;                // forma actual, p. ej. "fire_baby_chispin"
+  stage: "baby" | "child" | "juvenile" | "adult";
+  name: string;                  // nombre propio (normalizado NFC)
+  nameHistory: { name: string; at: number }[];
+  bornAt: number;                // la edad se calcula a partir de bornAt (no se guarda)
+  personality: PersonalityId[];  // 1–2 rasgos visibles, derivados de familia + temperamento + rasgos especiales
+  genome: Genome;                // EVOLUTION_SYSTEM §6
+  affinity: { primary: ElementId; secondary: ElementId };
+  attributes: Record<"str" | "int" | "cre" | "nat" | "man", { level: number; xp: number }>;
+  level: number; xp: number;
+  evolutionHistory: { from: FormId; to: FormId; at: number; rulesetVersion: number }[];
+  bonds: Record<TamtamId, number>; // Lazo 0–5 con otros Tamtams
+}
+```
+
+**Reglas de nombre** (implementadas en `packages/core/src/identity`):
+- Longitud configurable, **2–16 grafemas** por defecto. Se cuentan caracteres visibles: "Ñandú" son 5 y un emoji compuesto cuenta 1.
+- Se normaliza a NFC, se recortan los extremos y se colapsan los espacios internos.
+- Se permiten letras y marcas de cualquier alfabeto, números, espacio, `' - . ·` y emoji. Se rechazan los caracteres de control o invisibles y los nombres solo de símbolos.
+- Lista de bloqueo configurable (insultos ES/EN), comparada sin tildes ni mayúsculas.
+- **Nombre por defecto**, determinista por Tamtam: lista temática por familia (Fuego: Brasa, Chispa, Tizón, Ascua…).
+- Renombrar es gratis y queda en `nameHistory`. Evolucionar **no** cambia el nombre.
+
+**Personalidad (lanzamiento):** Juguetón, Tímido, Glotón, Curioso, Valiente, Dormilón, Presumido, Tranquilo, Travieso y Cariñoso. Afecta a la IA de la casa (preferencias de mobiliario y actividades espontáneas) y a las frases de las burbujas.

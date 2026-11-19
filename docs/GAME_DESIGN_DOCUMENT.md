@@ -1,10 +1,10 @@
 # TAM TAM EVO — Game Design Document
 
-> Versión 0.2 · Fase 1 (Diseño) · Estado: **aprobado** (D1–D10, 2026-11-19)
+> Versión 0.3 · Brief v3.0 integrado · Estado: D1–D10 aprobadas; **N1–N10 pendientes** (§13.2)
 > Título: **Tam Tam Evo** (D1 aprobada). No se usa la marca "Tamagotchi" en ningún material.
 
 Documentos relacionados:
-[ART_DIRECTION](ART_DIRECTION.md) · [CREATURE_DATABASE](CREATURE_DATABASE.md) · [EVOLUTION_SYSTEM](EVOLUTION_SYSTEM.md) · [GAMEPLAY_SYSTEMS](GAMEPLAY_SYSTEMS.md) · [TECHNICAL_ARCHITECTURE](TECHNICAL_ARCHITECTURE.md) · [ROADMAP](ROADMAP.md) · [CHANGELOG](CHANGELOG.md)
+[ART_DIRECTION](ART_DIRECTION.md) · [CREATURE_DATABASE](CREATURE_DATABASE.md) · [EVOLUTION_SYSTEM](EVOLUTION_SYSTEM.md) · [GAMEPLAY_SYSTEMS](GAMEPLAY_SYSTEMS.md) · [HOME_SYSTEM](HOME_SYSTEM.md) · [ECONOMY_SYSTEM](ECONOMY_SYSTEM.md) · [ACTIVITIES_SYSTEM](ACTIVITIES_SYSTEM.md) · [TECHNICAL_ARCHITECTURE](TECHNICAL_ARCHITECTURE.md) · [ROADMAP](ROADMAP.md) · [CHANGELOG](CHANGELOG.md)
 
 ---
 
@@ -39,7 +39,7 @@ iOS y Android (teléfonos, vertical). Hay build web interna para QA y pruebas vi
 ## 2. Bucles de juego
 
 ### 2.1 Bucle momento a momento (segundos)
-Mirar a la criatura → percibir una necesidad (expresión, burbuja, animación) → actuar (alimentar, acariciar, limpiar…) → reacción animada + feedback (partículas, sonido, háptica) → pequeña recompensa (XP, puntos de eje, Chispas).
+Mirar a la criatura → percibir una necesidad (expresión, burbuja, animación) → actuar (alimentar, acariciar, limpiar…) → reacción animada + feedback (partículas, sonido, háptica) → pequeña recompensa (XP, puntos de eje, Tamcoins).
 
 ### 2.2 Bucle de sesión (2–10 min)
 1. Abrir la app: resumen de lo que ocurrió mientras no estabas, contado por la criatura ("Ha dormido bien", "Te ha echado de menos").
@@ -65,7 +65,7 @@ Mirar a la criatura → percibir una necesidad (expresión, burbuja, animación)
            ┌──────────── CUIDADOS ───────────┐
            │  (necesidades, vínculo, CQ)      │
            ▼                                  │
-     MINIJUEGOS ──► Chispas / XP / Ejes ──► EVOLUCIÓN ──► ARENA
+MINIJUEGOS + ACTIVIDADES ──► Tamcoins / XP / Ejes / Atributos ──► EVOLUCIÓN ──► ARENA
            ▲                │                    │          │
            │                ▼                    ▼          │
            └──── TIENDA / OBJETOS ◄──── GENÉTICA / CRÍA ◄───┘
@@ -79,18 +79,21 @@ Mirar a la criatura → percibir una necesidad (expresión, burbuja, animación)
 
 | Pestaña | Contenido | Rol |
 |---------|-----------|-----|
-| **Hogar** | Hábitat ilustrado con las criaturas activas. Acciones de cuidado contextuales. | Centro emocional. La criatura ocupa al menos el 60% de la pantalla. |
+| **Hogar** | **TamTam Home**: la casa decorable con los Tamtams activos, sus objetos funcionales (Gym, Academy, Garden, Music, Workshop), la tienda y el modo Decorar. | Centro emocional y visual. |
 | **Juegos** | Salón recreativo con los 4 minijuegos, representados **solo por iconos** (sin nombres), y su Entusiasmo. | Fuente de recursos y de ejes de comportamiento. |
 | **Criaturas** | Plantel activo (máx. 3), Santuario, Huevos, Códice, Genética. | Colección e investigación. |
 | **Arena** | Preparación, rival, combate, rangos e historial. | Competición. |
 | **Perfil** | Logros, medallas, estadísticas, ajustes, inventario. | Meta y configuración. |
 
-La tienda y el inventario se abren desde Hogar como hojas contextuales. No hay una pestaña dedicada, para que la tienda no compita con la criatura.
+La tienda, el inventario y el modo Decorar se abren desde Hogar. No hay una pestaña dedicada, para que la tienda no compita con el Tamtam.
 
 ### 3.2 Pantalla Hogar (principio de "no-dashboard")
-- Sin barras de estadísticas permanentes. Las necesidades se comunican con la **expresión, postura y animación** de la criatura, y con un anillo radial discreto al tocarla.
-- Acciones en una **rueda de cuidados** de 6 botones grandes que aparece al tocar la criatura o el botón central.
-- Elementos del hábitat interactivos: cuenco, bañera, cama, juguetes, zona de entrenamiento, decoraciones.
+- La pantalla es la **habitación ilustrada** (HOME_SYSTEM): el Tamtam y la casa ocupan toda la pantalla y la interfaz flota en los bordes.
+- **Arriba:** el **nombre del Tamtam** seleccionado (sobre una cinta ilustrada; al tocarlo se abre su ficha), el **monedero** (Tamcoins con contador animado) y un selector de Tamtam si hay varios.
+- **Necesidades:** se leen en la **expresión, postura y animación**. Además hay un anillo radial compacto de 6 iconos junto al nombre, que se expande al tocar al Tamtam. No hay barras permanentes.
+- **Acciones rápidas:** **rueda de cuidados** de 6 botones grandes al tocar al Tamtam.
+- **Abajo, sobre la barra de navegación:** tres botones grandes ilustrados: **Tienda**, **Decorar** y **Actividades**. El último resalta los objetos funcionales de la casa; también se pueden tocar directamente.
+- Los objetos de la casa son interactivos: cuenco, bañera, cama, juguetes, objetos funcionales y decoración.
 - Ciclo día/noche sincronizado con la hora local. La iluminación del fondo cambia.
 - Con varias criaturas, se mueven libremente e interactúan entre sí (ver GAMEPLAY_SYSTEMS §3).
 
@@ -106,11 +109,21 @@ La tienda y el inventario se abren desde Hogar como hojas contextuales. No hay u
 | Genética | Genoma con loci de color, rasgos, potencial y afinidad secundaria. Cría desde Juvenil. | EVOLUTION_SYSTEM §6 |
 | Minijuegos | 4 juegos identificados solo por icono: laberinto (`maze`), bloques (`bricks`), cuadrícula lógica (`grid`) y serpiente (`trail`). | GAMEPLAY_SYSTEMS §4 |
 | Arena | Combate automático en tiempo real a 20 Hz, determinista, con estrategia configurable y 7 rangos. | GAMEPLAY_SYSTEMS §5 |
-| Economía | Chispas (común) y Astrolitos (especial, solo ganables). Sin pay-to-win. | GAMEPLAY_SYSTEMS §6 |
+| Identidad y nombres | Cada Tamtam es un individuo con ID, nombre propio que se conserva al evolucionar, historial y relaciones. | CREATURE_DATABASE §12 |
+| Casa | Habitación decorable por capas (pared, suelo, alfombras), editor táctil con rejilla y colisiones. Los Tamtams usan los muebles. | HOME_SYSTEM |
+| Actividades | Gym, Academy, Garden, Music y Workshop: interacciones jugables, 3 niveles de mejora y 5 atributos de desarrollo. | ACTIVITIES_SYSTEM |
+| Economía | **Tamcoins** (principal) y Astrolitos (especial, solo se ganan). Libro mayor atómico e idempotente. Sin pay-to-win. | ECONOMY_SYSTEM |
 
 ---
 
 ## 5. Progresión del jugador
+
+### 5.0 Tamtams: individuos con nombre
+- **Tamtam** es el nombre genérico de todas las criaturas del juego. Cada una es un **individuo**: tiene ID único, especie (familia), forma actual, **nombre propio**, fase, edad, personalidad, genética, afinidad, stats, atributos aprendidos, nivel, historial de evolución y relaciones (CREATURE_DATABASE §12).
+- **Nacimiento con nombre:** eclosión animada → presentación del Tamtam → campo de nombre (2–16 caracteres, Unicode completo, validado; si se deja vacío se propone un nombre por defecto) → confirmación → el Tamtam reacciona a su nombre (celebración).
+- **El nombre se conserva al evolucionar:** cambian la forma y la especie visible, no la identidad. Se puede renombrar en cualquier momento desde la ficha, gratis.
+- El nombre aparece en Hogar, la ficha, la colección, las pantallas de evolución, la Arena, los resultados de combate y las burbujas de interacción entre Tamtams ("Brasa y Lumi juegan juntos").
+
 
 ### 5.1 Primera experiencia (FTUE, ~8 minutos)
 1. **Escena de apertura** (20 s, se puede saltar): un nido luminoso cae en el hábitat.
@@ -149,9 +162,9 @@ Nivel de cuenta del 1 al 50, alimentado por todas las actividades. Desbloquea de
 
 ## 7. Narrativa y mundo
 
-**El mundo:** *Archipiélago Tamtam*, un conjunto de islas flotantes nacidas de un antiguo latido cósmico, el **Tam-Tam**. Cada isla resuena con un elemento. Las criaturas, los **Tamis**, nacen de huevos que caen cuando el latido se acelera. Los **Cuidadores** son humanos elegidos por un huevo; nunca al revés.
+**El mundo:** *Archipiélago Tamtam*, un conjunto de islas flotantes nacidas de un antiguo latido cósmico, el **Tam-Tam**. Cada isla resuena con un elemento. Las criaturas, los **Tamtams**, nacen de huevos que caen cuando el latido se acelera. Los **Cuidadores** son humanos elegidos por un huevo; nunca al revés.
 
-**Conflicto suave:** el latido se está debilitando. Cada evolución completada y cada forma registrada en el Códice "refuerza el pulso" (una meta global de colección que sirve de marco a las temporadas). La Arena es un festival ritual, el **Gran Tamborileo**, donde los Tamis muestran su fuerza. No es una guerra.
+**Conflicto suave:** el latido se está debilitando. Cada evolución completada y cada forma registrada en el Códice "refuerza el pulso" (una meta global de colección que sirve de marco a las temporadas). La Arena es un festival ritual, el **Gran Tamborileo**, donde los Tamtams muestran su fuerza. No es una guerra.
 
 **Tono:** cálido, curioso y humorístico, con momentos épicos en evoluciones y combates. Las criaturas no hablan; se expresan con sonidos característicos por familia y lenguaje corporal.
 
@@ -201,7 +214,9 @@ Nivel de cuenta del 1 al 50, alimentado por todas las actividades. Desbloquea de
 
 ---
 
-## 13. Decisiones aprobadas (2026-11-19)
+## 13. Decisiones
+
+### 13.1 Aprobadas (2026-11-19)
 
 | ID | Decisión | Resolución |
 |----|----------|------------|
@@ -215,3 +230,18 @@ Nivel de cuenta del 1 al 50, alimentado por todas las actividades. Desbloquea de
 | D8 | Evolución manual ("Ritual") o automática | ✅ Ritual iniciado por el jugador cuando la criatura es elegible. |
 | D9 | Nombres de minijuegos | ✅ **Sin nombres: solo iconos.** En la interfaz cada minijuego se identifica por un icono propio; ningún texto visible los nombra. Internamente se usan los IDs `maze`, `bricks`, `grid` y `trail`. |
 | D10 | Ritmo de crecimiento | ✅ Bebé→Adulto **entre 5 y 7 días según el cuidado y las horas de juego** (sistema de Madurez, EVOLUTION_SYSTEM §2). |
+
+### 13.2 Pendientes (brief v3.0)
+
+| ID | Decisión | Recomendación |
+|----|----------|---------------|
+| N1 | Uso de las imágenes de referencia: 3 son arte de *World of Warcraft* y 1 recuerda a *Hollow Knight* | Usarlas solo como lenguaje visual, con las reglas de ART_DIRECTION §11. No reproducir criaturas, caras ni siluetas, y no guardar las imágenes en el repositorio |
+| N2 | Producción del arte final de los adultos (acabado pintado como R2, o 3D como R3 y R4) | Estilo vectorial propio (cercano a R1 y R5) para todas las formas ahora, e ilustrador o ilustradora para los adultos en el Polish (ya contemplado en D4) |
+| N3 | Atributos de desarrollo frente a ejes de comportamiento | Mantener ambos: los **ejes** son tendencias de etapa (ocultas, para la evolución) y los **atributos** son aprendizajes permanentes y visibles. Las actividades suman a los dos |
+| N4 | Casa frente a hábitats de familia | La **casa** es el fondo de Hogar. Los hábitats pasan a ser la vista de la ventana, temas cosméticos y escenarios |
+| N5 | Monedas | **Tamcoins** sustituye a "Tamcoins". Astrolitos se mantiene como moneda especial que solo se gana jugando |
+| N6 | Coste de energía de las actividades | La necesidad *Descanso* pasa a llamarse **Energía** y es el coste de las actividades. Así se limitan las monedas de forma natural |
+| N7 | Estaciones de entrenamiento previas | Se sustituyen por el **Gym** (3 niveles, con ejercicios de fuerza, defensa y velocidad). La meditación pasa a la Music |
+| N8 | Roadmap combinado (casa, economía y actividades antes que evolución completa, minijuegos y Arena) | Ver ROADMAP. Es el orden del brief v3.0; las fases ya planificadas se mantienen después |
+| N9 | Nombre comercial: "Tam Tam Evo" (aprobado en D1) o "TamTam Evolution" (usado en el brief v3.0) | Necesito que elijas uno. Ambos son viables a nivel de marca |
+| N10 | Desbloqueo de gambits | Lo que llegue antes: rango de Arena o materia Estrategia |

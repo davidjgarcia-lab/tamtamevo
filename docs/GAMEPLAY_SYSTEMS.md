@@ -33,6 +33,8 @@ interface Creature {
 ## 2. Cuidados
 
 ### 2.1 Necesidades (0–100; 100 = plenamente satisfecha)
+> **v3.0 (N6, propuesta):** la necesidad *Descanso* pasa a llamarse **Energía** y es además el coste de las actividades de casa (ACTIVITIES_SYSTEM).
+
 
 | Necesidad | Decaimiento base (despierto) | Se recupera con | Señal visual principal |
 |-----------|------------------------------|-----------------|------------------------|
@@ -119,6 +121,8 @@ IA de **utilidad** evaluada cada 2–4 s cuando la criatura no está en una inte
 **Lazo** (0–5): puntos por interacciones y por actividades conjuntas (botón "Jugar juntas"). Requisito de cría: Lazo ≥ 3.
 
 ### 3.3 Decoración
+> **v3.0:** sustituido por la casa personalizable de **HOME_SYSTEM** (pendiente de N4). Se mantiene la regla de Confort.
+
 - Hábitat con 3 capas de profundidad (fondo, medio, primer plano) y colocación libre con *snapping* suave.
 - Cada decoración tiene **Confort** (de +1 a +5). El Confort total da hasta −15% de decaimiento de Felicidad.
 - Preferencias por familia (p. ej. a los Lumálidos les encantan las vidrieras; a los Terrálidos, las piedras raras). Una decoración preferida genera interacciones especiales.
@@ -133,14 +137,14 @@ IA de **utilidad** evaluada cada 2–4 s cuando la criatura no está en una inte
 - La criatura activa elegida **es el avatar** del jugador (usa su rig y sus animaciones).
 - Cada juego tiene su propia interfaz con identidad del universo, controles táctiles, música, SFX y récords locales (por criatura y global).
 - La lógica de cada juego es un módulo puro en `packages/core/minigames/<juego>` con paso fijo y semilla (reproducible, testeable y preparado para validación de récords en el servidor en el futuro).
-- Recompensas al terminar: Chispas, XP, puntos de eje (EVOLUTION_SYSTEM §3E), Investigación y fragmentos de objetos.
+- Recompensas al terminar: Tamcoins, XP, puntos de eje (EVOLUTION_SYSTEM §3E), Investigación y fragmentos de objetos.
 - **Habilidad de familia** (1 uso por partida o nivel) para que cada familia juegue un poco distinto: Fuego "Acelerón", Agua "Deslizar", Naturaleza "Brote" (escudo), Electricidad "Chispa" (aturde), Oscuridad "Fundirse" (intangible), Luz "Destello" (revela), Tierra "Excavar" (atraviesa un muro o bloque), Cosmos "Gravedad" (atrae objetos).
 
 ### 4.1 A · Laberinto — `maze` (inspiración: laberintos arcade de persecución)
 - **Objetivo:** recorrer el laberinto comiendo todas las *Semillas de Luz* sin que te atrapen los **Gruñones** (criaturas de humo gris).
 - **Controles:** swipe con *buffer* de giro (el giro se ejecuta en la siguiente intersección válida). Joystick virtual opcional.
 - **Enemigos (4 conductas):** *Perseguidor* (va a tu casilla), *Emboscador* (va 4 casillas por delante), *Patrullero* (circuito fijo + persecución cercana) y *Errático* (elige con RNG con semilla). Fases alternas de dispersión y caza.
-- **Power-ups:** *Latido* (los Gruñones se vuelven vulnerables durante 6 s), *Imán* (atrae semillas), *Escudo* (1 golpe), *Fruta bonus* (puntos y Chispas).
+- **Power-ups:** *Latido* (los Gruñones se vuelven vulnerables durante 6 s), *Imán* (atrae semillas), *Escudo* (1 golpe), *Fruta bonus* (puntos y Tamcoins).
 - **Niveles:** 30 diseñados a mano en 3 mundos (Jardín, Cuevas, Nubes) y un modo Infinito procedural (generador de laberintos con bucles; validación de conectividad).
 - **Puntuación:** semilla 10, fruta 100–500, Gruñón comido 200·2ⁿ dentro del mismo Latido, bonus de tiempo y de "sin golpes". 3 vidas.
 
@@ -148,7 +152,7 @@ IA de **utilidad** evaluada cada 2–4 s cuando la criatura no está en una inte
 - **Objetivo:** romper todos los bloques con la *Pelota-Tam* rebotando en un cojín que sostiene tu criatura.
 - **Controles:** arrastre horizontal relativo (el dedo no tapa el cojín). Tap para lanzar.
 - **Física:** propia y determinista (círculo contra AABB con barrido continuo para evitar *tunneling*). El ángulo de salida depende del punto de impacto en el cojín (±60°). La velocidad sube un 2% cada 10 golpes.
-- **Bloques:** normal, duro (2–3 golpes), metálico (indestructible), explosivo (área 3×3), moneda (Chispas), jaula (libera un Tami bebé cosmético que anima desde abajo) y elemental (débil a la familia del jugador: se rompe de un golpe).
+- **Bloques:** normal, duro (2–3 golpes), metálico (indestructible), explosivo (área 3×3), moneda (Tamcoins), jaula (libera un Tamtam bebé cosmético que anima desde abajo) y elemental (débil a la familia del jugador: se rompe de un golpe).
 - **Power-ups (caen al romper):** Multibola ×3, Cojín Grande, Imán, Láser, Bola de Fuego (atraviesa), Lento y Vida extra. Malos: Cojín Pequeño y Rápido.
 - **Niveles:** 40 en 4 mundos (uno por grupo de islas) con jefes cada 10 (un bloque-jefe animado con patrón propio) y modo Infinito.
 - **Puntuación:** por bloque, combos sin tocar el cojín (×1.1 acumulable) y bonus de nivel limpio.
@@ -174,7 +178,7 @@ IA de **utilidad** evaluada cada 2–4 s cuando la criatura no está en una inte
 
 ### 4.5 Recompensas de minijuegos
 ```
-Chispas = round( base_juego + puntuación / k_juego )   // tope por partida: 120
+Tamcoins = round( base_juego + puntuación / k_juego )   // tope por partida: 120
 XP      = 20 + 60 × rendimiento                         // rendimiento ∈ [0,1] normalizado por juego
 Ejes    = tabla EVOLUTION_SYSTEM §3E × (0.5 + rendimiento)
 Fragmentos: 1–3 por partida según rendimiento → 10 fragmentos = 1 objeto (catalizador/tónico) elegido por el jugador
@@ -183,7 +187,7 @@ Los fragmentos sustituyen a los drops aleatorios: el progreso hacia los objetos 
 
 ### 4.6 Entusiasmo (rendimiento decreciente sin bloqueo)
 Por criatura y minijuego, cada día (se reinicia a las 04:00 locales):
-| Partidas del día | Multiplicador de recompensas (Chispas, ejes, fragmentos) |
+| Partidas del día | Multiplicador de recompensas (Tamcoins, ejes, fragmentos) |
 |------------------|----------------------------------------------------------|
 | 1–5 | 100% |
 | 6–10 | 50% |
@@ -297,15 +301,17 @@ CLI `pnpm sim:arena` que enfrenta todas las formas contra todas (N = 1.000 comba
 ---
 
 ## 6. Economía
+> **v3.0:** esta sección queda **sustituida por ECONOMY_SYSTEM.md** (Tamcoins, libro mayor, precios y límites). Se conserva como histórico.
+
 
 ### 6.1 Monedas
 | Moneda | Tipo | Fuentes | Usos |
 |--------|------|---------|------|
-| **Chispas** | Común | Cuidados (pequeñas), minijuegos, Arena, objetivos diarios, logros | Comida, medicina, decoración, catalizadores, tónicos, manuales de habilidad, cría, crafteo de equipo, Lupa Genética |
+| **Tamcoins** | Común | Cuidados (pequeñas), minijuegos, Arena, objetivos diarios, logros | Comida, medicina, decoración, catalizadores, tónicos, manuales de habilidad, cría, crafteo de equipo, Lupa Genética |
 | **Astrolitos** | Especial (solo ganables) | Logros, primer ascenso a cada rango, objetivos semanales, hitos del Códice, eventos | Cosméticos especiales, Reliquias, huecos de Santuario, Catalizador de Mutación (máx. 1/semana), temas de hábitat |
 
 ### 6.2 Flujo objetivo (jugador medio, 3–4 sesiones diarias)
-| Fuente | Chispas al día |
+| Fuente | Tamcoins al día |
 |--------|----------------|
 | Cuidados (+2 por acción útil, tope 80) | 80 |
 | Minijuegos (≈ 6 partidas a pleno rendimiento) | 400 |
@@ -328,7 +334,7 @@ CLI `pnpm sim:arena` que enfrenta todas las formas contra todas (N = 1.000 comba
 Objetivo: el gasto en cuidados básicos (~120/día) es muy inferior a los ingresos. Lo que se ahorra va a progresión y personalización. Revisión de inflación en la beta: los sumideros escalan con el nivel de Cuidador (decoraciones de tier superior).
 
 ### 6.3 Antiabuso
-- Entusiasmo (§4.6), tope de Chispas por partida y tope de caricias diarias.
+- Entusiasmo (§4.6), tope de Tamcoins por partida y tope de caricias diarias.
 - Récords y acciones competitivas con validación en el servidor en el futuro (los módulos son deterministas y reproducibles).
 - Sin pay-to-win: no se venden con dinero real ni stats, ni catalizadores, ni mutaciones, ni PC.
 
@@ -340,7 +346,7 @@ Objetivo: el gasto en cuidados básicos (~120/día) es muy inferior a los ingres
 | Luz | Alcanzar Plata en la Arena |
 | Oscuridad | Registrar 8 formas en el Códice |
 | Cosmos | Récord "Oro" en los 4 minijuegos **o** nivel de Cuidador 20 |
-| Semanal | Un Nido Errante a la semana de una familia rotativa (calendario fijo), por 600 Chispas |
+| Semanal | Un Nido Errante a la semana de una familia rotativa (calendario fijo), por 600 Tamcoins |
 
 ---
 
@@ -350,6 +356,8 @@ Objetivo: el gasto en cuidados básicos (~120/día) es muy inferior a los ingres
 - **Logros:** más de 80 en el lanzamiento, por categorías (Cuidados, Evolución, Genética, Minijuegos, Arena y Colección). Cada uno da una recompensa y algunos un título.
 
 ## 8. Entrenamiento
+> **v3.0 (N7, propuesta):** sustituido por el **Gym** de ACTIVITIES_SYSTEM §2.A. La meditación pasa a la Music.
+
 - Cuatro estaciones en el hábitat: **Fuerza** (saco), **Carrera** (rueda), **Defensa** (escudo de madera) y **Meditación** (cojín).
 - Interacción: **mini-ritmo de 20 s** (tocar al compás del tam-tam). La precisión da un multiplicador de 0.6 a 1.4 sobre la XP de entrenamiento y los puntos de eje.
 - Coste: −10 de Descanso y −8 de Hambre. Cooldown de 30 min por estación.

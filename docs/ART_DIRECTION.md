@@ -1,6 +1,6 @@
 # ART DIRECTION — Tam Tam Evo
 
-> Versión 0.2 · Fase 1 · Estado: **aprobado** (decisiones D1–D10, 2026-11-19)
+> Versión 0.3 · Brief v3.0 · Estado: §1–10 aprobados; **§11–12 pendientes de aprobación** (N1, N2)
 > Estética obligatoria: **2D ilustrado, muy colorido y con animaciones fluidas.** No es pixel art ni 3D.
 
 ---
@@ -14,7 +14,7 @@
 | **Legible** | Siluetas claras, jerarquía de color y criatura siempre en primer plano. | Fondos que compiten con la criatura, UI tipo dashboard. |
 | **Maravilla** | Las formas adultas son espectaculares, con escala, detalle y efectos propios. | Adultos que son bebés más grandes o recoloreados. |
 
-Referencias de *sensibilidad* (no de copia): ilustración de libro infantil premium, animación 2D de series contemporáneas y juegos indie ilustrados de alto acabado. Todo diseño es **original**: no se reutilizan personajes, siluetas ni paletas reconocibles de franquicias existentes.
+Referencias: ver **§11** (imágenes aportadas en el brief v3.0, analizadas y traducidas a reglas propias). Todo diseño es **original**: no se reutilizan personajes, siluetas ni paletas reconocibles de franquicias existentes.
 
 ---
 
@@ -169,3 +169,58 @@ Concepto (boceto) → Ilustración por partes (SVG por capa/slot) → Optimizaci
 7. Hábitat de Fuego (4 capas, día/noche).
 8. Mockups de las 5 pantallas principales.
 9. Lámina de siluetas de las 40 formas (para validar el test de silueta antes de producir).
+
+---
+
+## 11. Referencias del brief v3.0 — análisis
+
+Se aportaron **5 imágenes** (el brief habla de cuatro). Este es el análisis de lo que **realmente muestran**, porque las descripciones del brief no coinciden del todo con los archivos:
+
+| # | Lo que muestra la imagen | Técnica | Descripción del brief que mejor encaja | Uso que propongo |
+|---|--------------------------|---------|----------------------------------------|------------------|
+| R1 | Monstruito rojo compacto, cuernos naranjas grandes, cejas en "V", ojos amarillos, colmillo, pies y punta de cola violetas | 2D cartoon con contorno marrón oscuro, sombreado suave y brillo especular | "Monstruo rojo" ✔ | **Bebé e Infantil** |
+| R2 | Criatura humanoide delgada de bosque: melena de hojas con bordes cian luminosos, ojos brillantes, garras largas, cola frondosa | 2D pintado (concept art profesional) | "Criatura azul del bosque" (no tiene astas; la cresta hace ese papel) | **Adultos especiales**: bordes emisivos, melenas de hojas y plumas por capas |
+| R3 | Bestias emplumadas azules (cuadrúpedos y un ave con astas) con runas en espiral luminosas, en varias vistas "antes/después" | **3D** (modelos de juego) | "Azul y rosa, varios ángulos" (no hay rosa) | **Juvenil y Adulto**: plumaje en capas, runas en espiral, coherencia entre vistas, ojos amarillos brillantes. Se traduce a 2D |
+| R4 | Las mismas bestias dentro del juego, con niebla y poca luz | **3D** in-game | (sin descripción propia) | **Lectura de silueta y emisivos en entornos oscuros** (Arena y hábitats nocturnos) |
+| R5 | Personajes chibi encapuchados con cara-máscara blanca y llamas azules como cuernos y bordes de capa, en varias poses | 2D cartoon plano | "Criatura azul con llamas" (las llamas son **azules**, no naranjas) | **Elemento integrado en la silueta**: la llama forma parte de la forma, no es un efecto añadido. Hojas de poses |
+
+**Propiedad intelectual (decisión N1):** R2, R3 y R4 son arte de *World of Warcraft* (Blizzard; R2 está firmada por su artista), y R5 recuerda mucho al protagonista de *Hollow Knight*. Se usan **solo como lenguaje visual**. Reglas concretas:
+- No se reproduce ninguna criatura, silueta, cara ni marca de estas obras.
+- En particular, ningún Tamtam tendrá **capucha con cara-máscara blanca y ojos negros** (rasgo identificativo de R5). Los Umbrálidos mantienen su diseño propio de humo y ojos luminosos.
+- Las imágenes no se guardan en el repositorio.
+
+### 11.1 Reglas de estilo derivadas
+| Regla | Viene de | Aplicación técnica en TamRig |
+|-------|----------|------------------------------|
+| **Cejas expresivas** como motor de la expresión (enfado, determinación, tristeza) | R1 | Nuevo slot facial `brows` con estados (`neutral`, `angry`, `sad`, `determined`, `surprised`) |
+| **Apéndices grandes que definen la silueta** (cuernos, crestas, orejas) desde el Bebé | R1, R5 | Cada Bebé e Infantil lleva al menos 1 apéndice icónico de su familia (Chispín: llama + **dos cuernitos de brasa**, ver §11.2) |
+| **Contorno de color oscuro y grueso**, con más peso abajo | R1 | Ya implementado (trazo inferior); se añade grosor variable por parte |
+| **Volumen con degradados suaves** (no solo planos) + brillo especular controlado | R1 | Nuevo: rellenos con **degradado lineal o radial** por parte (`fill: { gradient }`) |
+| **Plumaje, hojas y escamas en capas** que se superponen (textura por forma, no por píxel) | R2, R3 | Generador de **mechones procedurales**: N piezas repetidas a lo largo de un hueso, con variación determinista de tamaño y ángulo. Cada mechón tiene follow-through propio |
+| **Bordes y runas emisivos** (cian, magenta, oro) sobre bases de valor oscuro | R2, R3, R4 | Nuevo tinte `emissive` + capa de *glow* aditivo (blur) + pulso animado (runas que "respiran") |
+| **Ojos luminosos** en formas adultas y juveniles | R2, R3, R4 | Variante de ojo `glow` (iris emisivo sin pupila) para los adultos |
+| **Elemento como parte de la anatomía** (llamas-cuerno, colas de agua, astas de cristal) | R5, R2 | Partes elementales con su propio shader animado (ondulación de llama o agua) |
+| **Garras y extremidades afiladas** solo a partir del Juvenil | R2, R3 | Progresión de forma: redondo (Bebé) → ángulos (Juvenil) → afilado (Adulto) |
+| **Hojas de poses / vistas** como entregable de diseño | R3, R5 | Cada forma se entrega con una hoja de 4 poses antes de animarla |
+
+### 11.2 Qué cambia en Chispín (aplicación inmediata, Fase 2)
+Chispín ya sigue la línea de R1 (cuerpo compacto, contorno de color y saturación). Le faltan:
+1. **Cejas** (para expresar enfado, determinación y tristeza).
+2. **Dos cuernitos de brasa** a los lados de la llama: refuerzan la silueta y anticipan los cuernos de Volcaurio.
+3. **Degradado de volumen** en el cuerpo, en lugar de la sombra plana.
+4. **Colmillito** visible en la expresión de enfado.
+5. **Punta de cola** con ascua (secundaria con follow-through).
+
+### 11.3 Límites honestos de producción (decisión N2)
+- El arte que produzco es **vectorial y generado como código** (rutas SVG, degradados y capas). Con las reglas de §11.1 se puede llegar a un acabado cercano a **R1 y R5** (cartoon limpio).
+- **No se puede igualar con este método** el acabado pintado de R2 ni el de los modelos 3D de R3 y R4 (texturas pintadas a mano e iluminación volumétrica). Para los adultos se pueden **evocar** (capas, emisivos, runas), no replicar.
+- Todo arte provisional se marca como **PLACEHOLDER** en los datos (`artStatus: "placeholder" | "prototype" | "final"`) y en el Rig Lab, y nunca se presenta como final.
+- Opciones para el arte final de los adultos: (a) ilustrador o ilustradora 2D, trabajando sobre los rigs existentes; (b) concept art generado con herramientas de imagen como guía, que yo traduzco a vector (coste por generación y consistencia variable); (c) aceptar el estilo vectorial como identidad propia.
+
+---
+
+## 12. Props y animaciones de actividad
+- Los **props** (mancuerna, libro, pincel, regadera, tambor, martillo, sartén) son partes con su propio mini-rig que se **enganchan** a los huesos `handL` / `handR` del Tamtam mediante un punto de anclaje. Un mismo clip `train_lift` sirve para todos los Tamtams de un arquetipo.
+- Los arquetipos sin manos (serpentinos, flotantes, `blob`) usan **anclaje a la cabeza o la cola**, o telequinesis (el prop flota con un brillo elemental).
+- Los muebles siguen la misma dirección de arte: contorno de color, 2 tonos + degradado suave, formas redondeadas y un motivo de familia en los temas.
+- **Muebles coherentes:** cada colección (Básica, Bosque, Brasa, Marea, Astral…) comparte paleta y lenguaje de formas. No se mezclan estilos dentro de una colección.
