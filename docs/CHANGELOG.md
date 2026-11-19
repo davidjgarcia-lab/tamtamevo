@@ -4,6 +4,29 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+### Primera versión de app móvil: pestañas, Chispín v3, cuidados táctiles, minijuegos, Arena (2026-11-19)
+#### Añadido
+- **Chispín v3**: rediseño completo como lagarto de magma cuadrúpedo (rig nuevo, 14 clips: idle, walk, run, eat, pet, sleep, celebrate, train, bathe, sad, hungry, angry, attack, hit). Ojos blancos almendrados con pupila de rendija, vetas de magma emisivas, cresta de tres llamas.
+- `CREATURE_FAMILIES_ANATOMY.md`: 5 familias (Acuáticas, Gelatinosas, Etéreas, Reptilianas, Híbridas) × 3 propuestas, reglas de anatomía/ojos/materiales y set de locomoción por familia. **Pendiente de validación**; hojas de concepto bloqueadas por el límite de imágenes.
+- **Navegación con pestañas**: Casa · Granja · Tienda · Arena · Conectar. Perfil desde la cabecera.
+- **Huevo en la habitación**: se calienta y se abre allí mismo (grietas y destello); el nombre se pone en un panel bajo el recién nacido. Eliminadas las pantallas de huevo y de nombre.
+- **Comer**: cada comida tiene ilustración (en el menú y en la tienda) y se ve en la boca del Tamtam, desapareciendo en tres bocados.
+- **Bañar**: ducha con alcachofa, chorro de agua, salpicaduras y espuma; después, toalla.
+- **Cacas por la habitación** (posición derivada de su hora) y **Limpiar con fregona**: frotar con el dedo sobre cada una.
+- **Suciedad visible**: manchas cuando la higiene baja de 50 y **moscas** por debajo de 30.
+- **Mimos acariciando**: deslizar el dedo sobre el Tamtam (ya no hay botón).
+- **Jugar → 4 minijuegos solo con iconos** (D9): laberinto, rompeladrillos, cuadrícula de emblemas 4×4 y estela con rival IA. Récords, monedas con rendimientos decrecientes diarios, diversión/actividad.
+- **Gimnasio y Estudio dentro de la habitación**: el Tamtam camina a las mancuernas o al escritorio (nuevo mueble) y la actividad aparece en el panel inferior. Estudio = memorizar recetas de ingredientes (Inteligencia).
+- **Granja**: Tamtams que no juegan (necesidades en pausa) e intercambio con el de casa.
+- **Arena**: rangos Bronce→Leyenda con PC, 3 rivales diarios (fácil/igualado/difícil), combate automático en tiempo real con barras de vida, daño flotante, esquivas y habilidad; recompensas idempotentes.
+- **Conectar**: código de amigo y lista de amigos. Visitas y combates amistosos **desactivados**: requieren servidor online (no existe aún).
+- Core: `arena.ts`, `activities.ts` (estudio, minijuegos, combate, granja), `poopSpot`/`cleanPoop`, SCHEMA_VERSION 2.
+#### Cambiado
+- Carga mínima 1600 → 400 ms.
+- Iconos, comidas y miniaturas se renderizan una vez a imagen (en web cada lienzo Skia es un contexto WebGL y el navegador solo mantiene unos 16).
+#### Corregido
+- Gimnasio: mantener pulsado en móvil ya no selecciona texto ni abre el menú contextual.
+
 ### Marca aplicada + launcher + carga + prototipo publicado (2026-11-19)
 #### Añadido
 - `BRAND_SYSTEM.md`: aplicación del Manual de Marca y del Art Direction (tokens, logo, icono, tipografía, componentes, arranque).

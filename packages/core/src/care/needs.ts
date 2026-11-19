@@ -228,6 +228,25 @@ export function clean(s: CareState, now: number, cfg: CareConfig = DEFAULT_CARE_
   return "clean";
 }
 
+/** Where a poop sits in the room (normalised 0–1), derived deterministically from its timestamp. */
+export function poopSpot(ts: number): { x: number; y: number } {
+  const h = (n: number) => {
+    const v = Math.sin(n * 12.9898 + 78.233) * 43758.5453;
+    return v - Math.floor(v);
+  };
+  return { x: 0.08 + h(ts / 1000) * 0.84, y: 0.45 + h(ts / 1000 + 7) * 0.5 };
+}
+
+/** Mops up one specific poop (the mop interaction). */
+export function cleanPoop(s: CareState, ts: number, now: number, cfg: CareConfig = DEFAULT_CARE_CONFIG): CareReaction {
+  advanceCare(s, now, cfg);
+  const i = s.poops.indexOf(ts);
+  if (i >= 0) s.poops.splice(i, 1);
+  s.needs.hygiene = clamp(s.needs.hygiene + 12, 0, 100);
+  touch(s, now);
+  return "clean";
+}
+
 export const MAX_PETS_PER_DAY = 20;
 
 export function pet(s: CareState, now: number, cfg: CareConfig = DEFAULT_CARE_CONFIG): CareReaction {

@@ -10,6 +10,7 @@ import { addAttributeXp, attributeArenaBonuses, upgradeActivity } from "../progr
 import { emptyRewardLog, grantActivityReward, type RewardLog } from "../rewards/rewards";
 import { purchase, type PlayerEconomyState } from "../shop/shop";
 import { FOODS, GYM, SLICE_CATALOG, STARTER_COINS, STARTER_ITEMS } from "./content";
+import { newArenaState, type ArenaState } from "./arena";
 import { FORM_QUALITY, formQuality, lustre } from "../appearance/appearance";
 
 /**
@@ -17,7 +18,7 @@ import { FORM_QUALITY, formQuality, lustre } from "../appearance/appearance";
  * Every action is a pure mutation of a draft — run it inside Store.transact.
  */
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export interface GameState {
   schemaVersion: number;
@@ -33,9 +34,16 @@ export interface GameState {
   gym: { sessions: number; strTrainingPoints: number };
   buffs: string[];
   lightsOn: boolean;
+  /** Tamtams that are not playing right now (decision: "Granja"). Their needs are paused. */
+  farm: { tamtam: Tamtam; care: CareState; alleleId: string }[];
+  /** Minigame best scores and play counts. */
+  records: Record<string, { best: number; plays: number }>;
+  study: { sessions: number };
+  arena: ArenaState;
 }
 
-export const FIRST_EGG_INCUBATION_MS = 20_000;
+/** The first egg hatches quickly (tutorial); it sits in the room until the player opens it. */
+export const FIRST_EGG_INCUBATION_MS = 8_000;
 
 export function newGame(now: number, ids: { tamtamId: string }, alleleId = "brasa"): GameState {
   const wallet = emptyWallet();
@@ -50,6 +58,7 @@ export function newGame(now: number, ids: { tamtamId: string }, alleleId = "bras
     { uid: "p-lamp", itemId: "furn_lamp_mushroom", layer: "floor", x: 3, y: 0, mirrored: false, rotated: false },
     { uid: "p-poster", itemId: "furn_poster_volcano", layer: "wall", x: 1, y: 1, mirrored: false, rotated: false },
     { uid: "p-gym", itemId: "gym_dumbbells", layer: "floor", x: 10, y: 0, mirrored: false, rotated: false },
+    { uid: "p-desk", itemId: "study_desk", layer: "floor", x: 7, y: 0, mirrored: false, rotated: false },
   ];
   for (const p of starter) placeItem(room, SLICE_CATALOG, inventory, p);
   return {
@@ -66,6 +75,10 @@ export function newGame(now: number, ids: { tamtamId: string }, alleleId = "bras
     gym: { sessions: 0, strTrainingPoints: 0 },
     buffs: [],
     lightsOn: true,
+    farm: [],
+    records: {},
+    study: { sessions: 0 },
+    arena: newArenaState(),
   };
 }
 
@@ -273,8 +286,13 @@ export function debugGrantAll(s: GameState, now: number): void {
 }
 
 export function debugNewEgg(s: GameState, now: number, tamtamId: string, alleleId: string): void {
+  // With a Tamtam at home, the newborn goes to the farm (Granja); otherwise it is the egg in the room.
+  if (s.tamtam) {
+    const t = hatchTamtam({ id: tamtamId, speciesId: "fire", formId: "fire_baby_chispin", requestedName: "", bornAt: now, personality: ["curious"], affinity: { primary: "fire", secondary: "fire" } });
+    s.farm.push({ tamtam: t, care: newCareState(now), alleleId });
+    return;
+  }
   s.phase = "egg";
-  s.tamtam = null;
   s.egg = { tamtamId, speciesId: "fire", formId: "fire_baby_chispin", laidAt: now, hatchAt: now + FIRST_EGG_INCUBATION_MS, alleleId };
 }
 

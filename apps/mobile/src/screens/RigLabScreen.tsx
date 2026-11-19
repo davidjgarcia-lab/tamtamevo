@@ -44,9 +44,15 @@ const AMBIENT: EmitterDef = {
 const ACTIONS: { id: ChispinClipId; label: string }[] = [
   { id: "idle", label: "Reposo" },
   { id: "walk", label: "Caminar" },
+  { id: "run", label: "Correr" },
   { id: "eat", label: "Comer" },
   { id: "pet", label: "Caricia" },
   { id: "sleep", label: "Dormir" },
+  { id: "celebrate", label: "Saltar" },
+  { id: "train", label: "Entrenar" },
+  { id: "bathe", label: "Bañarse" },
+  { id: "angry", label: "Enfado" },
+  { id: "attack", label: "Atacar" },
 ];
 
 export function RigLabScreen() {
@@ -60,7 +66,7 @@ export function RigLabScreen() {
   const res = useMemo(() => buildResources(rig, palette, allEmitters), [palette]);
 
   const groundY = size.h * 0.8;
-  const scale = size.h > 0 ? Math.min((size.h * 0.42) / 125, size.w / 210) : 1;
+  const scale = size.h > 0 ? Math.min((size.h * 0.4) / 100, size.w / 230) : 1;
   const background = useMemo(
     () => (size.w > 0 ? buildFireHabitat(size.w, size.h, groundY) : null),
     [size.w, size.h, groundY],
@@ -263,9 +269,10 @@ const styles = StyleSheet.create({
   hintText: { fontFamily: fonts.body, fontSize: 13, color: "#FFE3C7" },
   panel: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 6, gap: 8 },
   section: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.inkSoft },
-  row: { flexDirection: "row", gap: 8 },
+  row: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
   action: {
-    flex: 1,
+    flexBasis: "22%",
+    flexGrow: 1,
     minHeight: 48,
     borderRadius: 16,
     backgroundColor: colors.card,

@@ -1,10 +1,40 @@
 # GAMEPLAY TEST RESULTS
 
 > Ejecución del 2026-11-19 · commit del vertical slice · entorno: contenedor Linux en la nube, Chromium headless (build web), Node 22.
-> Resumen: **111 tests unitarios y de integración PASSED** (rig 14, core 92, art 5) · **21/21 comprobaciones E2E PASSED** · 0 errores de consola. (Actualizado tras añadir siestas, Lustre y calidad de forma.)
+> **Actualizado (app v1):** 117 unitarios PASSED · 19/19 E2E PASSED. Anterior: **111 tests unitarios y de integración PASSED** (rig 14, core 92, art 5) · **21/21 comprobaciones E2E PASSED** · 0 errores de consola. (Actualizado tras añadir siestas, Lustre y calidad de forma.)
 > Evidencia: `docs/media/slice/*.jpg`, vídeo `docs/media/vertical-slice-demo.mp4`, matriz `EVOLUTION_TEST_MATRIX.md`.
 
-## 1. E2E (tools/playthrough.mjs, 390×844)
+## 1. E2E — primera versión de app (tools/playthrough.mjs, 390×844)
+
+| ID | Funcionalidad | Esperado | Obtenido | Estado | Evidencia |
+|----|---------------|----------|----------|--------|-----------|
+| E2E-01 | Carga | Carga < 8 s y huevo directamente en la habitación | ~1,7 s | PASSED | media/app-v1/01 |
+| E2E-02 | Eclosión | El huevo se abre en la habitación, sin pantalla aparte | ✔ | PASSED | 02, 03 |
+| E2E-03 | Nombre | Nombre inválido no avanza; "Tizón" se guarda | ✔ | PASSED | 03 |
+| E2E-04 | Navegación | Pestañas Casa · Granja · Tienda · Arena · Conectar | ✔ | PASSED | 04 |
+| E2E-05 | Mimos | No existe botón "Mimos" | ✔ | PASSED | 04 |
+| E2E-06 | Comer | Comidas con imagen; la comida se ve en la boca; hambre sube | 80→100 | PASSED | 05, 06 |
+| E2E-07 | Acariciar | Deslizar el dedo sobre el Tamtam sube el cariño | 70→100 | PASSED | 09 |
+| E2E-08 | Suciedad | Higiene baja → manchas + moscas; cacas por la habitación | ✔ | PASSED | 10 |
+| E2E-09 | Fregona | Frotar sobre cada caca la limpia | ✔ | PASSED | 11 |
+| E2E-10 | Jugar | Abre 4 minijuegos sin nombres, solo iconos | ✔ | PASSED | 12, 13 |
+| E2E-11 | Recompensa minijuego | Terminar una partida da Tamcoins | 300→315 | PASSED | 14 |
+| E2E-12 | Gimnasio | Dentro de la habitación; mantener pulsado no selecciona texto | selección "" | PASSED | 15 |
+| E2E-13 | Estudio | Memoria de ingredientes en el escritorio → XP Inteligencia | ✔ | PASSED | 16, 17 |
+| E2E-14 | Tienda | Sección propia; "Probar en mi casa" y comprar | 362→242 | PASSED | 18, 19 |
+| E2E-15 | Granja | Tamtams que no juegan; intercambio | ✔ | PASSED | 20 |
+| E2E-16 | Arena | Combate automático en tiempo real, resultado y PC | ✔ | PASSED | 21–23 |
+| E2E-17 | Conectar | Código de amigo + aviso de que requiere servidor | ✔ | PASSED | 24 |
+| E2E-18 | Debug aislado | Salir de debug deja la partida normal intacta | 300 = 300 | PASSED | — |
+| E2E-19 | Estabilidad | Sin errores de consola/página | 0 | PASSED | — |
+
+Unitarios: rig 14 · core 98 · art 5 = **117 PASSED**. También verificado bajo subruta `/tamtam/` (build del artefacto).
+
+**NOT IMPLEMENTED / BLOCKED:** Conectar online (requiere servidor), formas evolucionadas dibujadas (solo Chispín bebé),
+otras 4 familias (propuestas en texto, imágenes bloqueadas por límite del generador), conservación de volumen
+para gelatinosas en el rig. Probado solo en navegador (build web); no se ha probado aún en dispositivo iOS/Android real.
+
+## 1b. E2E del vertical slice anterior (histórico)
 
 | ID | Funcionalidad | Escenario / entrada | Esperado | Obtenido | Estado | Evidencia |
 |----|---------------|---------------------|----------|----------|--------|-----------|

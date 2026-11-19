@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { compileClip, compileRig, contrast, derivePalette, evaluateFrame } from "@tamtam/rig";
 import { chispinClips, chispinEmitters, chispinRig, fireColorAlleles } from "./index";
 
-const REQUIRED_CLIPS = ["idle", "walk", "eat", "pet", "sleep", "celebrate", "train", "bathe", "sad", "hungry", "angry"];
+const REQUIRED_CLIPS = ["idle", "walk", "run", "eat", "pet", "sleep", "celebrate", "train", "bathe", "sad", "hungry", "angry", "attack", "hit"];
 
 describe("Chispín", () => {
   const rig = compileRig(chispinRig);
@@ -33,19 +33,22 @@ describe("Chispín", () => {
     });
   });
 
-  it("never pushes the feet below their ground contact height", () => {
+  it("keeps the paws on the ground while walking (legs never go below their rest height)", () => {
     const walk = clips.findIndex((c) => c.id === "walk");
-    const footL = rig.boneIds.indexOf("footL");
-    for (let t = 0; t < 2; t += 0.02) {
-      const f = evaluateFrame(rig, clips, { clip: walk, start: 0, prevClip: -1, prevStart: 0 }, { time: t, vx: 40, seed: 3 });
-      expect(f.world[footL * 6 + 5]!).toBeLessThanOrEqual(1);
+    for (const leg of ["legFN", "legFF", "legBN", "legBF"]) {
+      const b = rig.boneIds.indexOf(leg);
+      for (let t = 0; t < 2; t += 0.02) {
+        const f = evaluateFrame(rig, clips, { clip: walk, start: 0, prevClip: -1, prevStart: 0 }, { time: t, vx: 40, seed: 3 });
+        expect(f.world[b * 6 + 5]!, leg).toBeLessThanOrEqual(-21);
+      }
     }
   });
 
   it("every colour allele keeps readable line art", () => {
     for (const a of fireColorAlleles) {
       const p = derivePalette(a.genes);
-      expect(contrast(p.ink, p.base), a.id).toBeGreaterThan(2.5);
+      // Dark-scaled families: the outline must separate from the lit edge of the body (rim/baseLight).
+      expect(contrast(p.ink, p.baseLight), a.id).toBeGreaterThan(2.5);
     }
   });
 });

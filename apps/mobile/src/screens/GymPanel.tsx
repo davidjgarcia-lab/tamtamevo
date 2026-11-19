@@ -1,20 +1,17 @@
-import { Canvas, createPicture, Picture, Skia } from "@shopify/react-native-skia";
 import { completeGymSession, GYM, UPGRADES, upgradeGym, type GymResult } from "@tamtam/core";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { useDerivedValue } from "react-native-reanimated";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { drawTamtam, useCreature } from "../creature/useCreature";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import type { ChispinClipId } from "@tamtam/art";
 import { newId, useGame } from "../game/GameProvider";
 import { brand, colors, fonts } from "../theme";
 import { Btn, Coin } from "../ui/kit";
 
 type Phase = "intro" | "playing" | "result";
 
-/** Gym activity (ACTIVITIES_SYSTEM §2.A): hold to charge, release inside the green zone. */
-export function GymScreen({ onClose }: { onClose: () => void }) {
+/** Gym activity inside the room (ACTIVITIES_SYSTEM §2.A): hold to charge, release inside the green zone. */
+export function GymPanel({ onClose, play }: { onClose: () => void; play: (clip: ChispinClipId) => void }) {
   const { state, act, now, tzOffsetMin } = useGame();
-  const creature = useCreature(state.alleleId);
+  const creature = { play };
   const level = state.economy.activityLevels.gym;
   const reps = GYM.reps[level] ?? 5;
   const [phase, setPhase] = useState<Phase>("intro");
@@ -27,7 +24,6 @@ export function GymScreen({ onClose }: { onClose: () => void }) {
   const chargeRef = useRef(0);
   const holding = useRef<{ start: number; id: ReturnType<typeof setInterval> } | null>(null);
   const runId = useRef(newId());
-  const [size, setSize] = useState({ w: 0, h: 0 });
 
   // Green zone shrinks with each repetition (fatigue).
   const zoneW = Math.max(0.1, 0.26 - rep * 0.025);
@@ -37,15 +33,6 @@ export function GymScreen({ onClose }: { onClose: () => void }) {
     if (holding.current) clearInterval(holding.current.id);
   }, []);
 
-  const { res, clock, playback, emitters } = creature;
-  const picture = useDerivedValue(() => {
-    const { w, h } = size;
-    const t = clock.value;
-    return createPicture((c) => {
-      if (w === 0) return;
-      drawTamtam(c, res, playback.value, emitters.value, t, { x: w / 2, y: h * 0.9, scale: Math.min(h / 190, w / 200), dir: 1 }, 0);
-    }, Skia.XYWHRect(0, 0, Math.max(1, w), Math.max(1, h)));
-  });
 
   const start = () => {
     const cost = GYM.energyCostByLevel[level] ?? GYM.energyCost;
@@ -116,25 +103,15 @@ export function GymScreen({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <SafeAreaView style={g.root}>
+    <View style={g.root}>
       <View style={g.head}>
-        <View>
-          <Text style={g.kicker}>Tamtam Gym · Nivel {level}</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={g.kicker}>Gimnasio · Nivel {level} · Energía {Math.round(state.care.needs.energy)} · Fuerza nv. {state.tamtam?.attributes.str.level ?? 0}</Text>
           <Text style={g.title}>{GYM.levelNames[level]}</Text>
         </View>
-        <Btn label="Salir" small onPress={onClose} />
+        <Btn label="Salir" small onPress={onClose} testID="gym-exit" />
       </View>
-      <View style={g.stats}>
-        <Text style={g.stat}>Energía {Math.round(state.care.needs.energy)}</Text>
-        <Text style={g.stat}>Fuerza nv. {state.tamtam?.attributes.str.level ?? 0}</Text>
-        <Text style={g.stat}>Sesiones {state.gym.sessions}</Text>
-      </View>
-      <View style={g.stage} onLayout={(e) => setSize({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}>
-        <Canvas style={StyleSheet.absoluteFill}>
-          <Picture picture={picture} />
-        </Canvas>
-        {feedback && <Text style={g.feedback}>{feedback}</Text>}
-      </View>
+      {feedback && <Text style={g.feedback}>{feedback}</Text>}
 
       {phase === "intro" && (
         <View style={g.panel}>
@@ -160,8 +137,14 @@ export function GymScreen({ onClose }: { onClose: () => void }) {
             <View style={[g.zone, { left: `${(zoneC - zoneW / 2) * 100}%`, width: `${zoneW * 100}%` }]} />
             <View style={[g.needle, { left: `${charge * 100}%` }]} />
           </View>
-          <Pressable onPressIn={pressIn} onPressOut={pressOut} style={({ pressed }) => [g.hold, pressed && g.holdPressed]} accessibilityRole="button" accessibilityLabel="Mantén pulsado para levantar" testID="gym-hold">
-            <Text style={g.holdText}>MANTÉN Y SUELTA</Text>
+          <Pressable
+            onPressIn={pressIn}
+            onPressOut={pressOut}
+            delayLongPress={60_000}
+            onLongPress={() => undefined}
+            {...(Platform.OS === "web" ? ({ onContextMenu: (e: { preventDefault: () => void }) => e.preventDefault() } as object) : {})}
+            style={({ pressed }) => [g.hold, NO_SELECT, pressed && g.holdPressed]} accessibilityRole="button" accessibilityLabel="Mantén pulsado para levantar" testID="gym-hold">
+            <Text style={[g.holdText, NO_SELECT]} selectable={false}>MANTÉN Y SUELTA</Text>
           </Pressable>
         </View>
       )}
@@ -184,24 +167,27 @@ export function GymScreen({ onClose }: { onClose: () => void }) {
           )}
           <View style={{ flexDirection: "row", gap: 8 }}>
             <Btn label="Otra vez" onPress={() => setPhase("intro")} style={{ flex: 1 }} />
-            <Btn label="Volver a casa" tone="coral" onPress={onClose} style={{ flex: 1 }} />
+            <Btn label="Terminar" tone="coral" onPress={onClose} style={{ flex: 1 }} />
           </View>
         </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
+/** Long-press must never start a text selection or a context menu (mobile web). */
+export const NO_SELECT = Platform.OS === "web" ? ({ userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none" } as object) : {};
+
 const g = StyleSheet.create({
-  root: { ...StyleSheet.absoluteFill, backgroundColor: "#1C1738" },
-  head: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 16, paddingTop: 8 },
+  root: { backgroundColor: brand.panel, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingTop: 10 },
+  head: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 16, gap: 8 },
   kicker: { fontFamily: fonts.bodyBold, color: brand.orange, fontSize: 13 },
-  title: { fontFamily: fonts.displayBold, color: "#FFFFFF", fontSize: 26 },
+  title: { fontFamily: fonts.displayBold, color: "#FFFFFF", fontSize: 22, lineHeight: 28 },
   stats: { flexDirection: "row", gap: 8, paddingHorizontal: 16, marginTop: 8 },
   stat: { fontFamily: fonts.bodyBold, fontSize: 12, color: brand.cloud, backgroundColor: brand.panel, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, overflow: "hidden" },
   stage: { flex: 1 },
-  feedback: { position: "absolute", top: 24, alignSelf: "center", fontFamily: fonts.displayBold, fontSize: 32, color: brand.gold },
-  panel: { backgroundColor: brand.panel, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 18, gap: 12 },
+  feedback: { position: "absolute", top: -54, alignSelf: "center", fontFamily: fonts.displayBold, fontSize: 32, color: brand.gold, textShadowColor: "#000", textShadowRadius: 6 },
+  panel: { padding: 16, paddingTop: 8, gap: 10 },
   body: { fontFamily: fonts.body, fontSize: 14, color: colors.inkSoft, lineHeight: 20 },
   msg: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.coralDark },
   meter: { height: 28, borderRadius: 14, backgroundColor: brand.core, overflow: "hidden", borderWidth: 2, borderColor: colors.line },

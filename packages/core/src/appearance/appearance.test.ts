@@ -61,7 +61,7 @@ import { arenaStrength, debugForceEvolution, debugSetLifetimeCare, debugSetNeed,
 describe("Form quality engraved at evolution", () => {
   const evolveWith = (care: number) => {
     const s = newGame(0, { tamtamId: `q${care}` });
-    hatch(s, 20_000);
+    hatch(s, 8_000);
     nameNewTamtam(s, "Lu", 21_000);
     debugSetLifetimeCare(s, care);
     for (const n of ["hunger", "hygiene", "happiness", "affection", "energy", "activity"] as const) debugSetNeed(s, n, care);

@@ -10,7 +10,7 @@ const T0 = Date.UTC(2026, 10, 20, 9, 0); // 10:00 local (UTC+1)
 
 function hatched(name = "Pimpollo"): GameState {
   const s = newGame(T0, { tamtamId: "tt-1" });
-  hatch(s, T0 + 20_000);
+  hatch(s, T0 + 8_000);
   nameNewTamtam(s, name, T0 + 21_000);
   return s;
 }
@@ -19,9 +19,9 @@ describe("birth and naming", () => {
   it("incubates, hatches only when ready and keeps the chosen name", () => {
     const s = newGame(T0, { tamtamId: "tt-1" });
     expect(s.phase).toBe("egg");
-    expect(eggProgress(s, T0 + 10_000)).toBeCloseTo(0.5);
+    expect(eggProgress(s, T0 + 4_000)).toBeCloseTo(0.5);
     expect(() => hatch(s, T0 + 5_000)).toThrow(GameRuleError);
-    hatch(s, T0 + 20_000);
+    hatch(s, T0 + 8_000);
     expect(s.phase).toBe("naming");
     const t = nameNewTamtam(s, "  Pimpollo ", T0 + 21_000);
     expect(t.name).toBe("Pimpollo");
@@ -30,7 +30,7 @@ describe("birth and naming", () => {
 
   it("uses a default name when left empty and persists names across save/load and evolution", () => {
     const s = newGame(T0, { tamtamId: "tt-9" });
-    hatch(s, T0 + 20_000);
+    hatch(s, T0 + 8_000);
     nameNewTamtam(s, "", T0 + 21_000);
     expect(s.tamtam!.name.length).toBeGreaterThan(1);
     rename(s, "Tizón", T0 + 30_000);

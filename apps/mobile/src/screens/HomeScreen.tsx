@@ -1,33 +1,36 @@
-import { Canvas, createPicture, PaintStyle, Picture, Skia } from "@shopify/react-native-skia";
+import { BlurStyle, Canvas, createPicture, PaintStyle, Picture, Skia } from "@shopify/react-native-skia";
 import type { ChispinClipId } from "@tamtam/art";
 import {
-  buy, careAction, checkPlacement, cloneData, feedFood, lustre, mirror, mood, move, napCooldownLeft, place, PlacementRejected, PurchaseError, SLICE_CATALOG, unplace,
-  type CareReaction, type CareKind, type CatalogItem, type Placement,
+  buy, careAction, checkPlacement, cleanPoop, cloneData, eggProgress, feedFood, FOODS, hatch, lustre, mirror, mood, move, napCooldownLeft, place, PlacementRejected, poopSpot,
+  SLICE_CATALOG, unplace, type CareKind, type CareReaction, type CatalogItem, type Placement,
 } from "@tamtam/core";
+import { transformPoint } from "@tamtam/rig";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, StyleSheet, Text, View, type GestureResponderEvent, type LayoutChangeEvent } from "react-native";
+import { StyleSheet, Text, View, type GestureResponderEvent, type LayoutChangeEvent } from "react-native";
 import { Easing, useDerivedValue, useSharedValue, withTiming } from "react-native-reanimated";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { scheduleOnRN } from "react-native-worklets";
 import { composeLook } from "../creature/look";
-import { drawTamtam, useCreature } from "../creature/useCreature";
+import { drawDirt, drawEgg, drawFoam, drawMeal, drawMop, drawShower, drawTowel, foodPicture } from "../creature/props";
+import { BONE, drawTamtam, useCreature } from "../creature/useCreature";
 import { newId, useGame } from "../game/GameProvider";
 import { buildRoomPicture, cellAt, drawFurniture, placementRect, roomGeom } from "../home/roomArt";
 import { brand, colors, fonts } from "../theme";
-import { Btn, Coin, Toast } from "../ui/kit";
-import { DebugPanel } from "./DebugPanel";
-import { GymScreen } from "./GymScreen";
-import { LustreLab } from "./LustreLab";
-import { FoodSheet, HistorySheet, InventoryTray, ProfileSheet, ShopSheet } from "./sheets";
+import { Btn } from "../ui/kit";
+import { Icon } from "../ui/icons";
+import { GymPanel, NO_SELECT } from "./GymPanel";
+import { NamingPanel } from "./NamingPanel";
+import { FoodSheet, InventoryTray } from "./sheets";
+import { StudyPanel } from "./StudyPanel";
+import { IconAction } from "./IconAction";
 
 const REACTION: Record<CareReaction, { clip: ChispinClipId; ms: number; text: string | null }> = {
-  eat: { clip: "eat", ms: 2200, text: "¡Ñam!" },
+  eat: { clip: "eat", ms: 2300, text: "¡Ñam!" },
   eat_favorite: { clip: "eat", ms: 2600, text: "¡Su comida favorita!" },
   refuse_full: { clip: "angry", ms: 1400, text: "Está lleno: no quiere más." },
   dislike: { clip: "angry", ms: 1600, text: "¡Puaj! No le gusta la comida fría." },
-  bathe: { clip: "bathe", ms: 2400, text: "¡Qué limpio!" },
-  clean: { clip: "celebrate", ms: 1100, text: "Todo limpio." },
-  pet: { clip: "pet", ms: 2600, text: null },
+  bathe: { clip: "bathe", ms: 3000, text: "¡A la ducha!" },
+  clean: { clip: "celebrate", ms: 1100, text: "¡Limpio!" },
+  pet: { clip: "pet", ms: 2400, text: null },
   pet_saturated: { clip: "idle", ms: 600, text: "Ya le has dado muchos mimos hoy." },
   play: { clip: "celebrate", ms: 2200, text: "¡A jugar!" },
   too_tired: { clip: "sad", ms: 1600, text: "Está demasiado cansado." },
@@ -47,84 +50,127 @@ const PLACE_ERR: Record<string, string> = {
   not_mirrorable: "Ese objeto no se puede girar.",
 };
 
-type Mode = { kind: "play" } | { kind: "decor"; selectedUid: string | null; pendingItem: string | null } | { kind: "preview"; item: CatalogItem; x: number; y: number; mirrored: boolean };
+const FOOD_IDS = Object.keys(FOODS);
+const FOOD_PICS = FOOD_IDS.map(foodPicture);
 
-export function HomeScreen() {
+type Mode =
+  | { kind: "play" }
+  | { kind: "mop" }
+  | { kind: "gym" }
+  | { kind: "study" }
+  | { kind: "decor"; selectedUid: string | null; pendingItem: string | null }
+  | { kind: "preview"; item: CatalogItem; x: number; y: number; mirrored: boolean };
+
+interface Fx {
+  egg: boolean;
+  eggP: number;
+  crack: number;
+  hygiene: number;
+  food: number;
+  foodStart: number;
+  bath: number;
+  mop: boolean;
+  mx: number;
+  my: number;
+}
+
+export function HomeScreen({
+  toast, preview, onPreviewDone, onOpenGames,
+}: { toast: (t: string) => void; preview: CatalogItem | null; onPreviewDone: () => void; onOpenGames: () => void }) {
   const game = useGame();
   const { state, act, now } = game;
-  const t = state.tamtam!;
-  // Lustre: how polished the Tamtam looks right now (recomputed every tick; the look only changes with the tier).
-  const liveTier = lustre(state.care, t).tier;
-  const formTier = t.stage === "baby" ? liveTier : t.formQuality ?? liveTier;
+  const t = state.tamtam;
+  const liveTier = t ? lustre(state.care, t).tier : "plain";
+  const formTier = !t || t.stage === "baby" ? liveTier : t.formQuality ?? liveTier;
   const look = useMemo(() => composeLook(formTier, liveTier), [formTier, liveTier]);
-  const creature = useCreature(state.alleleId, look);
+  const creature = useCreature(t ? state.alleleId : state.egg?.alleleId ?? state.alleleId, look);
   const [size, setSize] = useState({ w: 0, h: 0 });
-  const [sheet, setSheet] = useState<null | "food" | "shop" | "profile" | "history" | "debug">(null);
-  const [gym, setGym] = useState(false);
-  const [lab, setLab] = useState(false);
+  const [food, setFood] = useState(false);
   const [mode, setMode] = useState<Mode>({ kind: "play" });
-  const [toastText, setToastText] = useState<string | null>(null);
   const [reaction, setReaction] = useState<ChispinClipId | null>(null);
+  const [activityClip, setActivityClip] = useState<ChispinClipId | null>(null);
   const [walking, setWalking] = useState(false);
   const reactionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const posX = useSharedValue(0);
   const dir = useSharedValue(1);
   const vx = useSharedValue(0);
-
-  const toast = (text: string) => {
-    setToastText(text);
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToastText(null), 2200);
-  };
+  const fx = useSharedValue<Fx>({ egg: false, eggP: 0, crack: -1, hygiene: 100, food: -1, foodStart: 0, bath: -1, mop: false, mx: 0, my: 0 });
+  const arrive = useRef<(() => void) | null>(null);
+  const hatching = useRef(false);
 
   const g = useMemo(() => (size.w ? roomGeom(size.w, size.h, state.room) : null), [size, state.room]);
-  const laneY = g ? g.floorTop + g.floorCellH * 3.55 : 0;
-  const scale = g ? (g.floorCellH * 1.9) / 128 : 1;
+  const laneY = g ? g.floorTop + g.floorCellH * 3.4 : 0;
+  const scale = g ? Math.min((g.floorCellH * 2.1) / 100, g.w / 330) : 1;
 
   useEffect(() => {
     if (g && posX.value === 0) posX.value = g.w * 0.5;
   }, [g, posX]);
 
-  // Which animation should play: reaction > walking > mood.
-  const m = mood(state.care, now());
-  const base: ChispinClipId = m === "asleep" || m === "napping" ? "sleep" : m === "hungry" ? "hungry" : m === "sad" || m === "tired" || m === "dirty" ? "sad" : "idle";
-  const clip: ChispinClipId = reaction ?? (walking ? "walk" : base);
+  // Live inputs for the render worklet.
+  const isEgg = state.phase === "egg";
+  const eggP = eggProgress(state, now());
+  useEffect(() => {
+    fx.value = { ...fx.value, egg: isEgg, eggP, hygiene: state.care.needs.hygiene };
+  }, [isEgg, eggP, state.care.needs.hygiene, fx]);
+
+  // Shop → "Probar en mi casa".
+  useEffect(() => {
+    if (preview?.furniture) setMode({ kind: "preview", item: preview, x: preview.furniture.layer === "wall" ? 8 : 6, y: 1, mirrored: false });
+  }, [preview]);
+
+  // Which animation plays: walking > activity > reaction > mood.
+  const m = t ? mood(state.care, now()) : "happy";
+  const base: ChispinClipId = state.phase === "naming" ? "celebrate" : m === "asleep" || m === "napping" ? "sleep" : m === "hungry" ? "hungry" : m === "sad" || m === "tired" || m === "dirty" ? "sad" : "idle";
+  const inActivity = mode.kind === "gym" || mode.kind === "study";
+  const clip: ChispinClipId = walking ? "walk" : inActivity ? activityClip ?? "idle" : reaction ?? base;
   useEffect(() => {
     creature.play(clip);
   }, [clip, creature.play]);
 
+  const onArrive = () => {
+    setWalking(false);
+    const f = arrive.current;
+    arrive.current = null;
+    f?.();
+  };
+  const walkTo = (target: number, then?: () => void) => {
+    const dist = Math.abs(target - posX.value);
+    arrive.current = then ?? null;
+    if (dist < 8) return onArrive();
+    dir.value = target > posX.value ? 1 : -1;
+    vx.value = 46;
+    setWalking(true);
+    posX.value = withTiming(target, { duration: (dist / (70 * scale)) * 1000, easing: Easing.linear }, () => {
+      vx.value = 0;
+      scheduleOnRN(onArrive);
+    });
+  };
+
   // Wandering: when idle and happy enough, walk somewhere now and then.
   useEffect(() => {
-    if (!g) return;
+    if (!g || !t) return;
     const id = setInterval(() => {
-      if (reaction || walking || base !== "idle" || mode.kind !== "play" || gym || Math.random() < 0.4) return;
-      const target = g.w * (0.15 + Math.random() * 0.7);
-      const dist = Math.abs(target - posX.value);
-      if (dist < 30) return;
-      dir.value = target > posX.value ? 1 : -1;
-      vx.value = 46;
-      setWalking(true);
-      posX.value = withTiming(target, { duration: (dist / (46 * scale)) * 1000, easing: Easing.linear }, () => {
-        vx.value = 0;
-        scheduleOnRN(setWalking, false);
-      });
+      if (reaction || walking || base !== "idle" || mode.kind !== "play" || food || Math.random() < 0.4) return;
+      walkTo(g.w * (0.18 + Math.random() * 0.64));
     }, 4500);
     return () => clearInterval(id);
-  }, [g, reaction, walking, base, mode.kind, gym, scale, posX, dir, vx]);
+  });
 
-  const react = (r: CareReaction) => {
+  const react = (r: CareReaction, extra?: { food?: string }) => {
     const def = REACTION[r];
     if (def.text) toast(def.text);
     if (reactionTimer.current) clearTimeout(reactionTimer.current);
+    const tt = creature.clock.value;
+    if (extra?.food && (r === "eat" || r === "eat_favorite")) fx.value = { ...fx.value, food: FOOD_IDS.indexOf(extra.food), foodStart: tt };
+    if (r === "bathe") fx.value = { ...fx.value, bath: tt };
     if (def.ms > 0) {
       setReaction(def.clip);
-      reactionTimer.current = setTimeout(() => setReaction(null), def.ms);
-    } else {
-      setReaction(null);
-    }
+      reactionTimer.current = setTimeout(() => {
+        setReaction(null);
+        fx.value = { ...fx.value, food: -1, bath: -1 };
+      }, def.ms);
+    } else setReaction(null);
   };
-
   const doCare = (kind: CareKind) => react(act((s) => careAction(s, kind, now())));
 
   // ── Rendering ─────────────────────────────────────────────────────────────
@@ -132,27 +178,52 @@ export function HomeScreen() {
   const night = hour >= 21 || hour < 7;
   const roomPic = useMemo(() => (g ? buildRoomPicture(state.room, g, { night, lightsOn: state.lightsOn }) : null), [g, state.room, night, state.lightsOn]);
 
-  // Overlay: decor grid, selection, preview ghost, poops (JS-built, cheap).
+  const poopAt = (ts: number) => {
+    const sp = poopSpot(ts);
+    return { x: g!.floorX0 + sp.x * state.room.floor.cols * g!.floorCellW, y: g!.floorTop + sp.y * (g!.floorBottom - g!.floorTop) };
+  };
+
   const overlay = useMemo(() => {
     if (!g) return null;
     return createPicture((c) => {
       const p = Skia.Paint();
       p.setAntiAlias(true);
-      // Poops (cartoon swirl) on the front lane.
-      state.care.poops.forEach((_, i) => {
-        const x = g.w * (0.2 + i * 0.22);
-        const y = g.floorBottom - g.floorCellH * 0.35;
-        const s = g.floorCellH * 0.28;
-        p.setColor(Skia.Color("#8A5A3C"));
-        c.drawOval(Skia.XYWHRect(x - s, y - s * 0.5, s * 2, s), p);
-        c.drawOval(Skia.XYWHRect(x - s * 0.7, y - s, s * 1.4, s * 0.8), p);
-        c.drawOval(Skia.XYWHRect(x - s * 0.4, y - s * 1.4, s * 0.8, s * 0.6), p);
+      const ink = Skia.Paint();
+      ink.setAntiAlias(true);
+      ink.setStyle(PaintStyle.Stroke);
+      ink.setColor(Skia.Color("#2A1A3E"));
+      ink.setStrokeWidth(1.6);
+      // Poops wherever the Tamtam left them (positions derived from their timestamps).
+      for (const ts of state.care.poops) {
+        const { x, y } = poopAt(ts);
+        const s = g.floorCellH * 0.26;
+        const sh = Skia.Paint();
+        sh.setColor(Skia.Color("#05030D"));
+        sh.setAlphaf(0.25);
+        sh.setMaskFilter(Skia.MaskFilter.MakeBlur(BlurStyle.Normal, 3, true));
+        c.drawOval(Skia.XYWHRect(x - s * 1.1, y - s * 0.2, s * 2.2, s * 0.6), sh);
+        for (const [dy, rw, rh, col] of [[0, 1, 0.5, "#6E4630"], [-0.42, 0.72, 0.42, "#7E5238"], [-0.78, 0.44, 0.34, "#8E5E40"]] as const) {
+          p.setColor(Skia.Color(col));
+          const r = Skia.XYWHRect(x - s * rw, y + s * (dy - rh), s * rw * 2, s * rh * 2);
+          c.drawOval(r, p);
+          c.drawOval(r, ink);
+        }
         p.setColor(Skia.Color("#FFFFFF"));
-        c.drawCircle(x - s * 0.2, y - s * 0.7, s * 0.12, p);
-        c.drawCircle(x + s * 0.2, y - s * 0.7, s * 0.12, p);
-      });
-      if (mode.kind === "play") return;
-      // Grid.
+        p.setAlphaf(0.5);
+        c.drawOval(Skia.XYWHRect(x - s * 0.5, y - s * 0.75, s * 0.3, s * 0.16), p);
+        p.setAlphaf(1);
+        const stink = Skia.Paint();
+        stink.setAntiAlias(true);
+        stink.setStyle(PaintStyle.Stroke);
+        stink.setStrokeWidth(1.6);
+        stink.setColor(Skia.Color("#B6E36A"));
+        stink.setAlphaf(0.7);
+        for (const k of [-0.5, 0.5]) {
+          const path = Skia.Path.MakeFromSVGString(`M ${x + k * s} ${y - s * 1.3} c ${-s * 0.3} ${-s * 0.3} ${s * 0.3} ${-s * 0.6} 0 ${-s * 0.9} c ${-s * 0.3} ${-s * 0.3} ${s * 0.3} ${-s * 0.6} 0 ${-s * 0.9}`);
+          if (path) c.drawPath(path, stink);
+        }
+      }
+      if (mode.kind !== "decor" && mode.kind !== "preview") return;
       const line = Skia.Paint();
       line.setAntiAlias(true);
       line.setStyle(PaintStyle.Stroke);
@@ -190,39 +261,116 @@ export function HomeScreen() {
         c.restore();
       }
     }, Skia.XYWHRect(0, 0, g.w, g.h));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [g, state.care.poops, state.room, state.economy.inventory, mode]);
 
   const { res, clock, playback, emitters } = creature;
+  const W = Math.max(1, size.w);
+  const H = Math.max(1, size.h);
+  const eggX = g ? g.w * 0.5 : 0;
   const dynamic = useDerivedValue(() => {
     const tt = clock.value;
+    const f = fx.value;
     return createPicture((c) => {
-      if (!g) return;
-      drawTamtam(c, res, playback.value, emitters.value, tt, { x: posX.value, y: laneY, scale, dir: dir.value }, vx.value);
-    }, Skia.XYWHRect(0, 0, Math.max(1, size.w), Math.max(1, size.h)));
-  });
+      if (W < 2) return;
+      if (f.egg) {
+        drawEgg(c, eggX, laneY, scale * 1.15, tt, f.eggP, f.crack >= 0 ? tt - f.crack : -1);
+        return;
+      }
+      const at = { x: posX.value, y: laneY, scale, dir: dir.value };
+      const frame = drawTamtam(c, res, playback.value, emitters.value, tt, at, vx.value);
+      drawDirt(c, frame, BONE.body, BONE.head, at, f.hygiene, tt);
+      if (f.food >= 0) {
+        const [mx, my] = transformPoint(frame.world, BONE.head, 42, 4);
+        drawMeal(c, FOOD_PICS[f.food]!, at.x + mx * scale * at.dir, at.y + my * scale, scale * 1.35, (tt - f.foodStart) / 2.1);
+      }
+      if (f.bath >= 0 && tt - f.bath < 1.9) {
+        drawFoam(c, frame, BONE.body, BONE.head, at, tt);
+        drawShower(c, at.x + 6 * scale * at.dir, Math.max(30, laneY - 170 * scale), laneY, scale, tt);
+      } else if (f.bath >= 0 && tt - f.bath < 2.9) drawTowel(c, frame, BONE.head, at, tt);
+      if (f.mop) drawMop(c, f.mx, f.my, scale * 1.3, tt);
+    }, Skia.XYWHRect(0, 0, W, H));
+  }, [W, H, laneY, scale, eggX, res]);
 
-  // ── Input ─────────────────────────────────────────────────────────────────
+  // ── Input: tap, stroke (mimos) and mop ──────────────────────────────────
+  const offset = useRef({ x: 0, y: 0 });
   type Measurable = { measure: (cb: (x: number, y: number, w: number, h: number, px: number, py: number) => void) => void };
   const stageRef = useRef<Measurable | null>(null);
-  // Page coordinates → stage coordinates (locationX is unreliable on react-native-web).
-  const onStagePress = (e: GestureResponderEvent) => {
-    const { pageX, pageY } = e.nativeEvent;
-    stageRef.current?.measure((_x, _y, _w, _h, px, py) => handleStageTap(pageX - px, pageY - py));
+  const gesture = useRef({ sx: 0, sy: 0, lx: 0, ly: 0, moved: 0, stroke: 0, lastPet: 0, scrub: new Map<number, number>() });
+  const local = (e: GestureResponderEvent) => ({ x: e.nativeEvent.pageX - offset.current.x, y: e.nativeEvent.pageY - offset.current.y });
+  const overCreature = (x: number, y: number) => !!t && Math.abs(x - posX.value) < 85 * scale && y > laneY - 115 * scale && y < laneY + 12;
+
+  const onGrant = (e: GestureResponderEvent) => {
+    stageRef.current?.measure((_x, _y, _w, _h, px, py) => (offset.current = { x: px, y: py }));
+    const p = local(e);
+    Object.assign(gesture.current, { sx: p.x, sy: p.y, lx: p.x, ly: p.y, moved: 0, stroke: 0 });
+    if (mode.kind === "mop") fx.value = { ...fx.value, mop: true, mx: p.x, my: p.y };
   };
-  const handleStageTap = (x: number, y: number) => {
-    if (!g) return;
-    if (mode.kind === "play") {
-      // Poop?
-      const pi = state.care.poops.findIndex((_, i) => Math.hypot(x - g.w * (0.2 + i * 0.22), y - (g.floorBottom - g.floorCellH * 0.4)) < g.floorCellH * 0.6);
-      if (pi >= 0) return doCare("clean");
-      // Creature?
-      if (Math.abs(x - posX.value) < 60 * scale && y > laneY - 130 * scale && y < laneY + 10) return doCare(state.care.asleep ? "wake" : "pet");
-      // Dumbbells → gym.
-      const gymP = state.room.placements.find((p) => p.itemId === "gym_dumbbells");
-      if (gymP) {
-        const r = placementRect(g, gymP);
-        if (x >= r.x && x <= r.x + r.w && y >= r.y - g.floorCellH && y <= r.y + r.h) return setGym(true);
+  const onMove = (e: GestureResponderEvent) => {
+    const p = local(e);
+    const gs = gesture.current;
+    const d = Math.hypot(p.x - gs.lx, p.y - gs.ly);
+    gs.moved += d;
+    gs.lx = p.x;
+    gs.ly = p.y;
+    if (mode.kind === "mop" && g) {
+      fx.value = { ...fx.value, mop: true, mx: p.x, my: p.y };
+      for (const ts of state.care.poops) {
+        const q = poopAt(ts);
+        if (Math.hypot(p.x - q.x, p.y - q.y) > g.floorCellH * 0.9) continue;
+        const v = (gs.scrub.get(ts) ?? 0) + d;
+        gs.scrub.set(ts, v);
+        if (v > 120) {
+          gs.scrub.delete(ts);
+          act((s) => cleanPoop(s.care, ts, now()));
+          toast(state.care.poops.length <= 1 ? "¡Suelo reluciente!" : "¡Una menos!");
+        }
       }
+      return;
+    }
+    // Mimos: stroke the Tamtam with your finger.
+    if (mode.kind === "play" && t && overCreature(p.x, p.y)) {
+      gs.stroke += d;
+      const tNow = Date.now();
+      if (gs.stroke > 150 && tNow - gs.lastPet > 1800) {
+        gs.stroke = 0;
+        gs.lastPet = tNow;
+        doCare(state.care.asleep ? "wake" : "pet");
+      }
+    }
+  };
+  const onRelease = () => {
+    const gs = gesture.current;
+    if (mode.kind === "mop") return;
+    if (gs.moved < 12) handleTap(gs.sx, gs.sy);
+  };
+
+  const handleTap = (x: number, y: number) => {
+    if (!g) return;
+    if (state.phase === "egg") {
+      if (Math.abs(x - eggX) > 90 * scale || y < laneY - 150 * scale) return;
+      if (eggP < 1) return toast("Aún se está formando… dale unos segundos de calor.");
+      if (hatching.current) return;
+      hatching.current = true;
+      fx.value = { ...fx.value, crack: creature.clock.value };
+      setTimeout(() => {
+        act((s) => hatch(s, now()));
+        hatching.current = false;
+        fx.value = { ...fx.value, crack: -1, egg: false };
+      }, 1300);
+      return;
+    }
+    if (!t) return;
+    if (mode.kind === "play") {
+      if (overCreature(x, y)) return toast(state.care.asleep ? "Shhh… está durmiendo." : "Desliza el dedo sobre él para darle mimos.");
+      const hit = (id: string) => {
+        const p = state.room.placements.find((q) => q.itemId === id);
+        if (!p) return false;
+        const r = placementRect(g, p);
+        return x >= r.x && x <= r.x + r.w && y >= r.y - g.floorCellH * 1.2 && y <= r.y + r.h;
+      };
+      if (hit("gym_dumbbells")) return startActivity("gym");
+      if (hit("study_desk")) return startActivity("study");
       return;
     }
     if (mode.kind === "preview") {
@@ -231,7 +379,7 @@ export function HomeScreen() {
       if (cell) setMode({ ...mode, x: cell.x, y: cell.y });
       return;
     }
-    // Decor mode.
+    if (mode.kind !== "decor") return;
     if (mode.pendingItem) {
       const item = SLICE_CATALOG.get(mode.pendingItem)!;
       const cell = cellAt(g, state.room, item.furniture!.layer === "wall" ? "wall" : "floor", x, y);
@@ -245,13 +393,12 @@ export function HomeScreen() {
       }
       return;
     }
-    // Select an item under the finger (front-most first).
-    const hit = [...state.room.placements].reverse().find((p) => {
+    const hitP = [...state.room.placements].reverse().find((p) => {
       const r = placementRect(g, p);
       const top = p.layer === "floor" ? r.y - g.floorCellH * 1.4 : r.y;
       return x >= r.x && x <= r.x + r.w && y >= top && y <= r.y + r.h;
     });
-    if (hit && hit.uid !== mode.selectedUid) return setMode({ ...mode, selectedUid: hit.uid });
+    if (hitP && hitP.uid !== mode.selectedUid) return setMode({ ...mode, selectedUid: hitP.uid });
     if (mode.selectedUid) {
       const sel = state.room.placements.find((p) => p.uid === mode.selectedUid)!;
       const cell = cellAt(g, state.room, sel.layer === "wall" ? "wall" : "floor", x, y);
@@ -264,99 +411,142 @@ export function HomeScreen() {
     }
   };
 
-  const onBuy = (item: CatalogItem) => {
-    try {
-      act((s) => buy(s, item.id, newId(), now()));
-      toast(`Has comprado: ${item.name.es}`);
-    } catch (e) {
-      toast(e instanceof PurchaseError ? "No puedes comprarlo ahora." : "Error en la compra.");
+  // ── Activities inside the room (Gimnasio, Estudio) ───────────────────────
+  const startActivity = (kind: "gym" | "study") => {
+    if (!g) return;
+    if (state.care.asleep) return toast("Está dormido. Despiértalo primero.");
+    const p = state.room.placements.find((q) => q.itemId === (kind === "gym" ? "gym_dumbbells" : "study_desk"));
+    setActivityClip("idle");
+    setMode({ kind });
+    if (p) {
+      const r = placementRect(g, p);
+      const cx = r.x + r.w / 2;
+      const target = Math.min(g.w * 0.85, Math.max(g.w * 0.15, cx + (cx > g.w / 2 ? -1 : 1) * 70 * scale));
+      walkTo(target, () => (dir.value = cx > target ? 1 : -1));
     }
   };
+  const endActivity = () => {
+    setActivityClip(null);
+    setMode({ kind: "play" });
+  };
+
+  const startMop = () => {
+    if (state.care.poops.length === 0) return toast("No hay nada que limpiar. ¡Todo reluce!");
+    gesture.current.scrub.clear();
+    setMode({ kind: "mop" });
+  };
+  const endMop = () => {
+    fx.value = { ...fx.value, mop: false };
+    setMode({ kind: "play" });
+  };
+  useEffect(() => {
+    if (mode.kind === "mop" && state.care.poops.length === 0) {
+      const id = setTimeout(endMop, 700);
+      return () => clearTimeout(id);
+    }
+  });
 
   const confirmPreview = () => {
     if (mode.kind !== "preview") return;
     const { item, x, y, mirrored } = mode;
     try {
-      // Buy and place in ONE transaction: either both happen or neither.
       act((s) => {
         buy(s, item.id, newId(), now());
         place(s, { uid: newId(), itemId: item.id, layer: item.furniture!.layer, x, y, mirrored, rotated: false });
       });
       toast(`${item.name.es} comprado y colocado`);
       setMode({ kind: "play" });
+      onPreviewDone();
       creature.play("celebrate");
     } catch (e) {
-      toast(e instanceof PlacementRejected ? PLACE_ERR[e.reason] ?? "No cabe ahí." : e instanceof PurchaseError ? "No tienes suficientes Tamcoins." : "No se pudo completar.");
+      toast(e instanceof PlacementRejected ? PLACE_ERR[e.reason] ?? "No cabe ahí." : "No tienes suficientes Tamcoins.");
     }
   };
 
-  const onLayout = (e: LayoutChangeEvent) => setSize({ w: Math.round(e.nativeEvent.layout.width), h: Math.round(e.nativeEvent.layout.height) });
+  const onLayout = (e: LayoutChangeEvent) => {
+    setSize({ w: Math.round(e.nativeEvent.layout.width), h: Math.round(e.nativeEvent.layout.height) });
+    stageRef.current?.measure((_x, _y, _w, _h, px, py) => (offset.current = { x: px, y: py }));
+  };
   const needs = state.care.needs;
   const pills: [string, number, string][] = [
     ["Hambre", needs.hunger, brand.orange], ["Higiene", needs.hygiene, brand.cyan], ["Felicidad", needs.happiness, brand.gold],
     ["Cariño", needs.affection, brand.pink], ["Energía", needs.energy, brand.violet], ["Actividad", needs.activity, brand.mint],
   ];
+  const napLeft = napCooldownLeft(state.care, now());
 
   return (
-    <SafeAreaView style={h.root} edges={["top", "bottom"]}>
-      {game.profile === "debug" && <Text style={h.debugBanner}>MODO DEBUG · partida de pruebas · reloj simulado</Text>}
-      <View style={h.top}>
-        <Pressable style={h.ribbon} onPress={() => setSheet("profile")} accessibilityRole="button" accessibilityLabel={`Ficha de ${t.name}`}>
-          <Text style={h.name} numberOfLines={1}>{t.name}</Text>
-          <Text style={h.sub}>Chispín · Bebé · Nv {t.level}</Text>
-        </Pressable>
-        <Pressable style={h.wallet} onPress={() => setSheet("history")} accessibilityRole="button" accessibilityLabel={`${state.economy.wallet.balances.tamcoin} Tamcoins, ver historial`}>
-          <Coin />
-          <Text style={h.coins}>{state.economy.wallet.balances.tamcoin}</Text>
-        </Pressable>
-        <Btn label="DEV" small tone="dark" onPress={() => setSheet("debug")} testID="dev" />
-      </View>
-      <View style={h.pills}>
-        {pills.map(([label, v, color]) => (
-          <View key={label} style={h.pill} accessibilityLabel={`${label} ${Math.round(v)}`}>
-            <View style={[h.pillFill, { width: `${Math.max(4, v)}%`, backgroundColor: color }]} />
-            <Text style={h.pillText}>{label}</Text>
-          </View>
-        ))}
-      </View>
+    <View style={h.root}>
+      {t && (
+        <View style={h.pills}>
+          {pills.map(([label, v, color]) => (
+            <View key={label} style={h.pill} accessibilityLabel={`${label} ${Math.round(v)}`}>
+              <View style={[h.pillFill, { width: `${Math.max(4, v)}%`, backgroundColor: color }]} />
+              <Text style={h.pillText}>{label}</Text>
+            </View>
+          ))}
+        </View>
+      )}
 
-      <Pressable ref={stageRef as never} style={h.stage} onLayout={onLayout} onPress={onStagePress} accessibilityLabel="Habitación">
+      <View
+        ref={stageRef as never}
+        style={[h.stage, NO_SELECT]}
+        onLayout={onLayout}
+        onStartShouldSetResponder={() => true}
+        onMoveShouldSetResponder={() => true}
+        onResponderGrant={onGrant}
+        onResponderMove={onMove}
+        onResponderRelease={onRelease}
+        onResponderTerminationRequest={() => false}
+        accessibilityLabel={state.phase === "egg" ? "Habitación con tu huevo" : "Habitación"}
+        testID="stage"
+      >
         {roomPic && overlay && g && (
-          <Canvas style={StyleSheet.absoluteFill}>
+          <Canvas style={StyleSheet.absoluteFill} pointerEvents="none">
             <Picture picture={roomPic} />
             <Picture picture={overlay} />
             <Picture picture={dynamic} />
           </Canvas>
         )}
-      </Pressable>
+        {mode.kind === "mop" && <Text style={h.stageHint} pointerEvents="none">Frota con la fregona sobre la suciedad</Text>}
+        {state.phase === "egg" && (
+          <View style={h.eggHint} pointerEvents="none">
+            <View style={h.track}>
+              <View style={[h.fill, { width: `${Math.round(eggP * 100)}%` }]} />
+            </View>
+            <Text style={h.stageHint2}>{eggP < 1 ? "Tu primer huevo se está calentando en casa…" : "¡Se mueve! Tócalo para abrirlo"}</Text>
+          </View>
+        )}
+      </View>
 
-      {mode.kind === "play" && (
+      {state.phase === "naming" && <NamingPanel />}
+
+      {t && mode.kind === "play" && (
         <View style={h.panel}>
           <View style={h.row}>
-            <Btn small label="Comer" onPress={() => setSheet("food")} style={h.flex} testID="care-feed" />
-            <Btn small label="Bañar" onPress={() => doCare("bathe")} style={h.flex} testID="care-bathe" />
-            <Btn small label="Limpiar" onPress={() => doCare("clean")} style={h.flex} testID="care-clean" />
-            <Btn small label="Mimos" onPress={() => doCare("pet")} style={h.flex} testID="care-pet" />
+            <IconAction icon="food" label="Comer" color={brand.orange} onPress={() => setFood(true)} testID="care-feed" />
+            <IconAction icon="shower" label="Bañar" color={brand.cyan} onPress={() => doCare("bathe")} testID="care-bathe" />
+            <IconAction icon="mop" label="Limpiar" color={brand.mint} onPress={startMop} badge={state.care.poops.length || undefined} testID="care-clean" />
+            <IconAction icon="play" label="Jugar" color={brand.gold} onPress={() => (state.care.asleep ? toast("Está dormido. Despiértalo primero.") : onOpenGames())} testID="care-play" />
+            <IconAction icon="nap" label={napLeft > 0 ? `${napLeft}m` : "Siesta"} color={brand.violet} disabled={state.care.asleep || napLeft > 0} onPress={() => doCare("nap")} testID="care-nap" />
+            <IconAction icon={state.care.asleep ? "sun" : "moon"} label={state.care.asleep ? "Despertar" : "Dormir"} color={brand.blue} onPress={() => doCare(state.care.asleep ? "wake" : "sleep")} testID="care-sleep" />
           </View>
           <View style={h.row}>
-            <Btn small label="Jugar" onPress={() => doCare("play")} style={h.flex} testID="care-play" />
-            <Btn
-              small
-              label={napCooldownLeft(state.care, now()) > 0 ? `Siesta ${napCooldownLeft(state.care, now())}m` : "Siesta"}
-              disabled={state.care.asleep || napCooldownLeft(state.care, now()) > 0}
-              onPress={() => doCare("nap")}
-              style={h.flex}
-              testID="care-nap"
-            />
-            <Btn small label={state.care.asleep ? "Despertar" : "Dormir"} onPress={() => doCare(state.care.asleep ? "wake" : "sleep")} style={h.flex} testID="care-sleep" />
-          </View>
-          <View style={h.row}>
-            <Btn label="Tienda" tone="gold" onPress={() => setSheet("shop")} style={h.flex} testID="open-shop" />
-            <Btn label="Decorar" tone="light" onPress={() => setMode({ kind: "decor", selectedUid: null, pendingItem: null })} style={h.flex} testID="open-decor" />
-            <Btn label="Gimnasio" tone="coral" onPress={() => setGym(true)} style={h.flex} testID="open-gym" />
+            <Btn small label="Gimnasio" tone="coral" icon={<Icon name="gym" size={20} color={brand.core} accent={brand.core} />} onPress={() => startActivity("gym")} style={h.flex} testID="open-gym" />
+            <Btn small label="Estudio" tone="dark" icon={<Icon name="study" size={20} accent={brand.cyan} />} onPress={() => startActivity("study")} style={h.flex} testID="open-study" />
+            <Btn small label="Decorar" icon={<Icon name="decor" size={20} />} onPress={() => setMode({ kind: "decor", selectedUid: null, pendingItem: null })} style={h.flex} testID="open-decor" />
           </View>
         </View>
       )}
+
+      {mode.kind === "mop" && (
+        <View style={h.panel}>
+          <Text style={h.panelTitle}>Limpiando · {state.care.poops.length} por recoger</Text>
+          <Btn label="Listo" tone="coral" onPress={endMop} testID="mop-done" />
+        </View>
+      )}
+
+      {mode.kind === "gym" && <GymPanel onClose={endActivity} play={setActivityClip} />}
+      {mode.kind === "study" && <StudyPanel onClose={endActivity} play={setActivityClip} />}
 
       {mode.kind === "decor" && (
         <View style={h.panel}>
@@ -375,55 +565,39 @@ export function HomeScreen() {
           <Text style={h.panelTitle}>Probando: {mode.item.name.es} · toca una casilla</Text>
           <View style={h.row}>
             <Btn small label="Girar" disabled={!mode.item.furniture?.mirrorable} onPress={() => setMode({ ...mode, mirrored: !mode.mirrored })} style={h.flex} />
-            <Btn small label="Descartar" onPress={() => setMode({ kind: "play" })} style={h.flex} />
+            <Btn small label="Descartar" onPress={() => { setMode({ kind: "play" }); onPreviewDone(); }} style={h.flex} />
           </View>
           <Btn label={`Comprar y colocar · ${mode.item.price.amount}`} tone="gold" onPress={confirmPreview} testID="preview-buy" />
         </View>
       )}
 
-      {sheet === "food" && (
+      {food && (
         <FoodSheet
-          onClose={() => setSheet(null)}
+          onClose={() => setFood(false)}
           onFeed={(id) => {
-            setSheet(null);
-            react(act((s) => feedFood(s, id, now())));
+            setFood(false);
+            const go = () => react(act((s) => feedFood(s, id, now())), { food: id });
+            if (g && Math.abs(posX.value - g.w * 0.5) > g.w * 0.3) walkTo(g.w * 0.5, go);
+            else go();
           }}
         />
       )}
-      {sheet === "shop" && (
-        <ShopSheet
-          onClose={() => setSheet(null)}
-          onBuy={onBuy}
-          onPreview={(item) => {
-            setSheet(null);
-            setMode({ kind: "preview", item, x: item.furniture!.layer === "wall" ? 8 : 6, y: item.furniture!.layer === "wall" ? 1 : 1, mirrored: false });
-          }}
-        />
-      )}
-      {sheet === "profile" && <ProfileSheet onClose={() => setSheet(null)} />}
-      {sheet === "history" && <HistorySheet onClose={() => setSheet(null)} />}
-      {sheet === "debug" && <DebugPanel onClose={() => setSheet(null)} toast={toast} onLustreLab={() => { setSheet(null); setLab(true); }} />}
-      {lab && <LustreLab alleleId={state.alleleId} onClose={() => setLab(false)} />}
-      {gym && <GymScreen onClose={() => setGym(false)} />}
-      <Toast text={toastText} />
-    </SafeAreaView>
+    </View>
   );
 }
 
 const h = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.cream },
-  debugBanner: { backgroundColor: brand.violet, color: brand.cloud, textAlign: "center", fontFamily: fonts.bodyBold, fontSize: 11, paddingVertical: 3 },
-  top: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 12, paddingTop: 6 },
-  ribbon: { flex: 1, backgroundColor: brand.violet, borderRadius: 18, borderWidth: 1.5, borderBottomWidth: 4, borderColor: "#6E2BD6", paddingHorizontal: 14, paddingVertical: 4 },
-  name: { fontFamily: fonts.displayBold, fontSize: 24, color: brand.cloud, lineHeight: 30 },
-  sub: { fontFamily: fonts.body, fontSize: 11, color: "#E6DCFF", marginTop: -4 },
-  wallet: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: colors.card, borderRadius: 18, borderWidth: 1.5, borderBottomWidth: 4, borderColor: colors.line, paddingHorizontal: 12, height: 48 },
-  coins: { fontFamily: fonts.displayBold, fontSize: 18, color: colors.ink, fontVariant: ["tabular-nums"] },
-  pills: { flexDirection: "row", flexWrap: "wrap", gap: 4, paddingHorizontal: 12, paddingTop: 8 },
+  root: { flex: 1 },
+  pills: { flexDirection: "row", flexWrap: "wrap", gap: 4, paddingHorizontal: 12, paddingTop: 6 },
   pill: { width: "32.4%", height: 22, borderRadius: 11, backgroundColor: brand.panel, overflow: "hidden", justifyContent: "center" },
   pillFill: { ...StyleSheet.absoluteFill, right: undefined, opacity: 0.85 },
   pillText: { fontFamily: fonts.bodyBold, fontSize: 11, color: brand.cloud, paddingLeft: 8, textShadowColor: "rgba(10,7,24,0.7)", textShadowRadius: 3 },
-  stage: { flex: 1, margin: 10, borderRadius: 24, overflow: "hidden", backgroundColor: brand.panel, borderWidth: 1.5, borderColor: brand.line },
+  stage: { flex: 1, marginHorizontal: 10, marginVertical: 8, borderRadius: 24, overflow: "hidden", backgroundColor: brand.panel, borderWidth: 1.5, borderColor: brand.line },
+  stageHint: { position: "absolute", top: 10, alignSelf: "center", backgroundColor: "rgba(23,19,43,0.8)", color: brand.cloud, fontFamily: fonts.bodyBold, fontSize: 13, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, overflow: "hidden" },
+  eggHint: { position: "absolute", top: 12, left: 24, right: 24, gap: 6, alignItems: "center" },
+  stageHint2: { color: brand.cloud, fontFamily: fonts.bodyBold, fontSize: 14, textAlign: "center", textShadowColor: "#000", textShadowRadius: 4 },
+  track: { height: 10, alignSelf: "stretch", borderRadius: 5, backgroundColor: "rgba(23,19,43,0.7)", overflow: "hidden" },
+  fill: { height: 10, backgroundColor: brand.cyan, borderRadius: 5 },
   panel: { paddingHorizontal: 12, paddingBottom: 6, gap: 6 },
   panelTitle: { fontFamily: fonts.display, fontSize: 14, color: colors.ink, textAlign: "center" },
   row: { flexDirection: "row", gap: 6 },

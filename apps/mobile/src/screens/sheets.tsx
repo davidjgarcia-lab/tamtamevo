@@ -7,6 +7,8 @@ import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useGame } from "../game/GameProvider";
 import { brand, colors, fonts } from "../theme";
 import { Bar, Btn, Coin, Sheet } from "../ui/kit";
+import { FoodIcon } from "../ui/FoodIcon";
+import { ItemIcon } from "../ui/ItemIcon";
 
 const RARITY: Record<string, string> = { common: "Común", uncommon: "Poco común", rare: "Raro", epic: "Épico" };
 
@@ -21,6 +23,7 @@ export function FoodSheet({ onClose, onFeed }: { onClose: () => void; onFeed: (f
         <ScrollView contentContainerStyle={{ gap: 8 }}>
           {foods.map((f) => (
             <View key={f.id} style={k.card}>
+              <FoodIcon id={f.id} size={52} />
               <View style={{ flex: 1 }}>
                 <Text style={k.name}>
                   {f.item.name.es} <Text style={k.qty}>×{quantity(state.economy.inventory, f.id)}</Text>
@@ -50,17 +53,15 @@ const CATS: { id: ShopCategory; label: string }[] = [
   { id: "equipment", label: "Equipamiento" },
 ];
 
-export function ShopSheet({ onClose, onBuy, onPreview }: { onClose: () => void; onBuy: (item: CatalogItem) => void; onPreview: (item: CatalogItem) => void }) {
+/** Tienda (its own section of the app, outside the room). */
+export function ShopView({ onBuy, onPreview }: { onBuy: (item: CatalogItem) => void; onPreview: (item: CatalogItem) => void }) {
   const { state } = useGame();
   const [cat, setCat] = useState<ShopCategory>("food");
   const items = [...SLICE_CATALOG.values()].filter((i) => i.category === cat && i.price.amount > 0);
   return (
-    <Sheet title="Tienda" onClose={onClose} tall>
-      <View style={k.balance}>
-        <Coin />
-        <Text style={k.balanceText}>{state.economy.wallet.balances.tamcoin} Tamcoins</Text>
-      </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, paddingBottom: 10 }}>
+    <View style={{ flex: 1, paddingHorizontal: 12, paddingTop: 8 }}>
+      <Text style={k.screenTitle}>Tienda</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }} contentContainerStyle={{ gap: 6, paddingBottom: 10 }}>
         {CATS.map((c) => (
           <Btn key={c.id} label={c.label} small tone={c.id === cat ? "dark" : "light"} onPress={() => setCat(c.id)} />
         ))}
@@ -74,6 +75,9 @@ export function ShopSheet({ onClose, onBuy, onPreview }: { onClose: () => void; 
             st.status === "available" ? `Comprar · ${it.price.amount}` : st.status === "owned" ? "Máximo alcanzado" : st.status === "too_expensive" ? `Faltan ${st.missing}` : "Bloqueado";
           return (
             <View key={it.id} style={k.card}>
+              <View style={k.thumb}>
+                <ItemIcon id={it.id} size={56} />
+              </View>
               <View style={{ flex: 1 }}>
                 <Text style={k.name}>{it.name.es}</Text>
                 <Text style={k.desc}>
@@ -90,7 +94,7 @@ export function ShopSheet({ onClose, onBuy, onPreview }: { onClose: () => void; 
           );
         })}
       </ScrollView>
-    </Sheet>
+    </View>
   );
 }
 
@@ -98,7 +102,7 @@ export function HistorySheet({ onClose }: { onClose: () => void }) {
   const { state } = useGame();
   const rows = history(state.economy.wallet, "tamcoin", 60);
   const label = (src: string) =>
-    src === "welcome" ? "Regalo de bienvenida" : src === "activity:gym" ? "Gimnasio" : src === "debug" ? "Ajuste (modo debug)" : src.startsWith("shop:") ? SLICE_CATALOG.get(src.slice(5))?.name.es ?? src : src.startsWith("upgrade:gym") ? "Mejora del Gym" : src;
+    src === "welcome" ? "Regalo de bienvenida" : src === "activity:gym" ? "Gimnasio" : src === "activity:academy" ? "Estudio" : src === "arena" ? "Arena" : src.startsWith("minigame:") ? "Minijuego" : src === "debug" ? "Ajuste (modo debug)" : src.startsWith("shop:") ? SLICE_CATALOG.get(src.slice(5))?.name.es ?? src : src.startsWith("upgrade:gym") ? "Mejora del Gym" : src;
   return (
     <Sheet title="Monedero" onClose={onClose} tall>
       <View style={k.balance}>
@@ -244,6 +248,8 @@ const k = StyleSheet.create({
   txLabel: { fontFamily: fonts.display, fontSize: 15, color: colors.ink },
   txDate: { fontFamily: fonts.body, fontSize: 12, color: colors.inkSoft },
   txAmount: { fontFamily: fonts.displayBold, fontSize: 18, fontVariant: ["tabular-nums"] },
+  screenTitle: { fontFamily: fonts.displayBold, fontSize: 28, color: colors.ink, marginBottom: 6 },
+  thumb: { width: 64, height: 64, borderRadius: 14, backgroundColor: brand.core, alignItems: "center", justifyContent: "center" },
   section: { fontFamily: fonts.displayBold, fontSize: 17, color: colors.ink, marginTop: 8 },
   input: { height: 48, borderRadius: 14, borderWidth: 2, borderColor: colors.line, backgroundColor: brand.core, paddingHorizontal: 14, fontSize: 18, fontFamily: fonts.display, color: colors.ink },
   err: { color: brand.pink, fontFamily: fonts.body, fontSize: 13 },

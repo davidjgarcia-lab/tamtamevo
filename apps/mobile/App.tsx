@@ -6,21 +6,29 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { GameProvider, useGame } from "./src/game/GameProvider";
-import { EggScreen, NamingScreen } from "./src/screens/BirthScreens";
-import { HomeScreen } from "./src/screens/HomeScreen";
+import { GameProvider } from "./src/game/GameProvider";
+import { AppShell } from "./src/screens/AppShell";
 import { LoadingScreen } from "./src/screens/LoadingScreen";
+import { RigLabScreen } from "./src/screens/RigLabScreen";
+import { Platform } from "react-native";
+
+/** Dev tool on web: open with #riglab to inspect the creature rig and clips. */
+const RIG_LAB = Platform.OS === "web" && typeof window !== "undefined" && window.location.hash === "#riglab";
 
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
-/** Minimum time the branded loading screen stays visible (a short brand moment, not a wait). */
-const MIN_LOADING_MS = 1600;
+/** Minimum time the branded loading screen stays visible (a brief brand flash, not a wait). */
+const MIN_LOADING_MS = 400;
 
-function Router() {
-  const { state } = useGame();
-  if (state.phase === "egg") return <EggScreen />;
-  if (state.phase === "naming") return <NamingScreen />;
-  return <HomeScreen />;
+// Web: long-press must never select text or open the context menu (mobile browsers).
+if (Platform.OS === "web" && typeof document !== "undefined") {
+  const st = document.createElement("style");
+  st.textContent = "*{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}input,textarea,[data-selectable]{-webkit-user-select:text;user-select:text}";
+  document.head.appendChild(st);
+  document.addEventListener("contextmenu", (e) => {
+    const el = e.target as HTMLElement | null;
+    if (!el || (el.tagName !== "INPUT" && el.tagName !== "TEXTAREA")) e.preventDefault();
+  });
 }
 
 export default function App() {
@@ -36,6 +44,7 @@ export default function App() {
 
   const loading = (progress: number, step: string) => <LoadingScreen progress={progress} step={step} />;
 
+  if (RIG_LAB && fontsLoaded) return <SafeAreaProvider><RigLabScreen /></SafeAreaProvider>;
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />
@@ -43,7 +52,7 @@ export default function App() {
         loading(0.35, "Despertando el archipiélago…")
       ) : (
         <GameProvider fallback={loading(0.75, "Buscando tu partida…")}>
-          {minElapsed ? <Router /> : loading(1, "¡Listo!")}
+          {minElapsed ? <AppShell /> : loading(1, "¡Listo!")}
         </GameProvider>
       )}
     </SafeAreaProvider>

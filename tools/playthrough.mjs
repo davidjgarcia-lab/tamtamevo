@@ -41,180 +41,233 @@ const shot = (n) => page.screenshot({ path: join(out, `${n}.png`) });
 const coins = async () => Number((await page.locator('[aria-label$="Tamcoins, ver historial"]').getAttribute("aria-label")).split(" ")[0]);
 const need = async (label) => Number((await page.locator(`[aria-label^="${label} "]`).first().getAttribute("aria-label")).split(" ").pop());
 
+const stageBox = async () => page.getByTestId("stage").boundingBox();
+const sweep = async (y, times = 4, x0 = 0.12, x1 = 0.88) => {
+  const b = await stageBox();
+  await page.mouse.move(b.x + b.width * x0, b.y + b.height * y);
+  await page.mouse.down();
+  for (let i = 0; i < times; i++) {
+    for (let k = 0; k <= 20; k++) await page.mouse.move(b.x + b.width * (x0 + ((i % 2 ? 20 - k : k) / 20) * (x1 - x0)), b.y + b.height * y, { steps: 2 });
+  }
+  await page.mouse.up();
+};
+const dev = async (id) => { await page.getByTestId("dev").click(); await page.getByTestId(id).click(); await page.getByLabel(/^Cerrar /).first().click().catch(() => {}); await page.waitForTimeout(300); };
+
 try {
+  const t0 = Date.now();
   await page.goto(base);
-  await page.getByText("Incubando…").waitFor({ timeout: 30000 });
-  await page.waitForTimeout(1500);
-  await shot("01-egg-incubating");
-  check("E2E-01", "Huevo en incubación visible", true);
+  await page.getByTestId("stage").waitFor({ timeout: 30000 });
+  const loadMs = Date.now() - t0;
+  await page.waitForTimeout(800);
+  await shot("01-egg-in-room");
+  check("E2E-01", "Carga rápida y el huevo aparece directamente en la habitación", loadMs < 8000 && (await page.getByText("Tu primer huevo se está calentando").count()) > 0, `${loadMs} ms`);
   await page.getByText("¡Se mueve!").waitFor({ timeout: 30000 });
-  await shot("02-egg-ready");
-  await page.getByLabel("Abrir el huevo").click();
+  const b = await stageBox();
+  await page.mouse.click(b.x + b.width / 2, b.y + b.height * 0.72);
+  await page.waitForTimeout(500);
+  await shot("02-egg-cracking");
+  await page.getByText("¡Ha nacido un Brasálido!").waitFor({ timeout: 5000 });
   await page.waitForTimeout(600);
-  await shot("03-egg-cracking");
-  await page.getByText("¿Cómo se llamará?").waitFor({ timeout: 10000 });
-  await page.waitForTimeout(900);
-  await shot("04-naming");
-  check("E2E-02", "Eclosión → pantalla de nombre", true);
-  await page.getByTestId("name-input").fill("A");
+  await shot("03-naming-in-room");
+  check("E2E-02", "El huevo se abre en la habitación (sin pantalla aparte)", await page.getByTestId("stage").isVisible());
+  await page.getByTestId("name-input").fill("!!");
   await page.getByTestId("confirm-name").click();
   await page.waitForTimeout(300);
-  check("E2E-03", "Rechaza nombre de 1 carácter", await page.getByText("Necesita al menos 2 caracteres.").isVisible());
-  await page.getByTestId("name-input").fill("Ñandú Brasita");
+  const invalid = await page.getByTestId("name-input").isVisible();
+  await page.getByTestId("name-input").fill("Tizón");
   await page.getByTestId("confirm-name").click();
-  await page.getByText("Ñandú Brasita").first().waitFor({ timeout: 10000 });
-  await page.waitForTimeout(1500);
-  await shot("05-home");
-  check("E2E-04", "Nombre Unicode aceptado y visible en Hogar", true);
+  await page.getByText("Tizón", { exact: true }).waitFor({ timeout: 5000 });
+  await page.waitForTimeout(800);
+  await shot("04-home");
+  check("E2E-03", "Validación y nombre del Tamtam", invalid);
+  check("E2E-04", "Barra inferior Casa · Granja · Tienda · Arena · Conectar", (await Promise.all(["home", "farm", "shop", "arena", "connect"].map((t) => page.getByTestId(`tab-${t}`).isVisible()))).every(Boolean));
+  check("E2E-05", "Mimos ya no es un botón", (await page.getByRole("button", { name: "Mimos" }).count()) === 0);
 
-  const c0 = await coins();
-  check("E2E-05", "Monedero inicial 300", c0 === 300, `(${c0})`);
-
-  // Tap Chispín directly (centre of the front lane) → pet.
-  const st0 = await page.getByLabel("Habitación").boundingBox();
-  const a0 = await need("Cariño");
-  await page.mouse.click(st0.x + st0.width / 2, st0.y + st0.height * 0.86);
-  await page.waitForTimeout(400);
-  const a1 = await need("Cariño");
-  check("E2E-17", "Tocar a Chispín lo acaricia (Cariño sube)", a1 > a0, `${a0}→${a1}`);
-
-  // Feeding.
+  // Feeding with visible food.
   const h0 = await need("Hambre");
   await page.getByTestId("care-feed").click();
+  await page.waitForTimeout(400);
+  const foodImgs = await page.locator('img[src^="data:image/png"]').count();
+  await shot("05-food-sheet");
   await page.getByTestId("feed-food_ember_pepper").click();
-  await page.waitForTimeout(700);
-  await shot("06-eat");
-  const h1 = await need("Hambre");
-  check("E2E-06", "Comer sube el hambre (saciedad)", h1 > h0 || h1 === 100, `${h0}→${h1}`);
+  await page.waitForTimeout(650);
+  await shot("06-eating-pepper");
+  await page.waitForTimeout(2500);
+  check("E2E-06", "Cada comida tiene imagen y el Tamtam come (hambre sube)", foodImgs >= 2 && (await need("Hambre")) > h0, `imgs ${foodImgs}, ${h0}→${await need("Hambre")}`);
 
-  await page.getByTestId("care-pet").click();
-  await page.waitForTimeout(800);
-  await shot("07-pet");
+  // Shower and towel.
   await page.getByTestId("care-bathe").click();
-  await page.waitForTimeout(800);
-  await shot("08-bathe");
-  check("E2E-07", "Higiene a 100 tras bañar", (await need("Higiene")) >= 99);
-  await page.getByTestId("care-play").click();
-  await page.waitForTimeout(600);
-  await shot("09-play");
+  await page.waitForTimeout(900);
+  await shot("07-shower");
+  await page.waitForTimeout(1300);
+  await shot("08-towel");
+  await page.waitForTimeout(1200);
 
-  // Gym.
-  await page.waitForTimeout(2200);
-  await page.getByTestId("open-gym").click();
-  await page.getByTestId("gym-start").click();
-  const hold = page.getByTestId("gym-hold");
-  const box = await hold.boundingBox();
-  for (let i = 0; i < 5; i++) {
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await page.mouse.down();
-    await page.waitForTimeout(i === 2 ? 450 : 790);
-    if (i === 1) await shot("10-gym-lifting");
-    await page.mouse.up();
-    await page.waitForTimeout(450);
-  }
-  await page.waitForTimeout(800);
-  await shot("11-gym-result");
-  const gymOk = await page.getByText(/Tamcoins$/).first().isVisible().catch(() => false);
-  check("E2E-08", "Sesión de Gym completa con recompensa", gymOk);
-  await page.getByText("Volver a casa").click();
+  // Stroke to pet.
+  const a0 = await need("Cariño");
+  for (const y of [0.78, 0.84, 0.72]) await sweep(y, 4);
   await page.waitForTimeout(500);
-  const c1 = await coins();
-  check("E2E-09", "Las monedas del Gym llegan al monedero", c1 > c0, `${c0}→${c1}`);
+  await shot("09-petting");
+  const a1 = await need("Cariño");
+  check("E2E-07", "Acariciar deslizando el dedo da mimos", a1 > a0, `${a0}→${a1}`);
+  await page.waitForTimeout(2500);
 
-  // Shop: buy a chair with gym coins.
-  await page.getByTestId("open-shop").click();
-  await page.getByText("Mobiliario", { exact: true }).click();
-  await shot("12-shop");
-  await page.getByTestId("buy-furn_chair_wood").click();
-  await page.waitForTimeout(400);
-  const c2 = await coins();
-  check("E2E-10", "Compra descuenta 120", c2 === c1 - 120, `${c1}→${c2}`);
-  // Try in my house: poster (wall).
-  await page.getByText("Decoración", { exact: true }).click();
-  await page.getByText("Probar en mi casa").first().click();
-  await page.waitForTimeout(500);
-  await shot("13-preview");
-  await page.getByTestId("preview-buy").click();
-  await page.waitForTimeout(500);
-  const c3 = await coins();
-  check("E2E-11", "Probar en mi casa → comprar y colocar", c3 < c2, `${c2}→${c3}`);
-  await shot("14-after-preview-buy");
-
-  // Decor: place the chair from the inventory.
-  await page.getByTestId("open-decor").click();
-  await page.getByText(/Silla de madera ×1/).click();
-  const stage = await page.getByLabel("Habitación").boundingBox();
-  await page.mouse.click(stage.x + stage.width * 0.62, stage.y + stage.height * 0.66);
-  await page.waitForTimeout(400);
-  await shot("15-decor");
-  check("E2E-18", "Colocar mueble del inventario (modo Decorar)", await page.getByText("Todos tus muebles están colocados. Compra más en la Tienda.").isVisible());
-  await page.getByTestId("decor-done").click();
-
-  // Tap the dumbbells in the room → gym.
-  const st1 = await page.getByLabel("Habitación").boundingBox();
-  await page.mouse.click(st1.x + st1.width * 0.88, st1.y + st1.height * 0.63);
-  const gymOpened = await page.getByText("Tamtam Gym · Nivel 1").waitFor({ timeout: 3000 }).then(() => true).catch(() => false);
-  check("E2E-19", "Tocar las mancuernas abre el Gym", gymOpened);
-  if (gymOpened) await page.getByText("Salir", { exact: true }).click();
-
-  // History.
-  await page.getByLabel(/Tamcoins, ver historial/).click();
-  await page.waitForTimeout(300);
-  await shot("16-history");
-  check("E2E-12", "Historial muestra Gimnasio y compras", (await page.getByText("Gimnasio").count()) > 0 && (await page.getByText("Silla de madera").count()) > 0);
-  await page.getByLabel("Cerrar Monedero").click();
-
-  // Persistence: reload.
-  await page.waitForTimeout(800);
-  await page.reload();
-  await page.getByText("Ñandú Brasita").first().waitFor({ timeout: 30000 });
-  const c4 = await coins();
-  check("E2E-13", "Tras recargar: nombre y monedas persisten", c4 === c3, `${c3}→${c4}`);
-
-  // Debug mode: separate profile and simulated clock.
+  // Debug: dirty Tamtam + poops around the room.
   await page.getByTestId("dev").click();
   await page.getByTestId("debug-enter").click();
-  await page.getByText("MODO DEBUG · partida de pruebas · reloj simulado").waitFor();
-  // The debug panel stays open after entering debug mode.
-  await page.getByTestId("dbg-coins").click();
-  await page.getByLabel("Cerrar Modo debug").click();
-  const hunger0 = await need("Hambre");
-  await page.getByTestId("dev").click();
-  await page.getByTestId("dbg-24h").click();
-  await page.waitForTimeout(1500);
-  await page.getByLabel("Cerrar Modo debug").click();
+  await page.waitForTimeout(1200);
+  await page.getByLabel(/^Cerrar /).first().click();
+  const cDebugStart = await coins();
+  await dev("dbg-mess");
+  await page.waitForTimeout(1200);
+  await shot("10-dirty-flies-poops");
+  check("E2E-08", "Sucio: manchas y moscas; cacas repartidas por la habitación", (await page.getByTestId("care-clean").getAttribute("aria-label")) !== null && (await need("Higiene")) <= 20);
+  // Mop.
+  await page.getByTestId("care-clean").click();
+  await page.waitForTimeout(300);
+  for (const y of [0.5, 0.58, 0.66, 0.74, 0.82, 0.9, 0.97, 0.62, 0.78, 0.94]) {
+    if (!(await page.getByText(/Limpiando · \d+ por recoger/).isVisible().catch(() => false))) break;
+    await sweep(y, 3, 0.04, 0.96);
+  }
+  await shot("11-mopping");
+  await page.waitForTimeout(1000);
+  const left = await page.getByText(/Limpiando · \d+ por recoger/).isVisible().catch(() => false);
+  if (left) { await shot("11b-mop-left"); await page.getByTestId("mop-done").click(); }
+  check("E2E-09", "Fregona: frotando con el dedo se limpian las cacas", !left);
+
+  // Jugar → minigames (icons only).
+  await page.getByTestId("care-play").click();
+  await page.getByTestId("game-maze").waitFor({ timeout: 4000 });
   await page.waitForTimeout(500);
-  await shot("17-debug-after-24h");
-  const hunger1 = await need("Hambre");
-  check("E2E-14", "Debug +24 h hace bajar el hambre (con suelo 25)", hunger1 < hunger0 && hunger1 >= 25, `${hunger0}→${hunger1}`);
-  // Lustre comparison (debug).
-  await page.getByTestId("dev").click();
-  await page.getByTestId("dbg-lustre-lab").click();
-  await page.getByText("Lustre · comparativa").waitFor({ timeout: 5000 });
-  await page.waitForTimeout(2600);
-  await shot("20-lustre-lab");
-  check("E2E-21", "Comparativa de Lustre (5 niveles) se muestra", (await page.getByText("Legendario").count()) > 0);
-  await page.getByText("Cerrar", { exact: true }).click();
-  // Nap.
-  await page.getByTestId("care-nap").click();
+  await shot("12-minigame-hub");
+  const hubText = await page.locator("text=/Laberinto|Ladrillos|Sudoku|Serpiente/").count();
+  check("E2E-10", "Jugar abre los 4 minijuegos, solo con iconos", hubText === 0 && (await page.getByTestId("game-trail").isVisible()));
+  for (const id of ["maze", "bricks", "grid"]) {
+    await page.getByTestId(`game-${id}`).click();
+    await page.waitForTimeout(700);
+    if (id === "maze") for (const d of ["derecha", "abajo", "derecha", "abajo"]) await page.getByTestId(`pad-${d}`).click();
+    if (id === "bricks") { const bb = await page.getByTestId("bricks-board").boundingBox(); await page.mouse.click(bb.x + bb.width / 2, bb.y + bb.height * 0.9); await page.waitForTimeout(900); }
+    if (id === "grid") for (const c of [0, 1, 2, 5, 6]) await page.getByTestId(`cell-${c}`).click().catch(() => {});
+    await page.waitForTimeout(400);
+    await shot(`13-game-${id}`);
+    await page.getByTestId("game-exit").click();
+    await page.waitForTimeout(300);
+  }
+  const cBefore = await coins();
+  await page.getByTestId("game-trail").click();
+  await page.waitForTimeout(800);
+  await shot("13-game-trail");
+  await page.getByTestId("game-done").waitFor({ timeout: 15000 });
   await page.waitForTimeout(400);
-  check("E2E-20", "Siesta de 20 min disponible y con cooldown", await page.getByText(/^Siesta \d+m$/).isVisible());
-  const cDebug = await coins();
+  await shot("14-game-result");
+  await page.getByTestId("game-done").click();
+  await page.getByTestId("hub-close").click();
+  await page.waitForTimeout(400);
+  check("E2E-11", "Terminar un minijuego da Tamcoins", (await coins()) > cBefore, `${cBefore}→${await coins()}`);
+
+  // Gym inside the room, long press without text selection.
+  await dev("dbg-energy");
+  await page.getByTestId("open-gym").click();
+  await page.waitForTimeout(1500);
+  await page.getByTestId("gym-start").click();
+  const hold = await page.getByTestId("gym-hold").boundingBox();
+  for (let i = 0; i < 7 && (await page.getByTestId("gym-hold").isVisible().catch(() => false)); i++) {
+    await page.mouse.move(hold.x + hold.width / 2, hold.y + hold.height / 2);
+    await page.mouse.down();
+    await page.waitForTimeout(i === 0 ? 900 : 780);
+    if (i === 0) await shot("15-gym-in-room");
+    await page.mouse.up();
+    await page.waitForTimeout(250);
+  }
+  const selected = await page.evaluate(() => window.getSelection()?.toString() ?? "");
+  check("E2E-12", "Gimnasio dentro de la habitación; mantener pulsado no selecciona texto", selected === "" && (await page.getByTestId("stage").isVisible()), JSON.stringify(selected));
+  await page.getByText("Terminar", { exact: true }).click().catch(() => page.getByTestId("gym-exit").click());
+  await page.waitForTimeout(300);
+  // Study at the desk.
+  await page.getByTestId("open-study").click();
+  await page.waitForTimeout(1200);
+  await page.getByTestId("study-start").click();
+  await page.waitForTimeout(1500);
+  await shot("16-study-memorise");
+  for (let i = 0; i < 80; i++) {
+    if (await page.getByText(/XP de Inteligencia|demasiado cansado/).isVisible()) break;
+    if (await page.getByText(/Repite la receta/).isVisible()) await page.getByTestId("study-food_berry_bun").click();
+    await page.waitForTimeout(400);
+  }
+  await page.getByText(/XP de Inteligencia|demasiado cansado/).waitFor({ timeout: 10000 });
+  await shot("17-study-result");
+  check("E2E-13", "Estudio dentro de la habitación (memoria de ingredientes)", true);
+  await page.getByText("Terminar", { exact: true }).click();
+
+  // Tienda (own section) → try in my room → buy and place.
+  await page.getByTestId("tab-shop").click();
+  await page.waitForTimeout(600);
+  await page.getByRole("button", { name: "Mobiliario" }).click();
+  await page.waitForTimeout(400);
+  await shot("18-shop");
+  await page.getByRole("button", { name: "Probar en mi casa" }).first().click();
+  await page.waitForTimeout(800);
+  await shot("19-preview-in-room");
+  const cShop = await coins();
+  await page.getByTestId("preview-buy").click();
+  await page.waitForTimeout(500);
+  check("E2E-14", "Tienda fuera de la habitación; 'Probar en mi casa' y comprar", (await coins()) < cShop, `${cShop}→${await coins()}`);
+
+  // Granja.
+  await page.getByTestId("dev").click();
+  await page.getByRole("button", { name: "Huevo Ceniza" }).click();
+  await page.getByLabel(/^Cerrar /).first().click();
+  await page.getByTestId("tab-farm").click();
+  await page.waitForTimeout(1200);
+  await shot("20-farm");
+  const before = await page.getByTestId("profile").getAttribute("aria-label");
+  const farmName = await page.locator('text=/Descansando en la granja/').count();
+  await page.getByTestId("farm-swap-0").click();
+  await page.waitForTimeout(800);
+  const after = await page.getByTestId("profile").getAttribute("aria-label");
+  const swapped = farmName > 0 && (before !== after || (await page.getByText(/vuelve a casa/).isVisible()));
+  check("E2E-15", "Granja: los Tamtams que no juegan; se pueden intercambiar", swapped);
+  await page.getByTestId("tab-farm").click();
+  await page.getByTestId("farm-swap-0").click();
+  await page.waitForTimeout(600);
+
+  // Arena.
+  await dev("dbg-energy");
+  await page.getByTestId("tab-arena").click();
+  await page.waitForTimeout(1200);
+  await shot("21-arena");
+  await page.getByTestId("fight-even").click();
+  await page.waitForTimeout(2500);
+  await shot("22-battle");
+  await page.getByTestId("battle-exit").waitFor({ timeout: 60000 });
+  await shot("23-battle-result");
+  const won = await page.getByText("¡Victoria!").isVisible();
+  await page.getByTestId("battle-exit").click();
+  await page.waitForTimeout(500);
+  check("E2E-16", "Arena: combate automático en tiempo real con resultado y PC", (await page.getByText(/^(Victoria|Derrota) contra/).count()) > 0, won ? "victoria" : "derrota");
+
+  // Conectar.
+  await page.getByTestId("tab-connect").click();
+  await page.waitForTimeout(500);
+  await page.getByTestId("friend-code").fill("ABCD2345");
+  await page.getByRole("button", { name: "Guardar amigo" }).click();
+  await shot("24-connect");
+  check("E2E-17", "Conectar: código de amigo y aviso honesto de servidor", await page.getByText(/Requiere el servicio online/).isVisible());
+
+  // Leave debug: main save intact.
+  await page.getByTestId("tab-home").click();
   await page.getByTestId("dev").click();
   await page.getByTestId("debug-exit").click();
   await page.waitForTimeout(1500);
-  const cMain = await coins();
-  check("E2E-15", "Salir de debug: partida normal intacta", cMain === c4 && cDebug === c4 + 500, `main ${cMain}, debug ${cDebug}`);
-  await page.getByLabel(/^Ficha de /).click();
+  check("E2E-18", "Salir de debug: partida normal intacta", (await coins()) === cDebugStart, `${await coins()} vs ${cDebugStart}`);
+  await page.getByTestId("profile").click();
   await page.waitForTimeout(400);
-  await shot("18-profile");
+  await shot("25-profile");
   await page.getByLabel(/^Cerrar /).first().click();
-
-  // Other resolutions.
   for (const vp of [{ w: 360, h: 640 }, { w: 430, h: 932 }, { w: 768, h: 1024 }]) {
     await page.setViewportSize({ width: vp.w, height: vp.h });
     await page.waitForTimeout(900);
-    await shot(`19-home-${vp.w}x${vp.h}`);
+    await shot(`26-home-${vp.w}x${vp.h}`);
   }
 } catch (e) {
   check("E2E-XX", "Playthrough sin excepciones", false, e.message);
@@ -223,5 +276,5 @@ try {
   await browser.close();
   server.close();
 }
-check("E2E-16", "Sin errores de consola/página", errors.length === 0, errors.slice(0, 3).join(" | "));
+check("E2E-19", "Sin errores de consola/página", errors.length === 0, errors.slice(0, 3).join(" | "));
 console.log(JSON.stringify({ passed: results.filter((r) => r.ok).length, failed: results.filter((r) => !r.ok).length }));

@@ -47,7 +47,7 @@
 |-------|----------|--------------|-------------|------------|
 | Altura relativa en pantalla | 1,0 | 1,35 | 1,8 | 2,4–3,2 |
 | Cabeza / cuerpo | 1 : 0 (cabeza = cuerpo) o 1 : 0,4 | 1 : 1 | 1 : 2 | 1 : 3–5 (o anatomía no humanoide) |
-| Ancho de los ojos (respecto a la cara) | 30–36% cada ojo | 24–28% | 16–20% | 8–14% (pueden ser luminosos, sin pupila) |
+| Ancho de los ojos (respecto a la cara) | 18–22% cada ojo (rev. 2026-11: antes 30–36%, demasiado infantil) | 16–19% | 14–17% | 10–14% (pueden ser luminosos, sin pupila) |
 | Altura de los ojos en la cara | Mitad inferior (cara de bebé) | Centro | Centro-alto | Alto, mirada más intensa |
 | Extremidades | Muñones (≤ 12% de H) | Cortas con 3 dedos (≤ 25%) | Largas, articuladas, garras romas | Largas y potentes, garras y pezuñas definidas |
 | Forma de la cabeza | Círculo o gota | Óvalo, aparece el hocico | Óvalo + mandíbula marcada | Angulosa, con estructuras (cuernos, crestas) |
@@ -80,7 +80,7 @@ Cada especie se construye combinando **módulos**. No todas las especies tienen 
 | **Cabeza** | redonda, hocico, pico, máscara-cristal | `head`, `jaw` | Siempre la masa más legible. En Bebé = cuerpo. |
 | **Torso** | blob, barril, esbelto, serpentino | `body`, `chest`, `spine_1…n` | Define el arquetipo de rig. |
 | **Extremidades** | ninguna, muñones, bípedo, cuadrúpedo, aletas | `arm_*`, `leg_*`, `foot_*` | Máximo 4 patas + 2 brazos. Los dedos se cuentan: 3 (Infantil y Juvenil), 3–4 (Adulto). |
-| **Ojos** | grandes con pupila, felinos, luminosos sin pupila | `eyeL`, `eyeR` | Siempre 2 (salvo diseño especial aprobado). Mínimo 2 brillos. |
+| **Ojos** | almendrados **blancos/luminosos con pupila discreta** (rendija, punto o anillo), felinos, luminosos sin pupila — nunca ojos negros gigantes de dibujo infantil (rev. 2026-11) | `eyeL`, `eyeR` | Siempre 2 (salvo diseño especial aprobado). Mínimo 2 brillos. |
 | **Cejas** | trazo, mechón, placa | `browL`, `browR` | **Obligatorias** en todas las etapas (motor de la expresión). |
 | **Boca** | gato "w", pico, hocico, mandíbula | `mouth`, `jaw` | Colmillo visible solo en enfado o competición (Bebé e Infantil). |
 | **Nariz** | ninguna, punto, hocico | — | Opcional; nunca protagonista. |
@@ -208,3 +208,10 @@ Petición aprobada: los Tamtams deben tener **efectos de emisivo, halos, sheen**
 Cada forma nueva debe diseñar sus adornos por nivel (`tiers: [min, max]` en las partes del rig). Regla: **las formas descuidadas son menos vistosas, no feas ni grotescas**. Siguen siendo adorables, pero sin magia.
 
 Comparativa real: `docs/media/lustre-tiers.jpg`.
+
+## 9. Revisión 2026-11: menos infantil, más anatomía
+
+Tras la revisión del usuario, el estilo deja de ser "mascota redonda": anatomía reconocible, ojos blancos/luminosos
+almendrados con pupila discreta, más detalle (placas, patrones, apéndices), siluetas únicas y personalidad atractiva
+no infantil. Chispín v3 (lagarto de magma cuadrúpedo) es la referencia implementada. Familias, propuestas y
+locomoción: **CREATURE_FAMILIES_ANATOMY.md**.

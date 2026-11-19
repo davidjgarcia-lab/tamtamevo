@@ -1,6 +1,6 @@
 import type { SkCanvas } from "@shopify/react-native-skia";
 import { chispinClips, chispinEmitters, chispinRig, fireColorAlleles, type ChispinClipId } from "@tamtam/art";
-import { compileClip, compileRig, derivePalette, evaluateFrame, switchClip, type EmitterDef, type PlaybackState } from "@tamtam/rig";
+import { compileClip, compileRig, derivePalette, evaluateFrame, switchClip, type EmitterDef, type Frame, type PlaybackState } from "@tamtam/rig";
 import { useCallback, useMemo } from "react";
 import { useFrameCallback, useSharedValue, type SharedValue } from "react-native-reanimated";
 import { drawCreature, drawParticles, type ActiveEmitters, type Placement } from "./draw";
@@ -11,6 +11,7 @@ export const clips = chispinClips.map((c) => compileClip(rig, c));
 export const clipIndex = (id: ChispinClipId) => clips.findIndex((c) => c.id === id);
 const allEmitters: EmitterDef[] = Object.values(chispinEmitters).flat();
 export const SEED = 7;
+export const BONE = { body: rig.boneIds.indexOf("body"), head: rig.boneIds.indexOf("head"), jaw: rig.boneIds.indexOf("jaw") };
 
 export interface CreatureHandle {
   res: CreatureResources;
@@ -62,10 +63,11 @@ export function drawTamtam(
   t: number,
   at: Placement,
   vx: number,
-): void {
+): Frame {
   "worklet";
   const frame = evaluateFrame(rig, clips, playback, { time: t, vx, seed: SEED });
   drawParticles(canvas, res, emitters, t, at, SEED, true);
   drawCreature(canvas, res, frame, at, t);
   drawParticles(canvas, res, emitters, t, at, SEED, false);
+  return frame;
 }

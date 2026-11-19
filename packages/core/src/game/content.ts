@@ -65,6 +65,7 @@ export const FURNITURE: CatalogItem[] = [
   furn("furn_sofa_cushion", "Sofá de cojines", "Cushion sofa", "furniture", 650, "uncommon", { layer: "floor", w: 3, h: 1, mirrorable: true, rotatable: false, comfort: 3, interactions: [{ kind: "sit", dx: 1, dy: 0, capacity: 2 }] }, 1),
   furn("furn_brazier", "Brasero de cobre", "Copper brazier", "lighting", 1200, "rare", { layer: "floor", w: 1, h: 1, mirrorable: false, rotatable: false, comfort: 3 }, 2),
   furn("gym_dumbbells", "Mancuernas", "Dumbbells", "equipment", 0, "common", { layer: "floor", w: 2, h: 1, mirrorable: true, rotatable: false, interactions: [{ kind: "train", dx: 0, dy: 0, capacity: 1 }] }, 1),
+  furn("study_desk", "Escritorio de estudio", "Study desk", "equipment", 0, "common", { layer: "floor", w: 2, h: 1, mirrorable: true, rotatable: false, interactions: [{ kind: "study", dx: 0, dy: 0, capacity: 1 }] }, 1),
 ];
 
 export const SLICE_CATALOG = validateCatalog([...FURNITURE, ...Object.values(FOODS).map((f) => f.item)]);
@@ -76,6 +77,7 @@ export const STARTER_ITEMS: Record<string, number> = {
   furn_lamp_mushroom: 1,
   furn_poster_volcano: 1,
   gym_dumbbells: 1,
+  study_desk: 1,
   food_berry_bun: 3,
   food_ember_pepper: 2,
 };

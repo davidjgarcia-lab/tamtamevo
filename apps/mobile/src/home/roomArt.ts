@@ -186,6 +186,29 @@ export function drawFurniture(c: SkCanvas, itemId: string, r: { x: number; y: nu
       for (const cx of [0.15, 0.79]) outlinedRRect(c, x + w * cx, bar - u * 0.32, w * 0.07, u * 0.64, u * 0.06, grad(0, bar - u * 0.3, 0, bar + u * 0.3, ["#8B86A0", "#4A4558"]), lw * 0.8);
       break;
     }
+    case "study_desk": {
+      // Wooden desk with an open book, a jar of ingredients and a little lamp.
+      const top = base - u * 1.05;
+      outlinedRRect(c, x + w * 0.08, top + u * 0.12, w * 0.07, u * 0.93, u * 0.03, paint("#7A4A2A"), lw * 0.8);
+      outlinedRRect(c, x + w * 0.85, top + u * 0.12, w * 0.07, u * 0.93, u * 0.03, paint("#7A4A2A"), lw * 0.8);
+      outlinedRRect(c, x + w * 0.55, top + u * 0.2, w * 0.3, u * 0.45, u * 0.05, paint("#9A6438"), lw * 0.8);
+      outlinedRRect(c, x + w * 0.02, top, w * 0.96, u * 0.16, u * 0.06, grad(0, top, 0, top + u * 0.16, ["#C98A52", "#9A6438"]), lw);
+      // Book.
+      const bx = x + w * 0.18, by = top - u * 0.12;
+      outlinedRRect(c, bx, by, w * 0.17, u * 0.12, u * 0.02, paint("#F5F3FF"), lw * 0.6);
+      outlinedRRect(c, bx + w * 0.17, by, w * 0.17, u * 0.12, u * 0.02, paint("#E9E4FF"), lw * 0.6);
+      c.drawLine(bx + w * 0.03, by + u * 0.05, bx + w * 0.13, by + u * 0.05, paint("#8B42F6", 0.6, { stroke: lw * 0.4 }));
+      // Jar with glowing ember seeds.
+      const jx = x + w * 0.62, jy = top - u * 0.42;
+      outlinedRRect(c, jx, jy, w * 0.12, u * 0.42, u * 0.06, paint("#BFEFFF", 0.55), lw * 0.7);
+      for (const k of [0.25, 0.5, 0.75]) c.drawCircle(jx + w * 0.06, jy + u * 0.42 * k + u * 0.04, u * 0.05, paint("#FF8A00", 0.9, { blur: 1 }));
+      // Lamp.
+      const lx = x + w * 0.84;
+      c.drawLine(lx, top, lx, top - u * 0.5, paint("#4A4558", 1, { stroke: lw * 0.8 }));
+      c.drawCircle(lx - w * 0.03, top - u * 0.52, u * 0.1, paint("#FFD166"));
+      c.drawCircle(lx - w * 0.03, top - u * 0.52, u * 0.28, paint("#FFD166", 0.25, { blur: 8 }));
+      break;
+    }
     default:
       outlinedRRect(c, x, base - u, w, u, u * 0.1, paint("#CCCCCC"), lw);
   }

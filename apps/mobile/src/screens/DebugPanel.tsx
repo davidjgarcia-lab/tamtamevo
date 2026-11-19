@@ -64,7 +64,20 @@ export function DebugPanel({ onClose, toast, onLustreLab }: { onClose: () => voi
           <Btn small label="Todo a 50" onPress={() => setAll(50)} />
           <Btn small label="Todo a 100" onPress={() => setAll(100)} />
           <Btn small label="Energía a 5" onPress={() => act((s) => debugSetNeed(s, "energy", 5))} />
-          <Btn small label="Energía a 100" onPress={() => act((s) => debugSetNeed(s, "energy", 100))} />
+          <Btn small label="Energía a 100" onPress={() => act((s) => debugSetNeed(s, "energy", 100))} testID="dbg-energy" />
+          <Btn
+            small
+            label="Ensuciar (higiene 15 + cacas)"
+            testID="dbg-mess"
+            onPress={() => {
+              act((s) => {
+                debugSetNeed(s, "hygiene", 15);
+                const t0 = now();
+                s.care.poops.push(t0 - 3_600_000, t0 - 1_234_567, t0 - 777_777);
+              });
+              toast("Habitación sucia y Tamtam sin bañar");
+            }}
+          />
         </View>
 
         <Text style={d.h}>Niveles y atributos</Text>
@@ -105,12 +118,12 @@ export function DebugPanel({ onClose, toast, onLustreLab }: { onClose: () => voi
         <Text style={d.h}>Huevos y genética</Text>
         <View style={d.row}>
           {fireColorAlleles.map((a) => (
-            <Btn key={a.id} small label={`Huevo ${a.name}`} onPress={() => act((s) => debugNewEgg(s, now(), newId(), a.id))} />
+            <Btn key={a.id} small label={`Huevo ${a.name}`} onPress={() => { act((s) => debugNewEgg(s, now(), newId(), a.id)); toast(state.tamtam ? `Nuevo Chispín ${a.name} en la Granja` : "Nuevo huevo en casa"); }} />
           ))}
         </View>
 
         <Text style={d.h}>No disponible en este prototipo</Text>
-        <Text style={d.p}>Simular combates (no hay Arena todavía), activar minijuegos (no implementados) y herencia genética completa (solo hay alelos de color).</Text>
+        <Text style={d.p}>Herencia genética completa (solo hay alelos de color), formas evolucionadas dibujadas (solo existe Chispín bebé) y todo lo que necesita servidor (Conectar, Arena PvP real).</Text>
 
         <View style={d.row}>
           <Btn label="Reiniciar partida debug" small onPress={() => void g.resetDebug()} />
