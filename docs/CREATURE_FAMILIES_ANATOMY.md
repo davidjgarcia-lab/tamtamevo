@@ -1,9 +1,11 @@
 # Familias anatómicas y locomoción — propuestas visuales (v1)
 
-> Estado: **PROPUESTA PARA VALIDAR**. Texto + reglas. Las hojas de concepto de imagen de estas 15 propuestas
+> Estado: **PROPUESTA PARA VALIDAR** (v2: 10 familias × 5 propuestas). Texto + reglas. Las piezas modulares de las 9 familias ya están en el juego (prototipo vectorial, `packages/art/src/modular/`). Las hojas de concepto de imagen de estas 15 propuestas
 > están **BLOQUEADAS**: el generador de imágenes (plan gratuito de ElevenLabs) alcanzó su límite diario de
 > imágenes; se generarán en cuanto haya crédito. Solo Chispín v3 (reptiliano) tiene concepto aprobado e
 > implementado en el rig (`docs/media/concept/chispin-v3-reptil.jpg`).
+
+Las evoluciones son **aleatorias y combinan piezas de cualquier familia** (EVOLUTION_ALGORITHM.md, >110.000 millones de combinaciones).
 
 Este documento revisa el **sistema de personajes** (no solo un sprite): anatomía por familia, proporciones,
 esqueleto (rig), set de animaciones obligatorio según su forma de moverse y cómo evoluciona cada familia.
@@ -20,55 +22,118 @@ esqueleto (rig), set de animaciones obligatorio según su forma de moverse y có
 | **Personalidad** | Atractiva, con actitud (curiosa, orgullosa, traviesa, serena…), **no infantil**: cejas/placas expresivas, boca con dientes o pico, pose con peso. |
 | **Animación coherente** | La animación respeta la anatomía y la locomoción de la familia (§6). Un pez no camina; una gelatina no corre a zancadas. |
 
-## 1. Acuáticas (agua) — "Mareálidos"
+## 1. Las 10 familias (9 de piezas + Híbridas)
 
-| # | Propuesta | Silueta y anatomía | Detalle y materiales | Personalidad |
+| Familia (código) | Nombre | Elemento | Rasgos ancla | En el juego se consigue sobre todo con… |
 |---|---|---|---|---|
-| A1 | **Aletín** — axolote-dragón | Cuerpo alargado, 4 patas cortas palmeadas, **6 branquias plumosas** en abanico, cola-remo vertical | Piel húmeda glossy, branquias translúcidas con emisivo cian en las puntas, motas oscuras en el lomo | Curioso y juguetón, sonrisa ancha con dientes finos |
-| A2 | **Marelo** — caballito-serpiente | Vertical en S, hocico tubular, **aleta dorsal de velo**, cola prensil enrollada, sin patas | Escamas iridiscentes nacaradas, aleta de velo translúcida que ondula, ojo con anillo luminoso | Elegante y orgulloso, cejas finas altas |
-| A3 | **Brumanta** — manta voladora | Plano en rombo, **alas-aleta** amplias, cola látigo con perla, ojos en los bordes frontales | Dorso azul profundo con bioluminiscencia en puntos, vientre claro, sheen de agua | Sereno y misterioso, mirada entornada |
+| fire | **Magmáridos** | Fuego / lava | vetas de magma, llamas, roca volcánica | combatir y entrenar |
+| plant | **Silváridos** | Planta / árbol | corteza, hojas, raíces, flores | mimos y buenos cuidados |
+| metal | **Ferrálidos** | Metal | placas, remaches, visor, engranajes | mucho Gimnasio |
+| crystal | **Cristálidos** | Cristal | facetas, translucidez, prismas, luz interna | higiene y estudio |
+| ghost | **Umbrálidos** | Fantasma / oscuridad | niebla, capucha, ojos sin pupila, levitan | descuido (forma rara, no castigo) |
+| water | **Mareálidos** | Agua | aletas, branquias, piel húmeda, burbujas | higiene y minijuegos |
+| gel | **Gelíferos** | Gelatina | cuerpo translúcido con núcleo, rebote | minijuegos |
+| ether | **Etéridos** | Aire / espíritu | plumas, alas, halo, levitan | mimos y estudio |
+| reptile | **Escamáridos** | Tierra / escama | escamas, garras, cuernos, colas con maza | equilibrio entreno/combate/cuidados |
+| — | **Híbridas / Quimeras** | Mezcla | ninguna familia tiene la mitad de las piezas | aparece sola al mezclar |
 
-Rasgos ancla de la familia: **gotas/perlas emisivas**, aletas translúcidas, motas bioluminiscentes.
+Cada evolución sortea **5 piezas** (cuerpo, cabeza, patas, cola, lomo) más ojos, patrón, colores y mutación
+(EVOLUTION_ALGORITHM.md). Las propuestas siguientes son **formas de referencia** de cada familia, ya mezclando
+rasgos de otras, para el arte final y para guiar el generador.
 
-## 2. Gelatinosas — "Gelíferos"
+## 2. Cinco propuestas por familia
 
-| # | Propuesta | Silueta y anatomía | Detalle y materiales | Personalidad |
+### Magmáridos — fuego / lava
+| # | Propuesta | Anatomía y mezcla | Detalle y materiales | Personalidad |
 |---|---|---|---|---|
-| G1 | **Gelatón** — medusa terrestre | Campana translúcida sobre **4 patas-tentáculo** que se doblan como resortes | Núcleo luminoso visible dentro, burbujas internas, borde de la campana con ondas | Tranquilo pero glotón |
-| G2 | **Flanix** — babosa de cristal blando | Cuerpo bajo y largo con **dos antenas oculares**, manto con crestas onduladas | Translucidez ámbar con vetas, rastro brillante, sheen húmedo intenso | Pícaro, sonrisa ladeada |
-| G3 | **Burbo** — cubo-limo con caparazón | Masa gelatinosa dentro de un **caparazón poliédrico abierto** (placas), brazos pseudópodos | Gelatina verde-menta translúcida, placas opacas con runas | Testarudo y protector |
+| F1 | **Brasardo** | Lagarto de lava con **cresta de tres llamas** y cola-antorcha (fuego + reptil) | Placas de basalto con vetas emisivas | Valiente, glotón |
+| F2 | **Magmón** | Tortuga-volcán: caparazón con **cráter humeante**, patas columnares de roca (fuego + metal) | Lava entre juntas, humo como partícula | Lento e imparable |
+| F3 | **Tizombra** | Zorro de ceniza con **brasas en vez de ojos** y cola de humo (fuego + sombra) | Pelaje gris carbón, ascuas que flotan | Travieso, nocturno |
+| F4 | **Ígnaro** | Ave corredora con **alas de llama** cortas y cresta de plumas ardientes (fuego + aire) | Plumas con degradado naranja→amarillo | Impulsivo, orgulloso |
+| F5 | **Vaporín** | Salamandra anfibia con **branquias de vapor** y aleta caudal (fuego + agua) | Piel húmeda con chispas, vapor | Juguetón, cambiante |
 
-Rasgos ancla: **núcleo luminoso interno**, translucidez con burbujas, deformación elástica (squash & stretch real).
-
-## 3. Etéreas (aire/espíritu) — "Etéridos"
-
-| # | Propuesta | Silueta y anatomía | Detalle y materiales | Personalidad |
+### Silváridos — planta / árbol
+| # | Propuesta | Anatomía y mezcla | Detalle y materiales | Personalidad |
 |---|---|---|---|---|
-| E1 | **Velisto** — zorro espectral | Cuadrúpedo esbelto **sin patas traseras** (se disuelven en niebla), 3 colas de humo, orejas largas | Pelaje con degradado a transparente, runas que brillan, ojos blanco puro | Sabio y burlón |
-| E2 | **Lumbrela** — polilla-búho | Cuerpo compacto con **cuatro alas** de polilla con ocelos, penacho facial | Alas con escamas iridiscentes y polvo de luz (partículas), plumón suave | Noctámbulo y tímido |
-| E3 | **Orbián** — guardián de anillos | Torso flotante con máscara, **brazos separados** del cuerpo, anillos orbitando | Máscara de porcelana con grietas emisivas, anillos de cristal | Solemne, protector |
+| P1 | **Ramollo** | Ciervo pequeño con **cornamenta de rama** florida y patas-raíz | Corteza con musgo, flores rosa | Dulce, protector |
+| P2 | **Saucuchi** | Gelatina verde con **brotes y hojas** que crecen de la espalda (planta + gelatina) | Savia translúcida con semillas dentro | Tranquilo, dormilón |
+| P3 | **Musgex** | Lagarto tronco con **escamas de corteza** y cola de enredadera (planta + reptil) | Musgo, hongos luminosos | Paciente, gruñón |
+| P4 | **Brotiel** | Mariposa-hada con **alas de pétalo** y antenas de semilla (planta + aire) | Pétalos translúcidos, polen dorado | Curioso, risueño |
+| P5 | **Espinardo** | Erizo-cactus con **espinas cristalizadas** y flor en la cabeza (planta + cristal) | Púas verdes con puntas de cuarzo | Tímido pero valiente |
 
-Rasgos ancla: **partes desconectadas o que se disuelven**, emisivo blanco-violeta, flotación constante.
-
-## 4. Reptilianas (fuego/tierra) — "Brasálidos" (implementado: Chispín v3)
-
-| # | Propuesta | Silueta y anatomía | Detalle y materiales | Personalidad |
+### Ferrálidos — metal
+| # | Propuesta | Anatomía y mezcla | Detalle y materiales | Personalidad |
 |---|---|---|---|---|
-| R1 | **Chispín v3** — lagarto de magma (**APROBADO, en el juego**) | Cuadrúpedo bajo, cuello corto, **cresta de 3 llamas**, cola de 4 segmentos con ascua | Placas oscuras con **vetas de magma** emisivas, vientre crema, cuernos cortos, ojo blanco con pupila rendija | Valiente y glotón |
-| R2 | **Escorial** — camaleón volcánico | Cola enrollada, ojos-torreta, **casco óseo**, patas prensiles | Escamas que cambian de brasa a ceniza, casco con grietas emisivas | Paciente, observador |
-| R3 | **Pirotón** — tortuga-ankylo | Caparazón de **placas de basalto**, maza en la cola, patas columnares | Placas con lava entre juntas, musgo carbonizado | Tranquilo pero imparable |
+| M1 | **Ferrón** | Perro-armadura con **visor luminoso** y placas remachadas | Acero cepillado, sheen fuerte, juntas cobre | Leal, disciplinado |
+| M2 | **Cobrardo** | Escarabajo de cobre con **horno en el pecho** (metal + fuego) | Pátina verde, chispas | Trabajador |
+| M3 | **Engranino** | Búho mecánico con **engranajes en las alas** y ojos de lente (metal + aire) | Latón, cristal de lente | Sabio, meticuloso |
+| M4 | **Acerex** | Pangolín de escamas metálicas que se **enrolla en bola** (metal + reptil) | Escamas de acero superpuestas | Defensivo, testarudo |
+| M5 | **Remachín** | Robot-gelatina: **núcleo líquido** dentro de un esqueleto de varillas (metal + gelatina) | Metal + translucidez | Inventor, despistado |
 
-Rasgos ancla (ya en ART_BIBLE): ojos ámbar/blancos, **llama de tres lenguas**, **ascua en la punta de la cola**.
-
-## 5. Híbridas — "Quimeras"
-
-| # | Propuesta | Silueta y anatomía | Detalle y materiales | Personalidad |
+### Cristálidos — cristal
+| # | Propuesta | Anatomía y mezcla | Detalle y materiales | Personalidad |
 |---|---|---|---|---|
-| H1 | **Vaporín** (agua + fuego) | Lagarto con **branquias de vapor** y aletas en la cola | Mitad escamas de magma, mitad piel húmeda; vapor como partícula | Impulsivo |
-| H2 | **Cristaluz** (gelatina + etéreo) | Gelatina flotante con **alas de cristal** | Translucidez + iridiscencia, núcleo que pulsa | Soñador |
-| H3 | **Mantoso** (aire + tierra) | Ave corredora con **placas de roca** en el pecho y alas cortas | Plumas de humo + placas pétreas | Leal |
+| C1 | **Prismino** | Lince de cristal con **esquirlas en el lomo** que refractan arcoíris | Facetas, translucidez, luz interna | Elegante, frío |
+| C2 | **Cuarzardo** | Dragón pequeño con **cuernos de cuarzo** y cola-cristal (cristal + reptil) | Escamas mate + cristales emisivos | Orgulloso |
+| C3 | **Geodín** | Armadillo-geoda: **por fuera roca, por dentro amatista** al abrirse (cristal + metal) | Contraste rugoso/brillante | Reservado |
+| C4 | **Gemiel** | Medusa de cristal flotante con **tentáculos de hielo** (cristal + aire + agua) | Iridiscencia, partículas de escarcha | Serena |
+| C5 | **Facetombra** | Gato de obsidiana con **ojos de luz** y facetas negras (cristal + sombra) | Vidrio volcánico, reflejos violeta | Misterioso |
 
-Regla de híbridos: hereda **un rasgo ancla de cada familia** y la locomoción dominante del padre con mayor peso genético.
+### Umbrálidos — fantasma / oscuridad
+| # | Propuesta | Anatomía y mezcla | Detalle y materiales | Personalidad |
+|---|---|---|---|---|
+| U1 | **Umbrardo** | Lobo de niebla **sin patas traseras** (se disuelven), capucha de sombra | Humo, ojos blancos sin pupila | Solitario, leal a quien vuelve |
+| U2 | **Velombra** | Polilla nocturna con **alas con ojos** pintados y antenas plumosas (sombra + aire) | Polvo de luz violeta | Tímida |
+| U3 | **Farolín** | Rana-espectro con **farolillo** colgando de la cabeza (sombra + agua) | Piel translúcida oscura, luz cálida | Bromista |
+| U4 | **Nieblex** | Serpiente de humo con **máscara de hueso** (sombra + reptil) | Máscara mate, cuerpo que se deshace | Solemne |
+| U5 | **Sombruchi** | Gelatina negra con **estrellas dentro** (sombra + gelatina) | Translucidez con puntos de luz | Soñador |
+
+### Mareálidos — agua
+| # | Propuesta | Anatomía y mezcla | Detalle y materiales | Personalidad |
+|---|---|---|---|---|
+| A1 | **Aletín** | Axolote-dragón con **6 branquias plumosas** y cola-remo | Piel glossy, puntas cian emisivas | Curioso |
+| A2 | **Marelo** | Caballito-serpiente con **aleta de velo** y cola prensil | Escamas nacaradas iridiscentes | Elegante |
+| A3 | **Brumanta** | Manta voladora con **bioluminiscencia** y cola-látigo (agua + aire) | Puntos de luz, sheen de agua | Serena |
+| A4 | **Coralón** | Cangrejo-tortuga con **arrecife de coral** en el caparazón (agua + metal + planta) | Coral rosa, conchas | Hogareño |
+| A5 | **Perlina** | Nutria con **perla luminosa** en la frente y bigotes-aleta (agua + cristal) | Pelaje húmedo, perla emisiva | Juguetona |
+
+### Gelíferos — gelatina
+| # | Propuesta | Anatomía y mezcla | Detalle y materiales | Personalidad |
+|---|---|---|---|---|
+| G1 | **Gelatón** | Medusa terrestre: campana sobre **4 patas-resorte** | Núcleo luminoso, burbujas | Glotón |
+| G2 | **Flanix** | Babosa de cristal blando con **antenas oculares** | Ámbar translúcido, rastro brillante | Pícaro |
+| G3 | **Burbo** | Limo dentro de un **caparazón poliédrico abierto** (gelatina + metal) | Placas con runas | Protector |
+| G4 | **Mochiel** | Bola elástica con **alitas** y cola de nube (gelatina + aire) | Mate suave, rubor | Alegre |
+| G5 | **Lavuchi** | Gelatina de **magma** con piedras flotando dentro (gelatina + fuego) | Translucidez naranja, emisivo | Temperamental |
+
+### Etéridos — aire / espíritu
+| # | Propuesta | Anatomía y mezcla | Detalle y materiales | Personalidad |
+|---|---|---|---|---|
+| E1 | **Velisto** | Zorro espectral con **3 colas de viento** y orejas largas | Pelaje que se vuelve transparente | Sabio, burlón |
+| E2 | **Lumbrela** | Polilla-búho con **cuatro alas** de ocelos | Escamas iridiscentes | Noctámbulo |
+| E3 | **Orbián** | Guardián con máscara y **anillos orbitando** | Porcelana con grietas de luz | Solemne |
+| E4 | **Céfiriel** | Grulla-lagarto con **alas de pluma** y cuello largo (aire + reptil) | Plumas blancas, escamas en las patas | Noble |
+| E5 | **Nimbollo** | Oveja-nube con **cuernos de rama** y lluvia ligera (aire + planta + agua) | Lana-nube, hojas | Tranquila |
+
+### Escamáridos — tierra / escama
+| # | Propuesta | Anatomía y mezcla | Detalle y materiales | Personalidad |
+|---|---|---|---|---|
+| R1 | **Chispín** (bebé, implementado) | Lagarto cuadrúpedo con **cresta de llamas** y cola con ascua (reptil + fuego) | Vetas de magma, ojo blanco con rendija | Valiente, glotón |
+| R2 | **Escorial** | Camaleón con **ojos-torreta** y casco óseo | Escamas que cambian de color | Observador |
+| R3 | **Garrex** | Dinosaurio corredor con **maza en la cola** y placas dorsales | Escamas mate, placas pulidas | Feroz |
+| R4 | **Drácoral** | Lagarto marino con **aletas** y cuernos de coral (reptil + agua) | Escamas azules, coral rosa | Aventurero |
+| R5 | **Sauromusgo** | Iguana anciana con **musgo y flores** en el lomo (reptil + planta) | Corteza, líquenes | Paciente |
+
+### Híbridas / Quimeras (emergentes)
+| # | Propuesta | Mezcla | Rasgo |
+|---|---|---|---|
+| H1 | **Vaporín** | fuego + agua | Branquias de vapor |
+| H2 | **Cristaluz** | gelatina + cristal + aire | Gelatina con alas de cristal |
+| H3 | **Mantoso** | aire + reptil + metal | Ave corredora con placas |
+| H4 | **Ferrombra** | metal + sombra | Armadura vacía con niebla dentro |
+| H5 | **Florarco** | planta + cristal + fuego | Árbol de brasas con frutos de cuarzo |
+
+Regla: Quimera = ninguna familia aporta ≥ 50% de las piezas; hereda **un rasgo ancla de cada familia** presente.
 
 ## 6. Locomoción y set de animaciones por familia
 
@@ -78,7 +143,9 @@ Regla de híbridos: hereda **un rasgo ancla de cada familia** y la locomoción d
 | Gelatinosa | **Comprimir, expandir, rebotar, estirar** | `squash`, `stretch`, `bounce` (desplazamiento a saltos), `ooze` (arrastre lento) | Huesos de **escala** (sx/sy) con conservación de volumen; núcleo interno separado |
 | Etérea | **Levitar, flotar, girar, volar** | `levitate` (idle a 20–30 u del suelo, sombra que respira), `float` (deriva), `spin`, `fly` (batido o deslizamiento) | Raíz con offset vertical permanente; partes desconectadas con **lag** propio |
 | Reptiliana | **Caminar, correr, reptar, saltar, atacar** | `walk` (paso diagonal), `run` (galope), `crawl`, `jump`, `attack` (lunge + mordisco) | Cuadrúpedo: 4 patas de 2 segmentos, cuello, cabeza, mandíbula, cola de 4 (**implementado en Chispín v3**: walk, run, attack, hit, train, bathe…) |
-| Híbrida | La dominante + 1 clip de la otra familia | p. ej. Vaporín: `walk` + `swim` | Combinación de los anteriores |
+| Fuego, Planta, Metal, Cristal | Caminar (como reptil); Metal más pesado, Cristal más rígido | `walk`, `run`, `attack`; Planta: `root` (se planta), Metal: `stomp` | Mismo cuadrúpedo |
+| Sombra (fantasma) | **Levitar**, desvanecerse | `levitate`, `fade`, `phase` | Raíz elevada (implementado: flota 14 u), estelas en lugar de patas |
+| Híbrida | La de sus patas (la pieza 'patas' decide) | p. ej. Vaporín: `walk` + `swim` | Combinación de los anteriores |
 
 El motor (TamRig) ya soporta: cadenas con follow-through procedural, escala por hueso, cruces de clips,
 slots faciales (ojos/boca/cejas/prop), emisivos, sheen, gradientes y adornos por nivel de Lustre.
@@ -96,6 +163,6 @@ sombra dinámica para etéreas/acuáticas fuera del agua.
 
 ## 8. Validación (pendiente del usuario)
 
-Para cada familia, elegir **1 de las 3** (o pedir mezcla). Criterios: personalidad suficiente, silueta única,
+Para cada familia, marcar las propuestas favoritas de las 5 (o pedir mezclas). Criterios: personalidad suficiente, silueta única,
 variedad anatómica respecto a las otras familias. Tras la elección se produce la hoja de concepto,
 el rig y los clips como se hizo con Chispín v3.

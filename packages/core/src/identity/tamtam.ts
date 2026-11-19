@@ -23,6 +23,10 @@ export interface Tamtam {
   bonds: Record<string, number>;
   /** Lustre tier recorded at the last Ritual — drives looks, stats and skills of the current form. */
   formQuality?: "dull" | "plain" | "vivid" | "radiant" | "legendary";
+  /** Body plan after the first evolution (parts mixed from any family). Babies use the species art. */
+  genome?: import("../genetics/genome").Genome;
+  /** Generated form name (e.g. "Ferrino"). */
+  formName?: string;
 }
 
 export class NameRejected extends Error {

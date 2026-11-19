@@ -69,6 +69,38 @@ export interface CareState {
   playLog: number[];
   /** Day-scoped counters (pets per day…) keyed by `${day}|${what}`. */
   counters: Record<string, number>;
+  /** What happened during the CURRENT stage (reset at each evolution) — input of the evolution algorithm. */
+  log?: StageLog;
+}
+
+/** Care profile of the current stage: time integrals of needs + counts of actions. */
+export interface StageLog {
+  hours: number;
+  sat: number; // ∫ satisfaction dt
+  hyg: number; // ∫ hygiene dt
+  aff: number; // ∫ affection dt
+  hun: number; // ∫ hunger dt
+  pets: number;
+  baths: number;
+  meals: number;
+  cleans: number;
+  gym: number;
+  study: number;
+  games: number;
+  fights: number;
+  wins: number;
+}
+export type StageCounter = "pets" | "baths" | "meals" | "cleans" | "gym" | "study" | "games" | "fights" | "wins";
+
+export function emptyStageLog(): StageLog {
+  return { hours: 0, sat: 0, hyg: 0, aff: 0, hun: 0, pets: 0, baths: 0, meals: 0, cleans: 0, gym: 0, study: 0, games: 0, fights: 0, wins: 0 };
+}
+export function stageLog(s: CareState): StageLog {
+  if (!s.log) s.log = emptyStageLog();
+  return s.log;
+}
+export function bumpStage(s: CareState, what: StageCounter, n = 1): void {
+  stageLog(s)[what] += n;
 }
 
 const HOUR = 3_600_000;
@@ -140,6 +172,12 @@ export function advanceCare(s: CareState, now: number, cfg: CareConfig = DEFAULT
     s.maturity += growthRate(s, t, cfg) * dtH;
     s.satIntegral = (s.satIntegral ?? 0) + satisfaction(s.needs) * dtH;
     s.satHours = (s.satHours ?? 0) + dtH;
+    const lg = stageLog(s);
+    lg.hours += dtH;
+    lg.sat += satisfaction(s.needs) * dtH;
+    lg.hyg += s.needs.hygiene * dtH;
+    lg.aff += s.needs.affection * dtH;
+    lg.hun += s.needs.hunger * dtH;
     for (const n of NEED_IDS) {
       let r = rates[n];
       if (n === "hygiene") r -= s.poops.length * cfg.poopHygienePerHour;
@@ -205,6 +243,7 @@ export function feed(s: CareState, food: FoodDef, family: string, now: number, c
   s.needs.hunger = clamp(s.needs.hunger + food.hunger, 0, 100);
   s.needs.energy = clamp(s.needs.energy + food.energy, 0, 100);
   s.needs.happiness = clamp(s.needs.happiness + (disliked ? -8 : food.happiness + (fav ? 10 : 0)), 0, 100);
+  bumpStage(s, "meals");
   s.pendingPoops.push(now + (cfg.poopAfterMin + (Math.abs(Math.sin(now)) * cfg.poopJitterMin)) * 60_000);
   touch(s, now, 3);
   return disliked ? "dislike" : fav ? "eat_favorite" : "eat";
@@ -214,6 +253,7 @@ export function bathe(s: CareState, now: number, cfg: CareConfig = DEFAULT_CARE_
   advanceCare(s, now, cfg);
   if (s.asleep) return "already_asleep";
   s.needs.hygiene = clamp(s.needs.hygiene + 60, 0, 100);
+  bumpStage(s, "baths");
   s.needs.happiness = clamp(s.needs.happiness + 4, 0, 100);
   touch(s, now, 3);
   return "bathe";
@@ -242,6 +282,7 @@ export function cleanPoop(s: CareState, ts: number, now: number, cfg: CareConfig
   advanceCare(s, now, cfg);
   const i = s.poops.indexOf(ts);
   if (i >= 0) s.poops.splice(i, 1);
+  bumpStage(s, "cleans");
   s.needs.hygiene = clamp(s.needs.hygiene + 12, 0, 100);
   touch(s, now);
   return "clean";
@@ -256,6 +297,7 @@ export function pet(s: CareState, now: number, cfg: CareConfig = DEFAULT_CARE_CO
   s.counters[key] = n;
   touch(s, now, 1);
   if (n > MAX_PETS_PER_DAY) return "pet_saturated";
+  bumpStage(s, "pets");
   s.needs.affection = clamp(s.needs.affection + 8, 0, 100);
   s.needs.happiness = clamp(s.needs.happiness + 3, 0, 100);
   return "pet";

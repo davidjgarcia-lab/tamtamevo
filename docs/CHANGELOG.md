@@ -4,6 +4,17 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+### Evolución genética según los cuidados + 10 familias (2026-11-19)
+#### Añadido
+- **Evolución jugable**: cuando la madurez de la etapa se completa aparece "¡listo para evolucionar!" en Casa → Ritual (resplandor, destello y la nueva forma con qué familias aportó cada pieza y qué cuidados influyeron).
+- **Algoritmo genético** (`packages/core/src/genetics/`, `EVOLUTION_ALGORITHM.md`): perfil de cuidado de la etapa (cuidados, mimos, higiene, entreno, combate, estudio, juego) → afinidad por familia → sorteo de 5 piezas (herencia 28%, mutación salvaje 5–17%, resto por afinidad²) + colores, ojos, patrón y mutaciones raras. Determinista por Tamtam. **110.199.605.760** combinaciones.
+- **9 familias de piezas** (Magmáridos, Silváridos, Ferrálidos, Cristálidos, Umbrálidos, Mareálidos, Gelíferos, Etéridos, Escamáridos) + Quimeras; piezas vectoriales modulares sobre el esqueleto de Chispín (los 14 clips funcionan con cualquier mezcla; sombra y aire levitan).
+- Las formas evolucionadas cambian los stats de Arena (cada pieza aporta los de su familia, más fuerza por etapa) y la habilidad (la del lomo). Los rivales evolucionados también tienen formas aleatorias.
+- Ficha: barras de cómo lo estás criando y **tendencia de la próxima evolución** (% por familia).
+- Debug: madurez completa, forzar evolución, simular estilos de crianza y **Laboratorio de evolución** (9 tiradas por perfil).
+- Registro de etapa en el cuidado (caricias, baños, comidas, Gym, estudio, minijuegos, combates).
+- `CREATURE_FAMILIES_ANATOMY.md` v2: 10 familias × 5 propuestas mezclando rasgos.
+
 ### Primera versión de app móvil: pestañas, Chispín v3, cuidados táctiles, minijuegos, Arena (2026-11-19)
 #### Añadido
 - **Chispín v3**: rediseño completo como lagarto de magma cuadrúpedo (rig nuevo, 14 clips: idle, walk, run, eat, pet, sleep, celebrate, train, bathe, sad, hungry, angry, attack, hit). Ojos blancos almendrados con pupila de rendija, vetas de magma emisivas, cresta de tres llamas.

@@ -68,7 +68,7 @@ export function ArenaScreen({ toast, onBattle }: { toast: (t: string) => void; o
       {rivals.map(({ fighter, difficulty }) => (
         <View key={difficulty} style={a.card}>
           <View style={a.portrait}>
-            <Portrait alleleId={fighter.alleleId} size={84} dir={-1} />
+            <Portrait alleleId={fighter.alleleId} size={84} dir={-1} genome={fighter.genome} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={a.name}>{fighter.name}</Text>
@@ -92,8 +92,8 @@ export function ArenaScreen({ toast, onBattle }: { toast: (t: string) => void; o
 type Floating = { id: number; side: 0 | 1; text: string; color: string };
 
 function BattleView({ b, myAllele, onExit }: { b: Battle; myAllele: string; onExit: () => void }) {
-  const A = useCreature(myAllele);
-  const B = useCreature(b.rival.alleleId);
+  const A = useCreature(myAllele, undefined, b.me.genome);
+  const B = useCreature(b.rival.alleleId, undefined, b.rival.genome);
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [hp, setHp] = useState<[number, number]>([b.me.hp, b.rival.hp]);
   const [floats, setFloats] = useState<Floating[]>([]);

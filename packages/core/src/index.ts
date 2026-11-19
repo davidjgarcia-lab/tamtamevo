@@ -16,3 +16,6 @@ export * from "./evolution/engine";
 export * from "./appearance/appearance";
 export * from "./game/arena";
 export * from "./game/activities";
+export * from "./genetics/families";
+export * from "./genetics/genome";
+export * from "./genetics/evolve";

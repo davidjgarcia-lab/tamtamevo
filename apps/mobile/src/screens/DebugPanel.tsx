@@ -1,5 +1,5 @@
 import {
-  debugAttributeLevels, debugCoins, debugForceEvolution, debugGrantAll, debugLevelUp, debugNewEgg, debugSetLifetimeCare, debugSetNeed, LUSTRE_NAMES, lustre, type NeedId,
+  debugAttributeLevels, debugCoins, debugGrantAll, emptyStageLog, debugLevelUp, debugNewEgg, debugSetLifetimeCare, debugSetNeed, LUSTRE_NAMES, lustre, type NeedId,
 } from "@tamtam/core";
 import { fireColorAlleles } from "@tamtam/art";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -7,11 +7,20 @@ import { newId, useGame } from "../game/GameProvider";
 import { colors, fonts } from "../theme";
 import { Btn, Sheet } from "../ui/kit";
 
+/** Stage logs that reproduce typical care styles (40 h of stage). */
+const STYLES = {
+  Guerrero: { hours: 40, sat: 40 * 72, hyg: 40 * 55, aff: 40 * 50, hun: 40 * 70, gym: 12, fights: 12, wins: 8, pets: 5, baths: 3 },
+  "Limpio y estudioso": { hours: 40, sat: 40 * 85, hyg: 40 * 95, aff: 40 * 60, hun: 40 * 80, study: 10, baths: 12, cleans: 6, pets: 8 },
+  Mimado: { hours: 40, sat: 40 * 88, hyg: 40 * 70, aff: 40 * 95, hun: 40 * 85, pets: 40, baths: 5 },
+  Jugón: { hours: 40, sat: 40 * 75, hyg: 40 * 80, aff: 40 * 60, hun: 40 * 70, games: 14, baths: 6 },
+  Descuidado: { hours: 40, sat: 40 * 30, hyg: 40 * 25, aff: 40 * 20, hun: 40 * 30 },
+};
+
 /**
  * Developer Debug Mode. Works on a separate save slot ("debug") with a simulated clock,
  * so nothing here affects the normal game.
  */
-export function DebugPanel({ onClose, toast, onLustreLab }: { onClose: () => void; toast: (t: string) => void; onLustreLab: () => void }) {
+export function DebugPanel({ onClose, toast, onLustreLab, onEvolutionLab, onForceEvolution }: { onClose: () => void; toast: (t: string) => void; onLustreLab: () => void; onEvolutionLab: () => void; onForceEvolution: () => void }) {
   const g = useGame();
   const { state, act, now } = g;
 
@@ -101,18 +110,20 @@ export function DebugPanel({ onClose, toast, onLustreLab }: { onClose: () => voi
           <Btn small label="Desbloquear todo" onPress={() => { act((s) => debugGrantAll(s, now())); toast("Todos los objetos añadidos al inventario"); }} />
         </View>
 
-        <Text style={d.h}>Evolución (datos)</Text>
-        <Text style={d.p}>Fuerza la transición en los datos para probar el flujo y la conservación del nombre. En este prototipo solo está dibujada la forma Bebé, así que se sigue viendo a Chispín.</Text>
+        <Text style={d.h}>Evolución genética</Text>
+        <Text style={d.p}>
+          La evolución mezcla piezas de 9 familias según cómo se haya cuidado al Tamtam en esta etapa. Etapa: {state.tamtam?.stage ?? "—"} · madurez {state.care.maturity.toFixed(1)}.
+        </Text>
         <View style={d.row}>
-          <Btn
-            small
-            label="Forzar → Fogarín"
-            disabled={state.tamtam?.stage !== "baby"}
-            onPress={() => {
-              act((s) => debugForceEvolution(s, { formId: "fire_child_fogarin", stage: "child" }, now()));
-              toast(`${state.tamtam?.name} es ahora Fogarín (en datos)`);
-            }}
-          />
+          <Btn small label="Madurez completa" testID="dbg-mature" onPress={() => { act((s) => { s.care.maturity = 999; }); toast("Listo para evolucionar"); }} />
+          <Btn small label="Forzar evolución" tone="gold" disabled={!state.tamtam || state.tamtam.stage === "adult"} testID="dbg-evolve" onPress={onForceEvolution} />
+          <Btn small label="Laboratorio de evolución" tone="dark" testID="dbg-evolab" onPress={onEvolutionLab} />
+        </View>
+        <Text style={d.p}>Simular cómo se ha cuidado esta etapa (rellena el registro de la etapa):</Text>
+        <View style={d.row}>
+          {(Object.keys(STYLES) as (keyof typeof STYLES)[]).map((k) => (
+            <Btn key={k} small label={k} testID={`dbg-style-${k}`} onPress={() => { act((s) => { s.care.log = { ...emptyStageLog(), ...STYLES[k] }; }); toast(`Etapa simulada: ${k}`); }} />
+          ))}
         </View>
 
         <Text style={d.h}>Huevos y genética</Text>

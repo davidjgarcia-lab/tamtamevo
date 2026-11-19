@@ -4,6 +4,9 @@
  * 20 Hz simulation, attack cadence from speed, dodge, crits, one signature skill with cooldown,
  * elemental multiplier, 60 s limit. Ranks: Bronce → Leyenda with competitive points (PC).
  */
+import { CHISPIN_GENOME, type Genome } from "../genetics/genome";
+import { rollEvolution } from "../genetics/evolve";
+import { FAMILIES } from "../genetics/families";
 
 export interface Fighter {
   name: string;
@@ -16,6 +19,10 @@ export interface Fighter {
   crit: number; // 0–100 rating
   skillPower: number; // multiplier for the signature skill
   skillCooldown: number; // seconds
+  skillName?: string;
+  /** Evolved body plan (absent = baby Chispín). */
+  genome?: Genome;
+  stage?: string;
 }
 
 export type BattleEvent =
@@ -65,7 +72,7 @@ export function simulateBattle(a: Fighter, b: Fighter, seed: number): BattleResu
       if (t >= skillAt[i]!) {
         power = me.skillPower;
         skillAt[i] = t + me.skillCooldown;
-        events.push({ t, type: "skill", by: i, name: "Lluvia de Ascuas" });
+        events.push({ t, type: "skill", by: i, name: me.skillName ?? "Lluvia de Ascuas" });
       } else if (t >= next[i]!) {
         power = 1;
         events.push({ t, type: "attack", by: i });
@@ -140,6 +147,7 @@ export function makeRivals(me: Fighter, seed: number): { fighter: Fighter; diffi
         def: Math.round(me.def * m),
         spd: Math.round(me.spd * (0.9 + r() * 0.2)),
         crit: Math.round(me.crit * (0.8 + r() * 0.4)),
+        ...(me.genome ? rivalForm(r) : { genome: undefined, skillName: undefined }),
       },
     };
   });
@@ -161,4 +169,12 @@ export function recordFight(a: ArenaState, fightId: string, rival: string, d: Di
   a.history.unshift({ at, rival, won, pc, coins });
   a.history = a.history.slice(0, 50);
   return { pc, coins, duplicate: false };
+}
+
+/** Evolved rivals get a random form (a random care style) so the Arena shows the variety of Tamtams. */
+function rivalForm(r: () => number): { genome: Genome; skillName: string } {
+  const p = { care: r(), affection: r(), hygiene: r(), training: r(), fighting: r(), study: r(), play: r(), neglect: 0 };
+  p.neglect = 1 - p.care;
+  const g = rollEvolution(CHISPIN_GENOME, p, Math.floor(r() * 1e9)).genome;
+  return { genome: g, skillName: FAMILIES[g.parts.back].skill };
 }

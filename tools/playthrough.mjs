@@ -254,6 +254,31 @@ try {
   await shot("24-connect");
   check("E2E-17", "Conectar: código de amigo y aviso honesto de servidor", await page.getByText(/Requiere el servicio online/).isVisible());
 
+  // Evolution: simulate a warrior stage, complete maturity, ritual.
+  await page.getByTestId("tab-home").click();
+  await page.getByTestId("dev").click();
+  await page.getByTestId("dbg-style-Guerrero").click();
+  await page.getByTestId("dbg-mature").click();
+  await page.getByLabel(/^Cerrar /).first().click();
+  await page.waitForTimeout(600);
+  const ready = await page.getByTestId("evolve").isVisible();
+  await page.getByTestId("evolve").click();
+  await page.waitForTimeout(1200);
+  await shot("27-ritual-charge");
+  await page.getByTestId("ritual-done").waitFor({ timeout: 8000 });
+  await page.waitForTimeout(600);
+  await shot("28-ritual-result");
+  await page.getByTestId("ritual-done").click();
+  await page.waitForTimeout(800);
+  await shot("29-evolved-home");
+  const sub = await page.getByTestId("profile").getAttribute("aria-label");
+  check("E2E-20", "Evoluciona según los cuidados (aviso + ritual + forma nueva Infantil)", ready && (await page.getByText(/· Infantil · Nv/).isVisible()), sub ?? "");
+  await page.getByTestId("dev").click();
+  await page.getByTestId("dbg-evolab").click();
+  await page.waitForTimeout(1500);
+  await shot("30-evolution-lab");
+  await page.getByTestId("evolab-close").click();
+
   // Leave debug: main save intact.
   await page.getByTestId("tab-home").click();
   await page.getByTestId("dev").click();

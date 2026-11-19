@@ -1,17 +1,17 @@
 import { BlurStyle, Canvas, createPicture, PaintStyle, Picture, Skia } from "@shopify/react-native-skia";
 import type { ChispinClipId } from "@tamtam/art";
 import {
-  buy, careAction, checkPlacement, cleanPoop, cloneData, eggProgress, feedFood, FOODS, hatch, lustre, mirror, mood, move, napCooldownLeft, place, PlacementRejected, poopSpot,
+  buy, careAction, checkPlacement, readyToEvolve, cleanPoop, cloneData, eggProgress, feedFood, FOODS, hatch, lustre, mirror, mood, move, napCooldownLeft, place, PlacementRejected, poopSpot,
   SLICE_CATALOG, unplace, type CareKind, type CareReaction, type CatalogItem, type Placement,
 } from "@tamtam/core";
 import { transformPoint } from "@tamtam/rig";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { StyleSheet, Text, View, type GestureResponderEvent, type LayoutChangeEvent } from "react-native";
+import { Pressable, StyleSheet, Text, View, type GestureResponderEvent, type LayoutChangeEvent } from "react-native";
 import { Easing, useDerivedValue, useSharedValue, withTiming } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import { composeLook } from "../creature/look";
 import { drawDirt, drawEgg, drawFoam, drawMeal, drawMop, drawShower, drawTowel, foodPicture } from "../creature/props";
-import { BONE, drawTamtam, useCreature } from "../creature/useCreature";
+import { BONE, drawTamtam, STAGE_SCALE, useCreature } from "../creature/useCreature";
 import { newId, useGame } from "../game/GameProvider";
 import { buildRoomPicture, cellAt, drawFurniture, placementRect, roomGeom } from "../home/roomArt";
 import { brand, colors, fonts } from "../theme";
@@ -75,15 +75,15 @@ interface Fx {
 }
 
 export function HomeScreen({
-  toast, preview, onPreviewDone, onOpenGames,
-}: { toast: (t: string) => void; preview: CatalogItem | null; onPreviewDone: () => void; onOpenGames: () => void }) {
+  toast, preview, onPreviewDone, onOpenGames, onEvolve,
+}: { toast: (t: string) => void; preview: CatalogItem | null; onPreviewDone: () => void; onOpenGames: () => void; onEvolve: () => void }) {
   const game = useGame();
   const { state, act, now } = game;
   const t = state.tamtam;
   const liveTier = t ? lustre(state.care, t).tier : "plain";
   const formTier = !t || t.stage === "baby" ? liveTier : t.formQuality ?? liveTier;
   const look = useMemo(() => composeLook(formTier, liveTier), [formTier, liveTier]);
-  const creature = useCreature(t ? state.alleleId : state.egg?.alleleId ?? state.alleleId, look);
+  const creature = useCreature(t ? state.alleleId : state.egg?.alleleId ?? state.alleleId, look, t?.genome);
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [food, setFood] = useState(false);
   const [mode, setMode] = useState<Mode>({ kind: "play" });
@@ -100,7 +100,7 @@ export function HomeScreen({
 
   const g = useMemo(() => (size.w ? roomGeom(size.w, size.h, state.room) : null), [size, state.room]);
   const laneY = g ? g.floorTop + g.floorCellH * 3.4 : 0;
-  const scale = g ? Math.min((g.floorCellH * 2.1) / 100, g.w / 330) : 1;
+  const scale = (g ? Math.min((g.floorCellH * 2.1) / 100, g.w / 330) : 1) * (STAGE_SCALE[t?.stage ?? "baby"] ?? 1);
 
   useEffect(() => {
     if (g && posX.value === 0) posX.value = g.w * 0.5;
@@ -520,6 +520,11 @@ export function HomeScreen({
 
       {state.phase === "naming" && <NamingPanel />}
 
+      {t && mode.kind === "play" && readyToEvolve(state) && (
+        <Pressable onPress={onEvolve} style={({ pressed }) => [h.evolve, pressed && { opacity: 0.8 }]} accessibilityRole="button" accessibilityLabel="Evolucionar" testID="evolve">
+          <Text style={h.evolveText}>✦ ¡{t.name} está listo para evolucionar! ✦</Text>
+        </Pressable>
+      )}
       {t && mode.kind === "play" && (
         <View style={h.panel}>
           <View style={h.row}>
@@ -598,6 +603,8 @@ const h = StyleSheet.create({
   stageHint2: { color: brand.cloud, fontFamily: fonts.bodyBold, fontSize: 14, textAlign: "center", textShadowColor: "#000", textShadowRadius: 4 },
   track: { height: 10, alignSelf: "stretch", borderRadius: 5, backgroundColor: "rgba(23,19,43,0.7)", overflow: "hidden" },
   fill: { height: 10, backgroundColor: brand.cyan, borderRadius: 5 },
+  evolve: { marginHorizontal: 12, marginBottom: 6, borderRadius: 16, paddingVertical: 10, backgroundColor: brand.violet, borderWidth: 2, borderColor: brand.cyan, alignItems: "center" },
+  evolveText: { fontFamily: fonts.displayBold, fontSize: 16, color: brand.cloud },
   panel: { paddingHorizontal: 12, paddingBottom: 6, gap: 6 },
   panelTitle: { fontFamily: fonts.display, fontSize: 14, color: colors.ink, textAlign: "center" },
   row: { flexDirection: "row", gap: 6 },

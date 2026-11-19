@@ -1,9 +1,13 @@
-import { advanceCare, spendForActivity } from "../care/needs";
+import { advanceCare, bumpStage, spendForActivity } from "../care/needs";
 import { credit } from "../economy/wallet";
 import { addAttributeXp } from "../progression/progression";
 import { grantActivityReward, MINIGAME_ENTHUSIASM } from "../rewards/rewards";
 import { FORM_QUALITY, formQuality } from "../appearance/appearance";
 import { arenaStrength, GameRuleError, type GameState } from "./game";
+import { FAMILIES } from "../genetics/families";
+import { genomeStats } from "../genetics/genome";
+import { canEvolve, evolveTamtam, type EvolutionRoll } from "../genetics/evolve";
+import { rankOf } from "./arena";
 import { recordFight, simulateBattle, type Difficulty, type Fighter } from "./arena";
 
 /** Study (Academy · Cocina): memory session at the desk → Intelligence. */
@@ -21,6 +25,7 @@ export function completeStudySession(s: GameState, input: { runId: string; quali
   const up = addAttributeXp(s.tamtam, "int", r.xp);
   s.tamtam = up.tamtam;
   s.study.sessions += 1;
+  bumpStage(s.care, "study");
   return { ok: true, coins: r.coins, xp: r.xp, levels: up.gained, duplicate: false };
 }
 
@@ -49,6 +54,7 @@ export function completeMinigame(s: GameState, input: { game: MinigameId; runId:
   s.care.needs.energy = Math.max(0, s.care.needs.energy - 6);
   s.care.lastInteractionAt = input.now;
   for (let i = 0; i < 4; i++) s.care.playLog.push(input.now);
+  bumpStage(s.care, "games");
   const rec = s.records[input.game] ?? { best: 0, plays: 0 };
   const newRecord = input.score > rec.best;
   s.records[input.game] = { best: Math.max(rec.best, input.score), plays: rec.plays + 1 };
@@ -63,11 +69,16 @@ export function playerFighter(s: Readonly<GameState>): Fighter {
   const q = FORM_QUALITY[formQuality(t)];
   const str = arenaStrength(s).total;
   const lvl = 0.4 + 0.012 * t.level;
+  // Evolved forms: each part's family shapes the stats; later stages are stronger.
+  const g = t.genome ? genomeStats(t.genome) : { hp: 1, str: 1, def: 1, spd: 1, crit: 1, skill: 1 };
+  const stageMul = { baby: 1, child: 1.25, juvenile: 1.55, adult: 1.9 }[t.stage];
   return {
     name: t.name, formId: t.formId, alleleId: s.alleleId,
-    hp: Math.round(85 * 0.55 * lvl * 6 * q.statMul + 40),
-    str, def: Math.round(65 * 0.55 * lvl * q.statMul), spd: Math.round(75 * 0.55 * lvl * q.statMul + 20),
-    crit: 45, skillPower: 1.4 * q.skillPower, skillCooldown: 6 * q.skillCooldown,
+    hp: Math.round((85 * 0.55 * lvl * 6 * q.statMul + 40) * g.hp * stageMul),
+    str: Math.round(str * g.str * stageMul), def: Math.round(65 * 0.55 * lvl * q.statMul * g.def * stageMul), spd: Math.round((75 * 0.55 * lvl * q.statMul + 20) * g.spd * (0.8 + 0.2 * stageMul)),
+    crit: Math.round(45 * g.crit), skillPower: 1.4 * q.skillPower * g.skill, skillCooldown: 6 * q.skillCooldown,
+    skillName: t.genome ? FAMILIES[t.genome.parts.back].skill : "Lluvia de Ascuas",
+    genome: t.genome, stage: t.stage,
   };
 }
 
@@ -84,6 +95,8 @@ export function fight(s: GameState, rival: Fighter, d: Difficulty, input: { figh
     s.care.needs.hunger = Math.max(0, s.care.needs.hunger - 6);
     s.buffs = s.buffs.filter((b) => b !== "str_5_next_fight");
     s.tamtam = addAttributeXp(s.tamtam, "str", 20).tamtam;
+    bumpStage(s.care, "fights");
+    if (result.winner === 0) bumpStage(s.care, "wins");
   }
   return { me, result, ...rec };
 }
@@ -98,4 +111,23 @@ export function swapWithFarm(s: GameState, index: number, now: number): void {
   s.care = { ...entry.care, updatedAt: now, lastInteractionAt: now };
   s.alleleId = entry.alleleId;
   s.farm[index] = leaving;
+}
+
+/** Arena record used by Lustre. */
+export function arenaRecord(s: Readonly<GameState>) {
+  return { fights: s.arena.wins + s.arena.losses, wins: s.arena.wins, rankIndex: rankOf(s.arena.pc).index };
+}
+
+/** True when the active Tamtam can evolve now (maturity of the stage reached). */
+export function readyToEvolve(s: Readonly<GameState>): boolean {
+  return canEvolve(s.tamtam, s.care);
+}
+
+/** The Evolution Ritual: runs the evolution algorithm on the active Tamtam. */
+export function evolve(s: GameState, now: number, force = false): EvolutionRoll {
+  if (!s.tamtam) throw new GameRuleError("no_tamtam");
+  advanceCare(s.care, now);
+  const { tamtam, roll } = evolveTamtam(s.tamtam, s.care, now, arenaRecord(s), force);
+  s.tamtam = tamtam;
+  return roll;
 }

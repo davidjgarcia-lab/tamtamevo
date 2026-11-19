@@ -1,5 +1,5 @@
 import { Canvas, createPicture, Picture, Skia } from "@shopify/react-native-skia";
-import type { ChispinClipId } from "@tamtam/art";
+import type { ChispinClipId, GenomeLike } from "@tamtam/art";
 import { useEffect } from "react";
 import { View } from "react-native";
 import { useDerivedValue } from "react-native-reanimated";
@@ -7,8 +7,8 @@ import { drawTamtam, useCreature } from "./useCreature";
 import type { Look } from "./resources";
 
 /** Live animated portrait of a Tamtam (used in Granja, Arena and the header). */
-export function Portrait({ alleleId, size = 96, clip = "idle", dir = 1, look }: { alleleId: string; size?: number; clip?: ChispinClipId; dir?: number; look?: Look }) {
-  const c = useCreature(alleleId, look);
+export function Portrait({ alleleId, size = 96, clip = "idle", dir = 1, look, genome }: { alleleId: string; size?: number; clip?: ChispinClipId; dir?: number; look?: Look; genome?: GenomeLike | null }) {
+  const c = useCreature(alleleId, look, genome);
   useEffect(() => c.play(clip), [clip, c.play]);
   const { res, clock, playback, emitters } = c;
   const scale = size / 215;

@@ -1,4 +1,5 @@
 import {
+  bumpStage,
   advanceCare, bathe, clean, feed, goToSleep, nap, newCareState, pet, play, spendForActivity, wakeUp,
   DEFAULT_CARE_CONFIG, type CareConfig, type CareReaction, type CareState, type NeedId,
 } from "../care/needs";
@@ -192,6 +193,7 @@ export function completeGymSession(s: GameState, input: { runId: string; quality
   const up = addAttributeXp(s.tamtam, "str", r.xp);
   s.tamtam = up.tamtam;
   s.gym.sessions += 1;
+  bumpStage(s.care, "gym");
   const point = s.gym.sessions % GYM.sessionsPerStrPoint === 0;
   if (point) s.gym.strTrainingPoints += 1;
   return { ok: true, coins: r.coins, xp: r.xp, strLevelsGained: up.gained, strPointGained: point, duplicate: false };

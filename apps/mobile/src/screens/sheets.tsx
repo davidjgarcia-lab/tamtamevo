@@ -1,4 +1,5 @@
 import {
+  careProfile, CHISPIN_GENOME, FAMILIES, familyOdds, type FamilyId,
   arenaStrength, ageInDays, DEFAULT_CARE_CONFIG, FORM_QUALITY, formQuality, lifeMark, LUSTRE_NAMES, MARK_NAMES, lustre, SKILL_VARIANT_NAMES, FOODS, history, itemStatus, placedCount, quantity, rename, satisfaction, SLICE_CATALOG,
   validateName, xpToNext, type CatalogItem, type ShopCategory,
 } from "@tamtam/core";
@@ -155,7 +156,7 @@ export function ProfileSheet({ onClose }: { onClose: () => void }) {
     <Sheet title={t.name} onClose={onClose} tall>
       <ScrollView contentContainerStyle={{ gap: 10, paddingBottom: 12 }}>
         <Text style={k.desc}>
-          Brasálido · Chispín ({stageNames[t.stage]}) · Nivel {t.level} · {ageInDays(t, now())} días · Juguetón, Glotón
+          {t.formName ?? "Brasálido · Chispín"} ({stageNames[t.stage]}) · Nivel {t.level} · {ageInDays(t, now())} días · Juguetón, Glotón
         </Text>
         {editing ? (
           <View style={{ gap: 6 }}>
@@ -198,13 +199,41 @@ export function ProfileSheet({ onClose }: { onClose: () => void }) {
           );
         })()}
 
-        <Text style={k.section}>Crecimiento</Text>
-        <Bar label="Madurez" value={(Math.min(state.care.maturity, need) / need) * 100} color="#FF6B35" />
-        <Text style={k.desc}>
-          {state.care.maturity >= need
-            ? "Listo para el Ritual de Evolución. (La forma Fogarín aún no está dibujada en este prototipo.)"
-            : `Madurez ${state.care.maturity.toFixed(1)} / ${need}. Crece más rápido con buenos cuidados y tiempo de juego.`}
-        </Text>
+        <Text style={k.section}>Crecimiento y evolución</Text>
+        {(() => {
+          const need = t.stage === "adult" ? 1 : t.stage === "baby" ? DEFAULT_CARE_CONFIG.maturityThresholds.baby : t.stage === "child" ? DEFAULT_CARE_CONFIG.maturityThresholds.child - DEFAULT_CARE_CONFIG.maturityThresholds.baby : DEFAULT_CARE_CONFIG.maturityThresholds.juvenile - DEFAULT_CARE_CONFIG.maturityThresholds.child;
+          const prof = careProfile(state.care.log, state.care);
+          const odds = familyOdds(prof, t.genome ?? CHISPIN_GENOME);
+          const top = (Object.keys(odds) as FamilyId[]).sort((a, b) => odds[b] - odds[a]).slice(0, 4);
+          return (
+            <>
+              <Bar label="Madurez" value={t.stage === "adult" ? 100 : (Math.min(state.care.maturity, need) / need) * 100} color="#FF6B35" />
+              <Text style={k.desc}>
+                {t.stage === "adult" ? "Forma adulta definitiva." : state.care.maturity >= need ? "¡Listo para el Ritual de Evolución! Búscalo en Casa." : "Crece más rápido con buenos cuidados y tiempo de juego."}
+              </Text>
+              {t.genome && (
+                <Text style={k.desc}>
+                  Forma {t.formName}: cuerpo {FAMILIES[t.genome.parts.body].name}, cabeza {FAMILIES[t.genome.parts.head].name}, patas {FAMILIES[t.genome.parts.legs].name}, cola {FAMILIES[t.genome.parts.tail].name}, lomo {FAMILIES[t.genome.parts.back].name}.
+                </Text>
+              )}
+              {t.stage !== "adult" && (
+                <>
+                  <Text style={k.desc}>Cómo lo estás criando en esta etapa:</Text>
+                  <Bar label="Cuidados" value={prof.care * 100} color={brand.mint} />
+                  <Bar label="Mimos" value={prof.affection * 100} color={brand.pink} />
+                  <Bar label="Higiene" value={prof.hygiene * 100} color={brand.cyan} />
+                  <Bar label="Entreno" value={prof.training * 100} color={brand.orange} />
+                  <Bar label="Combate" value={prof.fighting * 100} color="#FF6B35" />
+                  <Bar label="Estudio" value={prof.study * 100} color={brand.blue} />
+                  <Bar label="Juego" value={prof.play * 100} color={brand.gold} />
+                  <Text style={k.desc}>
+                    Tendencia de la próxima evolución: {top.map((f) => `${FAMILIES[f].name} ${Math.round(odds[f] * 100)}%`).join(" · ")}. Cada pieza (cuerpo, cabeza, patas, cola, lomo) se sortea con estas probabilidades; algunas se heredan y alguna puede mutar.
+                  </Text>
+                </>
+              )}
+            </>
+          );
+        })()}
 
         <Text style={k.section}>Atributos aprendidos</Text>
         {ATTR.map((a) => (
