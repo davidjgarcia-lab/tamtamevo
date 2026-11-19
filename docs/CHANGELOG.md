@@ -4,6 +4,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+### Casa-nido de bosque (2026-11-19)
+#### Añadido
+- **Paredes y suelos editables** (Decorar ▸ Paredes / Suelo, y Tienda ▸ Paredes y suelos): nido trenzado, troncos, piedra con musgo, papel de hojas, corazón del árbol · tablones, musgo, losas de río, anillos de árbol. `setFinish` en core.
+- Habitación como **casa-nido de bosque**: marco de tronco curvado, techo de ramitas con hojas, raíces como zócalo, **ventana redonda** al bosque (luciérnagas de noche).
+- **Cuadros de paisajes** con marco de madera: volcán, noche estrellada, bosque al alba, acantilado y mar, montañas nevadas, aurora boreal, cascada, dunas.
+#### Cambiado
+- Muebles redibujados con formas más reales y sombra de contacto: cama-nido de mimbre con edredón y almohada, lámpara seta con láminas iluminadas, silla con patas, travesaño y respaldo de listones, helecho con frondas y maceta de barro, sofá de troncos, brasero de trípode, soporte de mancuernas, escritorio.
+
 ### Evolución genética según los cuidados + 10 familias (2026-11-19)
 #### Añadido
 - **Evolución jugable**: cuando la madurez de la etapa se completa aparece "¡listo para evolucionar!" en Casa → Ritual (resplandor, destello y la nueva forma con qué familias aportó cada pieza y qué cuidados influyeron).

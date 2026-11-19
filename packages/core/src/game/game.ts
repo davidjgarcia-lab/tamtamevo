@@ -58,10 +58,12 @@ export function newGame(now: number, ids: { tamtamId: string }, alleleId = "bras
     { uid: "p-rug", itemId: "furn_rug_round", layer: "rug", x: 4, y: 2, mirrored: false, rotated: false },
     { uid: "p-lamp", itemId: "furn_lamp_mushroom", layer: "floor", x: 3, y: 0, mirrored: false, rotated: false },
     { uid: "p-poster", itemId: "furn_poster_volcano", layer: "wall", x: 1, y: 1, mirrored: false, rotated: false },
+    { uid: "p-poster2", itemId: "furn_poster_forest", layer: "wall", x: 8, y: 1, mirrored: false, rotated: false },
     { uid: "p-gym", itemId: "gym_dumbbells", layer: "floor", x: 10, y: 0, mirrored: false, rotated: false },
     { uid: "p-desk", itemId: "study_desk", layer: "floor", x: 7, y: 0, mirrored: false, rotated: false },
   ];
   for (const p of starter) placeItem(room, SLICE_CATALOG, inventory, p);
+  room.finishes = { ...room.finishes, wallpaper: "wall_woven", flooring: "floor_planks" };
   return {
     schemaVersion: SCHEMA_VERSION,
     createdAt: now,
@@ -309,4 +311,12 @@ export function debugForceEvolution(s: GameState, to: { formId: string; stage: T
   const tier = lustre(s.care, s.tamtam).tier;
   s.tamtam = applyEvolution(s.tamtam, to, now, 1, tier);
   s.care.maturity = 0;
+}
+
+/** Changes the wall or floor finish of the room (the player must own it). */
+export function setFinish(s: GameState, slot: "wall" | "floor", itemId: string): void {
+  const item = SLICE_CATALOG.get(itemId);
+  if (!item || item.category !== "surfaces" || !itemId.startsWith(slot === "wall" ? "wall_" : "floor_")) throw new GameRuleError("not_a_finish");
+  if (quantity(s.economy.inventory, itemId) < 1) throw new GameRuleError("not_owned");
+  s.room.finishes = slot === "wall" ? { ...s.room.finishes, wallpaper: itemId } : { ...s.room.finishes, flooring: itemId };
 }

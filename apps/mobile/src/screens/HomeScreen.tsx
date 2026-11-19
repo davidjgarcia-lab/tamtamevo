@@ -1,7 +1,7 @@
 import { BlurStyle, Canvas, createPicture, PaintStyle, Picture, Skia } from "@shopify/react-native-skia";
 import type { ChispinClipId } from "@tamtam/art";
 import {
-  buy, careAction, checkPlacement, readyToEvolve, cleanPoop, cloneData, eggProgress, feedFood, FOODS, hatch, lustre, mirror, mood, move, napCooldownLeft, place, PlacementRejected, poopSpot,
+  buy, careAction, checkPlacement, readyToEvolve, setFinish, cleanPoop, cloneData, eggProgress, feedFood, FOODS, hatch, lustre, mirror, mood, move, napCooldownLeft, place, PlacementRejected, poopSpot,
   SLICE_CATALOG, unplace, type CareKind, type CareReaction, type CatalogItem, type Placement,
 } from "@tamtam/core";
 import { transformPoint } from "@tamtam/rig";
@@ -19,7 +19,7 @@ import { Btn } from "../ui/kit";
 import { Icon } from "../ui/icons";
 import { GymPanel, NO_SELECT } from "./GymPanel";
 import { NamingPanel } from "./NamingPanel";
-import { FoodSheet, InventoryTray } from "./sheets";
+import { FinishTray, FoodSheet, InventoryTray } from "./sheets";
 import { StudyPanel } from "./StudyPanel";
 import { IconAction } from "./IconAction";
 
@@ -87,6 +87,7 @@ export function HomeScreen({
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [food, setFood] = useState(false);
   const [mode, setMode] = useState<Mode>({ kind: "play" });
+  const [decorTab, setDecorTab] = useState<"Muebles" | "Paredes" | "Suelo">("Muebles");
   const [reaction, setReaction] = useState<ChispinClipId | null>(null);
   const [activityClip, setActivityClip] = useState<ChispinClipId | null>(null);
   const [walking, setWalking] = useState(false);
@@ -556,7 +557,25 @@ export function HomeScreen({
       {mode.kind === "decor" && (
         <View style={h.panel}>
           <Text style={h.panelTitle}>Decorar · toca un objeto y luego una casilla</Text>
-          <InventoryTray selected={mode.pendingItem} onPick={(id) => setMode({ kind: "decor", selectedUid: null, pendingItem: id })} />
+          <View style={h.row}>
+            {(["Muebles", "Paredes", "Suelo"] as const).map((tb) => (
+              <Btn key={tb} small label={tb} tone={decorTab === tb ? "dark" : "light"} onPress={() => setDecorTab(tb)} style={h.flex} testID={`decor-tab-${tb}`} />
+            ))}
+          </View>
+          {decorTab === "Muebles" ? (
+            <InventoryTray selected={mode.pendingItem} onPick={(id) => setMode({ kind: "decor", selectedUid: null, pendingItem: id })} />
+          ) : (
+            <FinishTray
+              slot={decorTab === "Paredes" ? "wall" : "floor"}
+              onPick={(id) => {
+                try {
+                  act((s) => setFinish(s, decorTab === "Paredes" ? "wall" : "floor", id));
+                } catch {
+                  toast("Consíguelo en la Tienda (Paredes y suelos).");
+                }
+              }}
+            />
+          )}
           <View style={h.row}>
             <Btn small label="Girar" disabled={!mode.selectedUid} onPress={() => { try { act((s) => mirror(s, mode.selectedUid!)); } catch { toast("Ese objeto no se puede girar."); } }} style={h.flex} />
             <Btn small label="Retirar" disabled={!mode.selectedUid} onPress={() => { act((s) => unplace(s, mode.selectedUid!)); setMode({ ...mode, selectedUid: null }); }} style={h.flex} />

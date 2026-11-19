@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   advanceCare, arenaStrength, auditWallet, buy, careAction, completeGymSession, debugAttributeLevels, debugCoins, debugForceEvolution,
   deserialize, eggProgress, feedFood, GameRuleError, GYM, hatch, MemoryStore, nameNewTamtam, newCareState, newGame, place, quantity,
-  rename, serialize, simulate, PROFILES, upgradeGym, tick, DEFAULT_CARE_CONFIG, type GameState,
+  rename, serialize, simulate, PROFILES, upgradeGym, tick, setFinish, DEFAULT_CARE_CONFIG, type GameState,
 } from "../index";
 
 const H = 3_600_000;
@@ -221,5 +221,18 @@ describe("lifecycle simulation", () => {
       expect(r.hoursToAdult!, p.id).toBeGreaterThanOrEqual(119);
       expect(r.hoursToAdult!, p.id).toBeLessThanOrEqual(168);
     }
+  });
+});
+
+describe("nest-house finishes", () => {
+  it("applies owned wall/floor finishes and refuses others", () => {
+    const s = hatched();
+    expect(s.room.finishes.wallpaper).toBe("wall_woven");
+    expect(() => setFinish(s, "wall", "wall_logs")).toThrow(/not_owned/);
+    debugCoins(s, 1000, T0);
+    buy(s, "wall_logs", "w1", T0);
+    setFinish(s, "wall", "wall_logs");
+    expect(s.room.finishes.wallpaper).toBe("wall_logs");
+    expect(() => setFinish(s, "floor", "wall_logs")).toThrow(/not_a_finish/);
   });
 });

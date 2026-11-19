@@ -59,8 +59,14 @@ export const FURNITURE: CatalogItem[] = [
   furn("furn_rug_round", "Alfombra de brasas", "Ember rug", "decoration", 0, "common", { layer: "rug", w: 4, h: 2, mirrorable: false, rotatable: false, comfort: 1 }, 2),
   furn("furn_lamp_mushroom", "Lámpara seta", "Mushroom lamp", "lighting", 0, "common", { layer: "floor", w: 1, h: 1, mirrorable: true, rotatable: false, comfort: 1, interactions: [{ kind: "toggle_light", dx: 0, dy: 0, capacity: 1 }] }, 3),
   furn("furn_chair_wood", "Silla de madera", "Wooden chair", "furniture", 120, "common", { layer: "floor", w: 1, h: 1, mirrorable: true, rotatable: false, comfort: 1, interactions: [{ kind: "sit", dx: 0, dy: 0, capacity: 1 }] }),
-  furn("furn_poster_volcano", "Póster Volcán", "Volcano poster", "decoration", 80, "common", { layer: "wall", w: 2, h: 2, mirrorable: false, rotatable: false, comfort: 1, colorVariants: ["dusk", "night"] }),
-  furn("furn_poster_stars", "Póster Estrellas", "Stars poster", "decoration", 150, "common", { layer: "wall", w: 2, h: 2, mirrorable: false, rotatable: false, comfort: 1 }),
+  furn("furn_poster_volcano", "Cuadro Volcán", "Volcano painting", "decoration", 80, "common", { layer: "wall", w: 2, h: 2, mirrorable: false, rotatable: false, comfort: 1, colorVariants: ["dusk", "night"] }),
+  furn("furn_poster_stars", "Cuadro Noche estrellada", "Starry night painting", "decoration", 150, "common", { layer: "wall", w: 2, h: 2, mirrorable: false, rotatable: false, comfort: 1 }),
+  furn("furn_poster_forest", "Cuadro Bosque al alba", "Forest at dawn painting", "decoration", 90, "common", { layer: "wall", w: 2, h: 2, mirrorable: false, rotatable: false, comfort: 1 }),
+  furn("furn_poster_sea", "Cuadro Acantilado y mar", "Sea cliffs painting", "decoration", 110, "common", { layer: "wall", w: 2, h: 2, mirrorable: false, rotatable: false, comfort: 1 }),
+  furn("furn_poster_mountains", "Cuadro Montañas nevadas", "Snowy mountains painting", "decoration", 130, "common", { layer: "wall", w: 2, h: 2, mirrorable: false, rotatable: false, comfort: 1 }),
+  furn("furn_poster_aurora", "Cuadro Aurora boreal", "Aurora painting", "decoration", 220, "uncommon", { layer: "wall", w: 2, h: 2, mirrorable: false, rotatable: false, comfort: 2 }),
+  furn("furn_poster_waterfall", "Cuadro Cascada escondida", "Hidden waterfall painting", "decoration", 160, "common", { layer: "wall", w: 2, h: 2, mirrorable: false, rotatable: false, comfort: 1 }),
+  furn("furn_poster_desert", "Cuadro Dunas al atardecer", "Desert dunes painting", "decoration", 120, "common", { layer: "wall", w: 2, h: 2, mirrorable: false, rotatable: false, comfort: 1 }),
   furn("furn_plant_fern", "Helecho de fuego", "Fire fern", "decoration", 180, "uncommon", { layer: "floor", w: 1, h: 1, mirrorable: true, rotatable: false, comfort: 2, interactions: [{ kind: "look", dx: 0, dy: 0, capacity: 1 }] }),
   furn("furn_sofa_cushion", "Sofá de cojines", "Cushion sofa", "furniture", 650, "uncommon", { layer: "floor", w: 3, h: 1, mirrorable: true, rotatable: false, comfort: 3, interactions: [{ kind: "sit", dx: 1, dy: 0, capacity: 2 }] }, 1),
   furn("furn_brazier", "Brasero de cobre", "Copper brazier", "lighting", 1200, "rare", { layer: "floor", w: 1, h: 1, mirrorable: false, rotatable: false, comfort: 3 }, 2),
@@ -68,7 +74,26 @@ export const FURNITURE: CatalogItem[] = [
   furn("study_desk", "Escritorio de estudio", "Study desk", "equipment", 0, "common", { layer: "floor", w: 2, h: 1, mirrorable: true, rotatable: false, interactions: [{ kind: "study", dx: 0, dy: 0, capacity: 1 }] }, 1),
 ];
 
-export const SLICE_CATALOG = validateCatalog([...FURNITURE, ...Object.values(FOODS).map((f) => f.item)]);
+/** Wall and floor finishes of the nest-house (category "surfaces"): not placed, applied to the whole room. */
+const finish = (id: string, es: string, en: string, price: number, rarity: CatalogItem["rarity"], desc: string): CatalogItem => ({
+  ...base, id, name: { es, en }, description: { es: desc, en: desc }, image: `surfaces/${id}`,
+  price: { currency: "tamcoin", amount: price }, category: "surfaces", rarity, level: 1, maxOwned: 1, stackable: false,
+});
+export const WALL_FINISHES: CatalogItem[] = [
+  finish("wall_woven", "Pared de nido trenzado", "Woven nest wall", 0, "common", "Ramas trenzadas, como el interior de un nido."),
+  finish("wall_logs", "Pared de troncos", "Log cabin wall", 140, "common", "Troncos apilados de cabaña de bosque."),
+  finish("wall_moss", "Piedra con musgo", "Mossy stone wall", 180, "uncommon", "Piedra fresca cubierta de musgo y helechos."),
+  finish("wall_leaves", "Papel de hojas", "Leaf wallpaper", 120, "common", "Papel pintado con hojas de otoño."),
+  finish("wall_treeheart", "Corazón del árbol", "Tree heart wall", 260, "rare", "Madera viva con vetas y luciérnagas."),
+];
+export const FLOOR_FINISHES: CatalogItem[] = [
+  finish("floor_planks", "Suelo de tablones", "Wooden planks", 0, "common", "Tablones de madera cálida."),
+  finish("floor_moss", "Alfombra de musgo", "Moss floor", 150, "common", "Musgo mullido con tréboles."),
+  finish("floor_stone", "Losas de río", "River stones", 170, "uncommon", "Piedras redondeadas del río."),
+  finish("floor_rings", "Anillos de árbol", "Tree rings", 210, "rare", "Rodajas de tronco con sus anillos."),
+];
+
+export const SLICE_CATALOG = validateCatalog([...FURNITURE, ...WALL_FINISHES, ...FLOOR_FINISHES, ...Object.values(FOODS).map((f) => f.item)]);
 
 /** Items granted at the start of the game (welcome pack). */
 export const STARTER_ITEMS: Record<string, number> = {
@@ -76,6 +101,9 @@ export const STARTER_ITEMS: Record<string, number> = {
   furn_rug_round: 1,
   furn_lamp_mushroom: 1,
   furn_poster_volcano: 1,
+  furn_poster_forest: 1,
+  wall_woven: 1,
+  floor_planks: 1,
   gym_dumbbells: 1,
   study_desk: 1,
   food_berry_bun: 3,

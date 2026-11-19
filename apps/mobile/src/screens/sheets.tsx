@@ -1,10 +1,11 @@
 import {
+  FLOOR_FINISHES, WALL_FINISHES,
   careProfile, CHISPIN_GENOME, FAMILIES, familyOdds, type FamilyId,
   arenaStrength, ageInDays, DEFAULT_CARE_CONFIG, FORM_QUALITY, formQuality, lifeMark, LUSTRE_NAMES, MARK_NAMES, lustre, SKILL_VARIANT_NAMES, FOODS, history, itemStatus, placedCount, quantity, rename, satisfaction, SLICE_CATALOG,
   validateName, xpToNext, type CatalogItem, type ShopCategory,
 } from "@tamtam/core";
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useGame } from "../game/GameProvider";
 import { brand, colors, fonts } from "../theme";
 import { Bar, Btn, Coin, Sheet } from "../ui/kit";
@@ -52,6 +53,7 @@ const CATS: { id: ShopCategory; label: string }[] = [
   { id: "decoration", label: "Decoración" },
   { id: "lighting", label: "Iluminación" },
   { id: "equipment", label: "Equipamiento" },
+  { id: "surfaces", label: "Paredes y suelos" },
 ];
 
 /** Tienda (its own section of the app, outside the room). */
@@ -62,7 +64,7 @@ export function ShopView({ onBuy, onPreview }: { onBuy: (item: CatalogItem) => v
   return (
     <View style={{ flex: 1, paddingHorizontal: 12, paddingTop: 8 }}>
       <Text style={k.screenTitle}>Tienda</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }} contentContainerStyle={{ gap: 6, paddingBottom: 10 }}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, flexShrink: 0, minHeight: 60 }} contentContainerStyle={{ gap: 6, paddingBottom: 10, alignItems: "center" }}>
         {CATS.map((c) => (
           <Btn key={c.id} label={c.label} small tone={c.id === cat ? "dark" : "light"} onPress={() => setCat(c.id)} />
         ))}
@@ -252,6 +254,26 @@ export function ProfileSheet({ onClose }: { onClose: () => void }) {
   );
 }
 
+/** Wall / floor finishes: owned ones apply at once, others show where to get them. */
+export function FinishTray({ slot, onPick }: { slot: "wall" | "floor"; onPick: (id: string) => void }) {
+  const { state } = useGame();
+  const list = (slot === "wall" ? WALL_FINISHES : FLOOR_FINISHES);
+  const current = slot === "wall" ? state.room.finishes.wallpaper ?? "wall_woven" : state.room.finishes.flooring;
+  return (
+    <ScrollView horizontal contentContainerStyle={{ gap: 8 }} showsHorizontalScrollIndicator={false}>
+      {list.map((f) => {
+        const owned = quantity(state.economy.inventory, f.id) > 0;
+        return (
+          <Pressable key={f.id} onPress={() => onPick(f.id)} style={[k.finish, current === f.id && k.finishOn, !owned && { opacity: 0.5 }]} accessibilityRole="button" accessibilityLabel={f.name.es} testID={`finish-${f.id}`}>
+            <ItemIcon id={f.id} size={54} />
+            <Text style={k.finishName} numberOfLines={2}>{owned ? f.name.es : `${f.name.es} · ${f.price.amount} TC`}</Text>
+          </Pressable>
+        );
+      })}
+    </ScrollView>
+  );
+}
+
 export function InventoryTray({ onPick, selected }: { onPick: (itemId: string) => void; selected: string | null }) {
   const { state } = useGame();
   const free = [...SLICE_CATALOG.values()].filter((i) => i.furniture && quantity(state.economy.inventory, i.id) - placedCount(state.room, i.id) > 0);
@@ -277,6 +299,9 @@ const k = StyleSheet.create({
   txLabel: { fontFamily: fonts.display, fontSize: 15, color: colors.ink },
   txDate: { fontFamily: fonts.body, fontSize: 12, color: colors.inkSoft },
   txAmount: { fontFamily: fonts.displayBold, fontSize: 18, fontVariant: ["tabular-nums"] },
+  finish: { width: 82, alignItems: "center", gap: 4, padding: 4, borderRadius: 14, borderWidth: 2, borderColor: "transparent" },
+  finishOn: { borderColor: brand.cyan },
+  finishName: { fontFamily: fonts.bodyBold, fontSize: 10, color: colors.inkSoft, textAlign: "center" },
   screenTitle: { fontFamily: fonts.displayBold, fontSize: 28, color: colors.ink, marginBottom: 6 },
   thumb: { width: 64, height: 64, borderRadius: 14, backgroundColor: brand.core, alignItems: "center", justifyContent: "center" },
   section: { fontFamily: fonts.displayBold, fontSize: 17, color: colors.ink, marginTop: 8 },

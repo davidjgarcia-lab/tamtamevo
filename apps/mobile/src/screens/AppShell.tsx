@@ -1,4 +1,4 @@
-import { buy, PurchaseError, type CatalogItem } from "@tamtam/core";
+import { buy, PurchaseError, setFinish, type CatalogItem } from "@tamtam/core";
 import { useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -51,8 +51,11 @@ export function AppShell() {
 
   const onBuy = (item: CatalogItem) => {
     try {
-      act((s) => buy(s, item.id, newId(), now()));
-      toast(`Has comprado: ${item.name.es}`);
+      act((s) => {
+        buy(s, item.id, newId(), now());
+        if (item.category === "surfaces") setFinish(s, item.id.startsWith("wall_") ? "wall" : "floor", item.id);
+      });
+      toast(item.category === "surfaces" ? `${item.name.es} aplicado en tu casa` : `Has comprado: ${item.name.es}`);
     } catch (e) {
       toast(e instanceof PurchaseError ? "No puedes comprarlo ahora." : "Error en la compra.");
     }
