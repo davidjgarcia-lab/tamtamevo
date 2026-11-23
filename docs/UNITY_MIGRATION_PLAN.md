@@ -11,17 +11,17 @@ Unreal (3D, desproporcionado) y GameMaker (sin ventaja) se descartan; Godot qued
 | Capa | Tecnología | Estado |
 |---|---|---|
 | Reglas (cuidados, economía, genética, Arena) | C# puro (`TamTam.Core`, sin UnityEngine) portado de `packages/core` | Genética **portada** con test de paridad; resto pendiente |
-| Criaturas | 2D Animation: PSB por familia con capas comunes + mismo esqueleto; Sprite Library (categoría = pieza, etiqueta = familia_variante) | `GenomeView` escrito; arte pendiente |
-| Materiales | Shader Graph `TamTam/CreatureLit`: máscaras R/G/B → base/acento/emisivo, translucidez, rim light, iridiscencia | pendiente |
-| Luz y post | URP 2D Renderer: luces 2D por habitación, bloom, color grading | pendiente |
-| Partículas | VFX Graph / Particle System por familia (ascuas, hojas, chispas, burbujas, niebla) | pendiente |
+| Criaturas | 2D Animation: PSB por familia con capas comunes + mismo esqueleto; Sprite Library (categoría = pieza, etiqueta = familia_variante) | Chispín: rig completo, cola con SpriteSkin (4 huesos), 14 clips + Animator, capa procedural; **arte provisional generado** (falta el PSB pintado) |
+| Materiales | `TamTam/CreatureLit` (HLSL para el 2D Renderer): máscara R/G/A → base/acento/glow, B → emisivo HDR, iridiscencia | hecho (translucidez y rim por shader, pendientes) |
+| Luz y post | URP 2D Renderer: luces 2D por habitación, bloom, color grading | hecho (escena ChispinLab) |
+| Partículas | VFX Graph / Particle System por familia (ascuas, hojas, chispas, burbujas, niebla) | ascuas de Chispín (Particle System + shader aditivo HDR); resto pendiente |
 | UI | UI Toolkit con los tokens de marca (BRAND_SYSTEM) | pendiente |
 | Guardado | JSON con el mismo esquema (SCHEMA_VERSION 2) → migración de partidas | pendiente |
 
 ## 2. Fases
 
-1. **Fundación** (necesita tu ordenador con Unity): abrir el proyecto, instalar paquetes, pasar los tests de paridad, URP 2D + bloom.
-2. **Chispín pintado**: generar el concepto pintado, separarlo por capas, rig en 2D Animation, los 14 clips (idle, walk, run, eat, pet, sleep, celebrate, train, bathe, sad, hungry, angry, attack, hit). *Hito de calidad: compararlo con tus referencias.*
+1. **Fundación** ✅ (2026-11-23, Unity 6000.3.29f1): paquetes instalados, 18/18 tests de paridad, URP 2D + bloom.
+2. **Chispín pintado** — técnica ✅ (rig, 14 clips, luces, bloom, recoloreo; render en `docs/media/unity/chispin-clips.png`), arte pintado ⏳: generar el concepto pintado, separarlo por capas, rig en 2D Animation, los 14 clips (idle, walk, run, eat, pet, sleep, celebrate, train, bathe, sad, hungry, angry, attack, hit). *Hito de calidad: compararlo con tus referencias.*
 3. **Piezas de las 9 familias** (2 variantes por pieza) en el mismo formato → evolución visible en Unity.
 4. **Port del juego**: habitación, cuidados táctiles, comida/ducha/fregona, minijuegos, Gym/Estudio, Granja, Tienda, Arena, Conectar.
 5. **Móvil**: builds Android/iOS, rendimiento (atlas, batching), pruebas en dispositivos.

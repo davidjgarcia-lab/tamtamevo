@@ -1,7 +1,17 @@
-{
+﻿{
   "name": "TamTam.Editor",
   "rootNamespace": "TamTam.EditorTools",
-  "references": ["TamTam.Core"],
+  "references": [
+    "TamTam.Core",
+    "TamTam.Runtime",
+    "Unity.2D.Animation.Runtime",
+    "Unity.2D.Sprite.Editor",
+    "Unity.RenderPipelines.Universal.Runtime",
+    "Unity.RenderPipelines.Universal.2D.Runtime",
+    "Unity.RenderPipelines.Universal.Editor",
+    "Unity.RenderPipelines.Core.Runtime",
+    "Unity.RenderPipelines.Core.Editor"
+  ],
   "includePlatforms": ["Editor"],
   "autoReferenced": false
 }

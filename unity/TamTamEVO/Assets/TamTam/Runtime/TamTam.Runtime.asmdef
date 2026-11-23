@@ -1,6 +1,6 @@
-{
+﻿{
   "name": "TamTam.Runtime",
   "rootNamespace": "TamTam",
-  "references": ["TamTam.Core", "Unity.2D.Animation.Runtime"],
+  "references": ["TamTam.Core", "Unity.2D.Animation.Runtime", "Unity.RenderPipelines.Universal.Runtime", "Unity.RenderPipelines.Universal.2D.Runtime", "Unity.RenderPipelines.Core.Runtime"],
   "autoReferenced": true
 }

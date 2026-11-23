@@ -3,6 +3,8 @@
   "rootNamespace": "TamTam.Tests",
   "references": [
     "TamTam.Core",
+    "TamTam.Runtime",
+    "Unity.2D.Animation.Runtime",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"
   ],
