@@ -71,13 +71,34 @@ Shader "TamTam/CreatureLit"
                 return o;
             }
 
+            half3 RgbToHsv(half3 c)
+            {
+                half4 K = half4(0.0h, -1.0h / 3.0h, 2.0h / 3.0h, -1.0h);
+                half4 p = lerp(half4(c.bg, K.wz), half4(c.gb, K.xy), step(c.b, c.g));
+                half4 q = lerp(half4(p.xyw, c.r), half4(c.r, p.yzx), step(p.x, c.r));
+                half d = q.x - min(q.w, q.y);
+                return half3(abs(q.z + (q.w - q.y) / (6.0h * d + 1e-4h)), d / (q.x + 1e-4h), q.x);
+            }
+            half3 HsvToRgb(half3 c)
+            {
+                half3 p = abs(frac(c.xxx + half3(1.0h, 2.0h / 3.0h, 1.0h / 3.0h)) * 6.0h - 3.0h);
+                return c.z * lerp(half3(1, 1, 1), saturate(p - 1.0h), c.y);
+            }
+            // Moves the pixel from the painted reference colour to the genome colour in HSV, keeping the
+            // painter's per-pixel hue/value variation (identity when genome == reference).
+            half3 Shift(half3 tex, half3 refC, half3 newC)
+            {
+                half3 t = RgbToHsv(tex), r = RgbToHsv(refC), n = RgbToHsv(newC);
+                t.x = frac(t.x + n.x - r.x);
+                t.y = saturate(t.y * n.y / max(r.y, 0.05h));
+                t.z = t.z * n.z / max(r.z, 0.05h);
+                return HsvToRgb(t);
+            }
             half3 Recolor(half3 tex, half4 m)
             {
-                half3 rb = _BaseColor.rgb / max(_RefBase.rgb, 0.02h);
-                half3 ra = _AccentColor.rgb / max(_RefAccent.rgb, 0.02h);
-                half3 rg = _GlowColor.rgb / max(_RefGlow.rgb, 0.02h);
                 half keep = saturate(1.0h - m.r - m.g - m.a);
-                return tex * (keep + m.r * rb + m.g * ra + m.a * rg);
+                return tex * keep + Shift(tex, _RefBase.rgb, _BaseColor.rgb) * m.r
+                     + Shift(tex, _RefAccent.rgb, _AccentColor.rgb) * m.g + Shift(tex, _RefGlow.rgb, _GlowColor.rgb) * m.a;
             }
 
             half4 LitFragment(Varyings input) : SV_Target

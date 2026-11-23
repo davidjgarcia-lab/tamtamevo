@@ -256,7 +256,7 @@ namespace TamTam.EditorTools.Chispin
         }
 
         // ── Materials ───────────────────────────────────────────────────────
-        static Material CreatureMaterial(Dictionary<string, (Color c, int fam)> pal)
+        internal static Material CreatureMaterial(Dictionary<string, (Color c, int fam)> pal)
         {
             string path = $"{MatDir}/CreatureLit.mat";
             var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
@@ -269,7 +269,7 @@ namespace TamTam.EditorTools.Chispin
             return mat;
         }
 
-        static Material EmberMaterial()
+        internal static Material EmberMaterial()
         {
             string texPath = $"{GenDir}/ember_dot.png";
             const int n = 64; var t = new Texture2D(n, n, TextureFormat.RGBA32, false);
@@ -390,7 +390,7 @@ namespace TamTam.EditorTools.Chispin
             return k[i].v + (k[i + 1].v - k[i].v) * EaseFn(k[i].e, u);
         }
 
-        static AnimationCurve Bake(Key[] keys, float dur, Func<float, float> map)
+        internal static AnimationCurve Bake(Key[] keys, float dur, Func<float, float> map)
         {
             var curve = new AnimationCurve();
             if (keys == null || keys.Length == 1)
@@ -464,9 +464,8 @@ namespace TamTam.EditorTools.Chispin
             return result;
         }
 
-        static AnimatorController BuildController(List<ClipDef> defs, List<AnimationClip> clips)
+        internal static AnimatorController BuildController(List<ClipDef> defs, List<AnimationClip> clips, string path = AnimDir + "/Chispin.controller")
         {
-            string path = $"{AnimDir}/Chispin.controller";
             AssetDatabase.DeleteAsset(path);
             var ctrl = AnimatorController.CreateAnimatorControllerAtPath(path);
             var sm = ctrl.layers[0].stateMachine;
@@ -508,7 +507,7 @@ namespace TamTam.EditorTools.Chispin
         }
 
         // ── Scene ───────────────────────────────────────────────────────────
-        static Sprite GeneratedSprite(string name, int w, int h, float ppu, Func<float, float, Color> f)
+        internal static Sprite GeneratedSprite(string name, int w, int h, float ppu, Func<float, float, Color> f)
         {
             var t = new Texture2D(w, h, TextureFormat.RGBA32, false);
             var px = new Color[w * h];
@@ -524,7 +523,7 @@ namespace TamTam.EditorTools.Chispin
             return AssetDatabase.LoadAssetAtPath<Sprite>(path);
         }
 
-        static Light2D AddLight(string name, Light2D.LightType type, Vector3 pos, string hex, float intensity, float radius = 0)
+        internal static Light2D AddLight(string name, Light2D.LightType type, Vector3 pos, string hex, float intensity, float radius = 0)
         {
             var go = new GameObject(name); go.transform.position = pos;
             var l = go.AddComponent<Light2D>();

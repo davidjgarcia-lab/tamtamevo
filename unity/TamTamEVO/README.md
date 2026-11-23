@@ -29,7 +29,17 @@ Desde línea de comandos (con el Editor cerrado):
 | `Assets/TamTam/Runtime/GenomeView.cs` | Montaje por genoma con Sprite Library (para las piezas de las 9 familias, fase 3) |
 | `../../docs/media/unity/chispin-clips.png` | Render de verificación generado en batch (14 clips + alelos Azul Llama y Oro Fundido) |
 
-## Arte
+## Chispín pintado (actual)
+
+- **TamTam ▸ Build Chispín PAINTED** (o `-executeMethod TamTam.EditorTools.Chispin.PaintedChispinBuilder.BuildBatch`):
+  toma `Art/Creatures/Chispin/Painted/chispin_side_raw.png` (ilustración pintada con IA, perfil, fondo transparente),
+  coloca 16 huesos sobre la pintura, genera malla y pesos automáticos (las llamas siguen a los huesos de cresta),
+  la máscara de tinte por color, los 14 clips re-apuntados a este rig y la escena `ChispinLab`.
+- Render de verificación con deformación real: `docs/media/unity/chispin-painted-clips.png`.
+- Pendiente: variantes de cara (ojos cerrados/felices, boca abierta) como superposiciones pintadas, fondo pintado del
+  hábitat (`Art/Environments/FireDen/fire_den_bg.png`; la escena lo usa en cuanto existe) y el resto de Tamtams.
+
+## Arte (versión vectorial)
 
 Las capas de `Art/Creatures/Chispin/Generated` se **generan** desde las formas del prototipo con sombreado, grano y
 líneas más finas: son provisionales. Cuando llegue el PSB pintado por IA (formato en `Art/Creatures/README.md`)
