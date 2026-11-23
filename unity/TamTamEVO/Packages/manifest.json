@@ -1,5 +1,10 @@
 {
   "dependencies": {
+    "com.unity.feature.2d": "2.0.2",
+    "com.unity.render-pipelines.universal": "17.3.0",
+    "com.unity.shadergraph": "17.3.0",
+    "com.unity.inputsystem": "1.14.0",
+    "com.unity.test-framework": "1.6.0",
     "com.unity.ugui": "2.0.0",
     "com.unity.modules.ui": "1.0.0",
     "com.unity.modules.imgui": "1.0.0",
