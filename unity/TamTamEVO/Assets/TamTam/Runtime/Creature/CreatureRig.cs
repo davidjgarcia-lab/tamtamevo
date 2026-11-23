@@ -33,6 +33,8 @@ namespace TamTam
         public Transform[] eyeBones;
         [Tooltip("Active while the eyes are open (blink only then).")]
         public GameObject eyesOpen;
+        [Tooltip("Painted rigs: a closed-eye overlay shown during blinks (instead of squashing eye bones).")]
+        public GameObject blinkOverlay;
         public ParticleSystem embers;
         public Renderer[] tinted;
         public float seed = 1;
@@ -100,6 +102,7 @@ namespace TamTam
                 float open = Mathf.Max(0.08f, BlinkOpenness(time, seed));
                 foreach (var e in eyeBones) { var s = e.localScale; e.localScale = new Vector3(s.x, s.y * open, s.z); }
             }
+            if (info.blink && blinkOverlay && !blinkOverlay.activeSelf && BlinkOpenness(time, seed) < 0.5f) blinkOverlay.SetActive(true);
 
             // Follow-through. Rig rotations are clockwise (SVG); Unity's z is counter-clockwise → signs flip.
             if (secondary != null)

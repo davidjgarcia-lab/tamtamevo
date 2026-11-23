@@ -96,6 +96,7 @@ Transform:
   m_Children:
   - {fileID: 2458122975711149810}
   - {fileID: 3832385777293163638}
+  - {fileID: 2020417221006109576}
   m_Father: {fileID: 7089035213324579283}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2834150809575458085
@@ -160,6 +161,97 @@ Transform:
   m_Children: []
   m_Father: {fileID: 5380632900276200267}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4310947647014713437
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2020417221006109576}
+  - component: {fileID: 2581179203044419640}
+  m_Layer: 0
+  m_Name: face_eyesClosed
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &2020417221006109576
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4310947647014713437}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0.01743391, w: 0.999848}
+  m_LocalPosition: {x: 0.3583157, y: 0.142095, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5245216048839379991}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &2581179203044419640
+SpriteRenderer:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4310947647014713437}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 2a05e75e6df799440b805752b699ac7b, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 1
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: 21300000, guid: a6a3eee83c543f2429619a80ee2e5a3c, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 0.6605351, y: 0.46404684}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
 --- !u!1 &4517291570652155784
 GameObject:
   m_ObjectHideFlags: 0
@@ -5166,28 +5258,28 @@ MonoBehaviour:
     breath: 1
     breathRate: 0.45
     flicker: 1
-    blink: 0
+    blink: 1
     embers: 2.4
   - id: walk
     loop: 1
     breath: 0.3
     breathRate: 0.45
     flicker: 1
-    blink: 0
+    blink: 1
     embers: 4
   - id: run
     loop: 1
     breath: 0.2
     breathRate: 0.45
     flicker: 1.4
-    blink: 0
+    blink: 1
     embers: 7
   - id: eat
     loop: 1
     breath: 1
     breathRate: 0.45
     flicker: 1.2
-    blink: 0
+    blink: 1
     embers: 3
   - id: pet
     loop: 1
@@ -5229,14 +5321,14 @@ MonoBehaviour:
     breath: 0.6
     breathRate: 0.3
     flicker: 0.45
-    blink: 0
+    blink: 1
     embers: 0.7
   - id: hungry
     loop: 1
     breath: 1
     breathRate: 0.45
     flicker: 1
-    blink: 0
+    blink: 1
     embers: 1.4
   - id: angry
     loop: 1
@@ -5326,9 +5418,11 @@ MonoBehaviour:
   breathBone: {fileID: 5380632900276200267}
   eyeBones: []
   eyesOpen: {fileID: 0}
+  blinkOverlay: {fileID: 4310947647014713437}
   embers: {fileID: 5319950544750345896}
   tinted:
   - {fileID: 3208299071001301995}
+  - {fileID: 2581179203044419640}
   seed: 1
   velocity: 0
   crossFade: 0.15

@@ -152,6 +152,18 @@ namespace TamTam.EditorTools.Chispin
             var state = skin.SetBoneTransforms(Layout.Select(b => bones[b.id]).ToArray());
             skin.alwaysUpdate = true;
             if (state != SpriteSkinState.Ready) Debug.LogWarning($"TamTam: painted SpriteSkin state {state}");
+            // Face overlay: closed eyes cut from an edited variant of the painting, riding the head bone.
+            GameObject eyesClosed = null;
+            if (MakeEyePatch(px, W, H, k, out var eyeC))
+            {
+                var spr = ImportOverlay(EyesClosedPath, EyesClosedMask, ppu);
+                eyesClosed = new GameObject("face_eyesClosed");
+                eyesClosed.transform.SetParent(go.transform, false);
+                eyesClosed.transform.localPosition = (eyeC - pivotPx) / ppu;
+                eyesClosed.transform.SetParent(bones["head"], true);
+                var esr = eyesClosed.AddComponent<SpriteRenderer>(); esr.sprite = spr; esr.sharedMaterial = pmat; esr.sortingOrder = 1;
+                eyesClosed.SetActive(false);
+            }
 
             // Embers + crest light at the flame crest.
             var emberMat = ChispinBuilder.EmberMaterial();
@@ -198,7 +210,21 @@ namespace TamTam.EditorTools.Chispin
                     Set("m_LocalScale.y", ChispinBuilder.Bake(Get("sy"), c.duration, v => float.IsNaN(v) ? 1 : v));
                     Set("m_LocalScale.z", ChispinBuilder.Bake(null, c.duration, v => 1));
                 }
-                var settings = AnimationUtility.GetAnimationClipSettings(clip); settings.loopTime = c.loop; AnimationUtility.SetAnimationClipSettings(clip, settings);
+                if (eyesClosed)
+                {
+                    var keys = c.face.TryGetValue("eyes", out var fk) && fk.Length > 0 ? fk : new[] { new FaceKey(0, "open") };
+                    float On(string v) => v == "closed" || v == "happy" ? 1 : 0;
+                    var curve = new AnimationCurve();
+                    if (keys[0].t > 0) curve.AddKey(0, 0);
+                    foreach (var fkey in keys) curve.AddKey(fkey.t, On(fkey.v));
+                    curve.AddKey(c.duration, On(keys[keys.Length - 1].v));
+                    for (int i = 0; i < curve.length; i++)
+                    {
+                        AnimationUtility.SetKeyLeftTangentMode(curve, i, AnimationUtility.TangentMode.Constant);
+                        AnimationUtility.SetKeyRightTangentMode(curve, i, AnimationUtility.TangentMode.Constant);
+                    }
+                    AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(AnimationUtility.CalculateTransformPath(eyesClosed.transform, go.transform), typeof(GameObject), "m_IsActive"), curve);
+                }                var settings = AnimationUtility.GetAnimationClipSettings(clip); settings.loopTime = c.loop; AnimationUtility.SetAnimationClipSettings(clip, settings);
                 EditorUtility.SetDirty(clip); clips.Add(clip);
             }
             var ctrl = ChispinBuilder.BuildController(defs, clips, $"{AnimDir}/ChispinPainted.controller");
@@ -207,14 +233,15 @@ namespace TamTam.EditorTools.Chispin
             var rigDef = ChispinData.Rig();
             var cr = go.AddComponent<CreatureRig>();
             cr.animator = go.GetComponent<Animator>();
-            cr.clips = defs.Select(c => new CreatureRig.ClipInfo { id = c.id, loop = c.loop, breath = c.breath, breathRate = c.breathRate, blink = false, flicker = c.flicker, embers = ChispinData.EmberRate[c.id] }).ToArray();
+            cr.clips = defs.Select(c => new CreatureRig.ClipInfo { id = c.id, loop = c.loop, breath = c.breath, breathRate = c.breathRate, blink = c.blink, flicker = c.flicker, embers = ChispinData.EmberRate[c.id] }).ToArray();
             cr.secondary = rigDef.secondary.Where(s => bones.ContainsKey(s.bone) && bones.ContainsKey(s.driver)).Select(s => new CreatureRig.Secondary
             {
                 bone = bones[s.bone], driver = bones[s.driver], lag = s.lag, gain = s.gain, velocityGain = s.velocityGain,
                 swayAmp = s.swayAmp, swayFreq = s.swayFreq, flickerAmp = s.flickerAmp, flickerFreq = s.flickerFreq,
             }).ToArray();
             cr.breathBone = bones["body"]; cr.eyeBones = new Transform[0];
-            cr.embers = ps; cr.tinted = new Renderer[] { sr };
+            cr.embers = ps; cr.blinkOverlay = eyesClosed;
+            cr.tinted = eyesClosed ? new Renderer[] { sr, eyesClosed.GetComponent<SpriteRenderer>() } : new Renderer[] { sr };
 
             Directory.CreateDirectory(Path.GetDirectoryName(PrefabPath));
             PrefabUtility.SaveAsPrefabAsset(go, PrefabPath);
@@ -222,6 +249,105 @@ namespace TamTam.EditorTools.Chispin
             BuildScene();
             AssetDatabase.SaveAssets();
             Debug.Log($"TamTam: painted Chispín built — {W}x{H}, ppu {ppu:0}, {Layout.Length} bones, {clips.Count} clips.");
+        }
+
+        const string EyesClosedSource = Dir + "/Source~/chispin_eyes_closed_full.png";
+        const string EyesClosedPath = Dir + "/chispin_eyes_closed.png";
+        const string EyesClosedMask = Dir + "/chispin_eyes_closed_mask.png";
+
+        static float Gray(Color32 c) => (c.r * 0.3f + c.g * 0.59f + c.b * 0.11f) / 255f;
+
+        /// Aligns an edited variant (same character, slightly shifted/scaled by the generator) onto the base painting
+        /// around a region, by brute-force search of offset + scale minimising the grey-level difference.
+        static (Vector2 d, float s) Register(Color32[] a, Color32[] b, int W, int H, RectInt region, Vector2 c)
+        {
+            float Cost(Vector2 d, float s, int step)
+            {
+                double sum = 0; int n = 0;
+                for (int y = region.yMin; y < region.yMax; y += step)
+                    for (int x = region.xMin; x < region.xMax; x += step)
+                    {
+                        var pa = a[y * W + x]; if (pa.a < 200) continue;
+                        var q = c + s * (new Vector2(x, y) - c) + d;
+                        int bx = Mathf.RoundToInt(q.x), by = Mathf.RoundToInt(q.y);
+                        if (bx < 0 || by < 0 || bx >= W || by >= H) { sum += 1; n++; continue; }
+                        float e = Gray(pa) - Gray(b[by * W + bx]); sum += e * e; n++;
+                    }
+                return n == 0 ? float.MaxValue : (float)(sum / n);
+            }
+            Vector2 best = Vector2.zero; float bs = 1, bc = float.MaxValue;
+            for (float s = 0.95f; s <= 1.051f; s += 0.01f)
+                for (int dy = -120; dy <= 120; dy += 8)
+                    for (int dx = -120; dx <= 120; dx += 8)
+                    { float cst = Cost(new Vector2(dx, dy), s, 8); if (cst < bc) { bc = cst; best = new Vector2(dx, dy); bs = s; } }
+            var coarse = best; float cs = bs;
+            for (float s = cs - 0.01f; s <= cs + 0.0101f; s += 0.0025f)
+                for (int dy = -8; dy <= 8; dy++)
+                    for (int dx = -8; dx <= 8; dx++)
+                    { var d = coarse + new Vector2(dx, dy); float cst = Cost(d, s, 3); if (cst < bc) { bc = cst; best = d; bs = s; } }
+            Debug.Log($"TamTam: eye variant registered d={best} s={bs:0.000} err={bc:0.0000}");
+            return (best, bs);
+        }
+
+        /// Cuts the closed eye out of the edited variant as a feathered patch in base-painting space.
+        static bool MakeEyePatch(Color32[] basePx, int W, int H, float k, out Vector2 centerPx)
+        {
+            centerPx = new Vector2(1800 * k, H - 470 * k);
+            if (!File.Exists(EyesClosedSource)) return false;
+            var vt = new Texture2D(2, 2); vt.LoadImage(File.ReadAllBytes(EyesClosedSource));
+            if (vt.width != W || vt.height != H) { Debug.LogWarning("TamTam: eye variant size differs"); return false; }
+            var vpx = vt.GetPixels32();
+            var head = new RectInt(Mathf.RoundToInt(1640 * k), Mathf.RoundToInt(H - 690 * k), Mathf.RoundToInt(460 * k), Mathf.RoundToInt(340 * k));
+            var (d, s) = Register(basePx, vpx, W, H, head, head.center);
+            int rx = Mathf.RoundToInt(150 * k), ry = Mathf.RoundToInt(105 * k);
+            int pw = rx * 2, ph = ry * 2;
+            var patch = new Color[pw * ph];
+            for (int y = 0; y < ph; y++)
+                for (int x = 0; x < pw; x++)
+                {
+                    var p = centerPx + new Vector2(x - rx + 0.5f, y - ry + 0.5f);
+                    var q = (Vector2)head.center + s * (p - (Vector2)head.center) + d;
+                    var c = vt.GetPixelBilinear(q.x / W, q.y / H);
+                    float r = Mathf.Sqrt(Mathf.Pow((x - rx + 0.5f) / rx, 2) + Mathf.Pow((y - ry + 0.5f) / ry, 2));
+                    float tt = Mathf.Clamp01((r - 0.62f) / 0.38f); float a = 1 - tt * tt * (3 - 2 * tt);
+                    var bp = basePx[Mathf.Clamp((int)p.y, 0, H - 1) * W + Mathf.Clamp((int)p.x, 0, W - 1)];
+                    patch[y * pw + x] = new Color(c.r, c.g, c.b, a * bp.a / 255f); // never paint outside the silhouette
+                }
+            var t = new Texture2D(pw, ph, TextureFormat.RGBA32, false); t.SetPixels(patch); t.Apply();
+            File.WriteAllBytes(EyesClosedPath, t.EncodeToPNG());
+            var mask = new Color[patch.Length];
+            for (int i = 0; i < patch.Length; i++) mask[i] = MaskOf(patch[i]);
+            var mt = new Texture2D(pw, ph, TextureFormat.RGBA32, false, true); mt.SetPixels(mask); mt.Apply();
+            File.WriteAllBytes(EyesClosedMask, mt.EncodeToPNG());
+            return true;
+        }
+
+        static Color MaskOf(Color c)
+        {
+            if (c.a < 0.02f) return Color.clear;
+            Color.RGBToHSV(c, out float h, out float s, out float v);
+            float hd = h * 360;
+            float fire = (hd >= 8 && hd <= 55 && s > 0.45f && v > 0.55f) ? Mathf.Clamp01((v - 0.55f) / 0.25f) * Mathf.Clamp01((s - 0.45f) / 0.2f) : 0;
+            float scale = ((hd >= 320 || hd <= 12) && s > 0.3f && v < 0.75f && fire < 0.5f) ? Mathf.Clamp01((s - 0.3f) / 0.2f) : 0;
+            return new Color(scale, fire, fire * Mathf.Clamp01((v - 0.6f) / 0.3f), 0);
+        }
+
+        static Sprite ImportOverlay(string path, string maskPath, float ppu)
+        {
+            AssetDatabase.ImportAsset(maskPath);
+            var mi = (TextureImporter)AssetImporter.GetAtPath(maskPath);
+            mi.sRGBTexture = false; mi.alphaSource = TextureImporterAlphaSource.FromInput; mi.mipmapEnabled = false;
+            mi.textureCompression = TextureImporterCompression.Uncompressed; mi.npotScale = TextureImporterNPOTScale.None; mi.SaveAndReimport();
+            AssetDatabase.ImportAsset(path);
+            var ti = (TextureImporter)AssetImporter.GetAtPath(path);
+            ti.textureType = TextureImporterType.Sprite; ti.spriteImportMode = SpriteImportMode.Single; ti.spritePixelsPerUnit = ppu;
+            ti.mipmapEnabled = false; ti.alphaIsTransparency = true; ti.textureCompression = TextureImporterCompression.Uncompressed;
+            ti.SaveAndReimport();
+            var factory = new SpriteDataProviderFactories(); factory.Init();
+            var dp = factory.GetSpriteEditorDataProviderFromObject(ti); dp.InitSpriteEditorDataProvider();
+            dp.GetDataProvider<ISecondaryTextureDataProvider>().textures = new[] { new SecondarySpriteTexture { name = "_TintMask", texture = AssetDatabase.LoadAssetAtPath<Texture2D>(maskPath) } };
+            dp.Apply(); ti.SaveAndReimport();
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
         }
 
         static Key[] Merge(Key[] a, Key[] b)
@@ -380,7 +506,7 @@ namespace TamTam.EditorTools.Chispin
                 var bi = (TextureImporter)AssetImporter.GetAtPath(BackdropPath);
                 bi.textureType = TextureImporterType.Sprite; bi.mipmapEnabled = false; bi.maxTextureSize = 4096;
                 var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(BackdropPath);
-                bi.spritePixelsPerUnit = tex.height / (2 * 1.9f); bi.SaveAndReimport();
+                bi.spritePixelsPerUnit = tex.height / (2 * 1.55f * 1.06f); bi.SaveAndReimport();
                 bg = AssetDatabase.LoadAssetAtPath<Sprite>(BackdropPath);
             }
             else
@@ -391,7 +517,7 @@ namespace TamTam.EditorTools.Chispin
                     c += PaletteMath.Hex("#FF6A2A") * Mathf.Exp(-Mathf.Pow((u - 0.5f) / 0.32f, 2) - Mathf.Pow((v - 0.22f) / 0.2f, 2)) * 0.22f;
                     return c;
                 });
-            var bgGo = new GameObject("Backdrop"); bgGo.transform.position = new Vector3(0, 1.25f, 5);
+            var bgGo = new GameObject("Backdrop"); bgGo.transform.position = new Vector3(0, 1.15f, 5);
             var bgsr = bgGo.AddComponent<SpriteRenderer>(); bgsr.sprite = bg; bgsr.sortingOrder = -100;
 
             var shadow = ChispinBuilder.GeneratedSprite("ground_shadow", 256, 64, 256 / 4.2f, (u, v) =>
@@ -399,11 +525,11 @@ namespace TamTam.EditorTools.Chispin
                 float d = Mathf.Pow((u - 0.5f) / 0.5f, 2) + Mathf.Pow((v - 0.5f) / 0.5f, 2);
                 return new Color(0.04f, 0.02f, 0.06f, Mathf.Clamp01(1 - d) * 0.6f);
             });
-            var shGo = new GameObject("GroundShadow"); shGo.transform.position = new Vector3(0.1f, 0.03f, 0);
+            var shGo = new GameObject("GroundShadow"); shGo.transform.position = new Vector3(-0.4f, 0.03f, 0);
             var shsr = shGo.AddComponent<SpriteRenderer>(); shsr.sprite = shadow; shsr.sortingOrder = -10;
 
             var chispin = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath));
-            chispin.transform.position = new Vector3(0.0f, 0.05f, 0);
+            chispin.transform.position = new Vector3(-0.45f, 0.0f, 0); chispin.transform.localScale = Vector3.one * 0.85f;
 
             // Painted art carries its own shading: brighter, gentler lights that tint rather than sculpt.
             ChispinBuilder.AddLight("Ambient (Global)", Light2D.LightType.Global, Vector3.zero, "#C9BFE6", 0.85f);
