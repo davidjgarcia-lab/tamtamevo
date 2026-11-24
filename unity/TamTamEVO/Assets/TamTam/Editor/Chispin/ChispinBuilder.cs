@@ -28,10 +28,16 @@ namespace TamTam.EditorTools.Chispin
         const float STROKE_SCALE = 0.6f; // finer line art than the web prototype (less "drawn", more painted)
 
         const string Root = "Assets/TamTam";
-        const string GenDir = Root + "/Art/Creatures/Chispin/Generated";
-        const string AnimDir = Root + "/Animation/Chispin";
+        const string DefaultGenDir = Root + "/Art/Creatures/Chispin/Generated";
+        const string DefaultAnimDir = Root + "/Animation/Chispin";
+        const string DefaultPrefabPath = Root + "/Prefabs/Chispin.prefab";
+        // Output locations: Chispín by default; BuildCreature() points them at an evolved form while it builds.
+        static string GenDir = DefaultGenDir;
+        static string AnimDir = DefaultAnimDir;
+        static string PrefabPath = DefaultPrefabPath;
+        static string CreatureName = "Chispin";
+        static RigDef CurrentRig;
         const string MatDir = Root + "/Materials";
-        const string PrefabPath = Root + "/Prefabs/Chispin.prefab";
         const string ScenePath = Root + "/Scenes/ChispinLab.unity";
         static readonly string[] TailBones = { "tail1", "tail2", "tail3", "tail4" };
 
@@ -48,6 +54,7 @@ namespace TamTam.EditorTools.Chispin
             RenderSetup.Setup();
             var rig = ChispinData.Rig();
             var clips = ChispinData.Clips();
+            CurrentRig = rig;
             foreach (var d in new[] { GenDir, AnimDir, MatDir, Path.GetDirectoryName(PrefabPath), Path.GetDirectoryName(ScenePath) }) Directory.CreateDirectory(d);
 
             var rest = RestMatrices(rig);
@@ -70,6 +77,36 @@ namespace TamTam.EditorTools.Chispin
             BuildScene();
             AssetDatabase.SaveAssets();
             Debug.Log($"TamTam: Chispín built — {groups.Count} painted layers, {animClips.Count} clips, scene {ScenePath}.");
+        }
+
+        /// Builds any creature that shares Chispín's skeleton and clips (evolved forms from the genome) into its own folders.
+        /// The art is painted with the reference fire palette so the tint mask recolours it to the genome's palette at runtime
+        /// (CreatureRig.SetPalette), exactly like Chispín's colour alleles.
+        public static GameObject BuildCreature(RigDef rig, string name, string genDir, string animDir, string prefabPath)
+        {
+            var saved = (GenDir, AnimDir, PrefabPath, CreatureName, CurrentRig);
+            try
+            {
+                GenDir = genDir; AnimDir = animDir; PrefabPath = prefabPath; CreatureName = name; CurrentRig = rig;
+                var clips = ChispinData.Clips();
+                foreach (var d in new[] { GenDir, AnimDir, MatDir, Path.GetDirectoryName(PrefabPath) }) Directory.CreateDirectory(d);
+                var rest = RestMatrices(rig);
+                var groups = MakeGroups(rig);
+                var pal = PaletteMath.Derive("#7D2430", "#FF7A24", "#FFC247", "#FFB347");
+                PaintGroups(rig, groups, rest, pal);
+                AssetDatabase.Refresh();
+                foreach (var g in groups) ImportGroup(rig, g, rest);
+                var mat = CreatureMaterial(pal);
+                var emberMat = EmberMaterial();
+                var go = BuildHierarchy(rig, groups, mat, emberMat, out var bones, out var faceObjects);
+                var animClips = BuildClips(rig, clips, go, bones, faceObjects);
+                go.GetComponent<Animator>().runtimeAnimatorController = BuildController(clips, animClips);
+                SetupRig(go, rig, clips, bones, faceObjects);
+                var prefab = PrefabUtility.SaveAsPrefabAsset(go, PrefabPath);
+                UnityEngine.Object.DestroyImmediate(go);
+                return prefab;
+            }
+            finally { (GenDir, AnimDir, PrefabPath, CreatureName, CurrentRig) = saved; }
         }
 
         // ── Rig maths (rig space: y down, clockwise degrees) ─────────────────
@@ -182,7 +219,7 @@ namespace TamTam.EditorTools.Chispin
             var toTail = rest["tail1"].inverse;
             for (int i = 0; i < TailBones.Length; i++)
             {
-                var def = ChispinData.Rig().Bone(TailBones[i]);
+                var def = (CurrentRig ?? ChispinData.Rig()).Bone(TailBones[i]);
                 bones.Add(new SpriteBone
                 {
                     name = TailBones[i], guid = GUID.Generate().ToString(), parentId = i - 1,
@@ -295,7 +332,7 @@ namespace TamTam.EditorTools.Chispin
         static GameObject BuildHierarchy(RigDef rig, List<Group> groups, Material mat, Material emberMat,
             out Dictionary<string, Transform> bones, out List<(GameObject go, Group g)> faceObjects)
         {
-            var go = new GameObject("Chispin");
+            var go = new GameObject(CreatureName);
             go.AddComponent<Animator>();
             bones = new Dictionary<string, Transform>();
             foreach (var b in rig.bones)
@@ -464,8 +501,9 @@ namespace TamTam.EditorTools.Chispin
             return result;
         }
 
-        internal static AnimatorController BuildController(List<ClipDef> defs, List<AnimationClip> clips, string path = AnimDir + "/Chispin.controller")
+        internal static AnimatorController BuildController(List<ClipDef> defs, List<AnimationClip> clips, string path = null)
         {
+            path ??= AnimDir + "/" + CreatureName + ".controller";
             AssetDatabase.DeleteAsset(path);
             var ctrl = AnimatorController.CreateAnimatorControllerAtPath(path);
             var sm = ctrl.layers[0].stateMachine;

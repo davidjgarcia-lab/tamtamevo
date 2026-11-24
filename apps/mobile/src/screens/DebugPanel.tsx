@@ -6,6 +6,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { newId, useGame } from "../game/GameProvider";
 import { colors, fonts } from "../theme";
 import { Btn, Sheet } from "../ui/kit";
+import { exportEnvironmentAssets } from "../home/exportAssets";
 
 /** Stage logs that reproduce typical care styles (40 h of stage). */
 const STYLES = {
@@ -126,6 +127,30 @@ export function DebugPanel({ onClose, toast, onLustreLab, onEvolutionLab, onForc
           <Btn small label="Madurez completa" testID="dbg-mature" onPress={() => { act((s) => { s.care.maturity = 999; }); toast("Listo para evolucionar"); }} />
           <Btn small label="Forzar evolución" tone="gold" disabled={!state.tamtam || state.tamtam.stage === "adult"} testID="dbg-evolve" onPress={onForceEvolution} />
           <Btn small label="Laboratorio de evolución" tone="dark" testID="dbg-evolab" onPress={onEvolutionLab} />
+        </View>
+        <Text style={d.h}>Unity</Text>
+        <Text style={d.p}>Lleva a Unity el genoma de este Tamtam (TamTam ▸ Evoluciones ▸ 2) y los assets actuales de la casa (tools/export-unity-assets.mjs).</Text>
+        <View style={d.row}>
+          <Btn
+            small
+            label="Copiar genoma para Unity"
+            disabled={!state.tamtam?.genome}
+            testID="dbg-copy-genome"
+            onPress={() => {
+              const json = JSON.stringify(state.tamtam!.genome);
+              void navigator.clipboard?.writeText(json).then(() => toast("Genoma copiado"), () => toast(json));
+            }}
+          />
+          <Btn
+            small
+            label="Exportar assets de la casa"
+            testID="dbg-export-assets"
+            onPress={() => {
+              const list = exportEnvironmentAssets();
+              (globalThis as { __tamtamUnityExport?: unknown }).__tamtamUnityExport = list;
+              toast(`${list.length} assets listos para Unity`);
+            }}
+          />
         </View>
         <Text style={d.p}>Simular cómo se ha cuidado esta etapa (rellena el registro de la etapa):</Text>
         <View style={d.row}>

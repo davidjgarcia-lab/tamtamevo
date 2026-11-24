@@ -4,6 +4,16 @@ Resumen priorizado de `TANDA1_MINIJUEGOS.md`, `TANDA2_CUIDADOS_HABITACION.md` y 
 Principio: **todo gira alrededor del Tamtam** (lo cuidas, juega contigo, lucha y evoluciona), sin monetización
 agresiva (nada de anuncios obligatorios ni probabilidades falsas).
 
+## Estado (2026-11-24)
+
+| Fase | Estado | Notas honestas |
+|---|---|---|
+| A | **IMPLEMENTADO** y probado (E2E-06, 21, 22, 23) | El nivel 1–60 es del **cuidador** (no del Tamtam). Sin notificaciones push (no hay app nativa todavía). |
+| B | **IMPLEMENTADO** y probado (E2E-10, 11) | El dibujo que se descubre en ladrillos es un paisaje de fondo, no un puzle de piezas. |
+| C | **IMPLEMENTADO** y probado (E2E-16, 25) | Líderes semanales con rivales **locales generados** (sin servidor). Los "objetos de cómic" no están hechos (**NO IMPLEMENTADO**). La escuela se elige en el nivel 10. |
+| D | **IMPLEMENTADO** y probado (E2E-23, 24, 26) | Salón, cocina, baño y dormitorio; la **sala de juegos no está hecha** (**NO IMPLEMENTADO**). La ropa son 4 accesorios de cabeza/cuello. La foto se descarga como PNG en la web y en móvil solo se cuenta. |
+| E | **BLOQUEADO** | Necesita un servidor (cuentas, retos entre jugadores, rankings reales). |
+
 ## Fase A — "Se siente vivo" (cuidados táctiles y progreso)
 1. **Baño táctil** por pasos: jabón, frotar, ducha y toalla. **Comer arrastrando**, con rechazo si está lleno.
 2. **Cuidar paga:** monedas y XP con límites y espera. **Nivel del Tamtam 1–60** con desbloqueos.

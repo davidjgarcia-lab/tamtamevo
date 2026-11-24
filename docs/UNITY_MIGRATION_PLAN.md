@@ -6,6 +6,9 @@ profesional para animar ilustraciones pintadas (2D Animation: huesos + deformaci
 intercambiar piezas, luces 2D, bloom, Shader Graph para emisivo/translúcido/iridiscente, VFX).
 Unreal (3D, desproporcionado) y GameMaker (sin ventaja) se descartan; Godot queda como alternativa abierta.
 
+> **Actualización 2026-11-24:** las evoluciones y la casa-nido ya pasan de la web a Unity con datos exportados.
+> Pasos y limitaciones en [`UNITY_UPDATE_GUIDE.md`](UNITY_UPDATE_GUIDE.md).
+
 ## 1. Arquitectura
 
 | Capa | Tecnología | Estado |

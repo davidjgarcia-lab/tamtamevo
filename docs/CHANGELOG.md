@@ -4,6 +4,28 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+### Fases C y D del plan de mejoras + puente a Unity (2026-11-24)
+#### Añadido
+- **Arena (fase C):** una técnica por familia (Ascuas, Coraza, Reflejo, Esquiva fantasma, Raíces, Torbellino, Rebote,
+  Corriente, Mordisco feroz). Ventajas entre familias (+15 %/−13 %) que se ven antes de luchar. Nivel de Arena con
+  **carta 1 de 2** (estadística, técnica o compañero de la Granja). **Energía de Arena 5/día** y combate de consuelo
+  tras 3 derrotas. No se lucha dormido, agotado ni con hambre. Escuelas Garra, Pluma y Rayo (nivel 10 de cuidador).
+  Líderes de la semana con insignias (tabla local). Narración en el combate, **Repetir** y **¡Revancha!**
+- **Casa (fase D):** habitaciones por nivel (Salón 1, Cocina 2, Baño 4, Dormitorio 6), cada una con sus muebles y acabados.
+  La cocina sacia un 15 % más y el baño limpia un 20 % más. En el dormitorio, el interruptor de luz y la cama aceleran
+  el descanso. Nuevos muebles: arenero de musgo (recoge la mitad de las cacas), pelota, peonza, fogón y tina.
+  Estrellas de confort en la tienda. **Árbol de bayas** en la Granja (10 min). **Colección**: bestiario de formas vistas
+  (tuyas y rivales), álbum de cuadros y armario con 4 accesorios que se ven sobre la cabeza. **Modo foto** (descarga PNG en la web).
+- **Unity:** `tools/export-unity.ts` (familias, biblioteca de piezas, esqueleto y 80 formas) y `tools/export-unity-assets.mjs`
+  (casa-nido, acabados, paisajes, cuadros y muebles). En Unity: menú **TamTam ▸ Actualizar todo**, constructor de formas
+  evolucionadas, `EvolutionCatalog` y `TamtamPresenter`, escenas EvolutionLab y NestHouse, y tests de paridad.
+  Guía: `docs/UNITY_UPDATE_GUIDE.md`. DEV ▸ **Copiar genoma para Unity**.
+- E2E ampliado a 26 comprobaciones (baño por pasos, comida arrastrada, problemas, niveles, habitaciones, foto/colección, Arena con cartas, bayas).
+#### Limitaciones
+- El C# nuevo **no se ha compilado aquí** (no hay Unity en este entorno): está pendiente de probar en el PC.
+- Las formas evolucionadas (web y Unity) siguen siendo piezas vectoriales; el arte pintado por familia está **BLOQUEADO** (sin cupo de generación de imágenes).
+- Sala de juegos, objetos de cómic en Arena y fase E (social) **NO IMPLEMENTADOS**.
+
 ### Chispín pintado en la app web (2026-11-24)
 #### Añadido
 - El Chispín **pintado con IA** del proyecto Unity (PaintedChispinBuilder) ahora también en la app/prototipo web:

@@ -6,6 +6,7 @@
     "test": "pnpm -r --if-present test",
     "typecheck": "pnpm -r --if-present typecheck",
     "web:build": "pnpm --filter mobile web:build",
-    "shots": "node tools/screenshots.mjs"
+    "shots": "node tools/screenshots.mjs",
+    "unity:export": "node --no-warnings --experimental-transform-types --import ./tools/ts/register.mjs tools/export-unity.ts && pnpm web:build && node tools/export-unity-assets.mjs"
   }
 }

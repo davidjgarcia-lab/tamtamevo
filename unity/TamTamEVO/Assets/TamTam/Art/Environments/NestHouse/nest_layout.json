@@ -1,0 +1,103 @@
+{
+ "placements": [
+  {
+   "uid": "p-bed",
+   "itemId": "furn_bed_nest",
+   "layer": "floor",
+   "x": 0,
+   "y": 0,
+   "mirrored": false,
+   "rotated": false
+  },
+  {
+   "uid": "p-rug",
+   "itemId": "furn_rug_round",
+   "layer": "rug",
+   "x": 4,
+   "y": 2,
+   "mirrored": false,
+   "rotated": false
+  },
+  {
+   "uid": "p-lamp",
+   "itemId": "furn_lamp_mushroom",
+   "layer": "floor",
+   "x": 3,
+   "y": 0,
+   "mirrored": false,
+   "rotated": false
+  },
+  {
+   "uid": "p-poster",
+   "itemId": "furn_poster_volcano",
+   "layer": "wall",
+   "x": 1,
+   "y": 1,
+   "mirrored": false,
+   "rotated": false
+  },
+  {
+   "uid": "p-poster2",
+   "itemId": "furn_poster_forest",
+   "layer": "wall",
+   "x": 8,
+   "y": 1,
+   "mirrored": false,
+   "rotated": false
+  },
+  {
+   "uid": "p-gym",
+   "itemId": "gym_dumbbells",
+   "layer": "floor",
+   "x": 10,
+   "y": 0,
+   "mirrored": false,
+   "rotated": false
+  },
+  {
+   "uid": "p-desk",
+   "itemId": "study_desk",
+   "layer": "floor",
+   "x": 7,
+   "y": 0,
+   "mirrored": false,
+   "rotated": false
+  }
+ ],
+ "finishes": {
+  "wallColor": "#2E2560",
+  "flooring": "floor_planks",
+  "wallpaper": "wall_woven"
+ },
+ "floor": {
+  "cols": 12,
+  "rows": 4
+ },
+ "wall": {
+  "cols": 12,
+  "rows": 6
+ },
+ "window": {
+  "x": 4,
+  "y": 1,
+  "w": 3,
+  "h": 3
+ },
+ "geom": {
+  "w": 1080,
+  "h": 1350,
+  "wallTop": 54,
+  "wallBottom": 756.0000000000001,
+  "floorTop": 756.0000000000001,
+  "floorBottom": 1309.5,
+  "wallCell": 84.6,
+  "wallX0": 32.400000000000034,
+  "floorCellW": 86.39999999999999,
+  "floorCellH": 138.37499999999997,
+  "floorX0": 21.6
+ },
+ "backdrop": {
+  "w": 1080,
+  "h": 1350
+ }
+}

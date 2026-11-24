@@ -1,0 +1,404 @@
+{
+ "forms": [
+  {
+   "key": "fire0-fire0-fire0-fire0-fire0-slit-seams-fire0fire-none",
+   "name": "Magmaardo",
+   "file": "fire0-fire0-fire0-fire0-fire0-slit-seams-fire0fire-none.json"
+  },
+  {
+   "key": "fire1-fire1-fire1-fire1-fire1-slit-seams-fire1fire-none",
+   "name": "Magmaardo",
+   "file": "fire1-fire1-fire1-fire1-fire1-slit-seams-fire1fire-none.json"
+  },
+  {
+   "key": "plant0-plant0-plant0-plant0-plant0-slit-seams-plant0plant-none",
+   "name": "Musgoollo",
+   "file": "plant0-plant0-plant0-plant0-plant0-slit-seams-plant0plant-none.json"
+  },
+  {
+   "key": "plant1-plant1-plant1-plant1-plant1-slit-seams-plant1plant-none",
+   "name": "Musgoollo",
+   "file": "plant1-plant1-plant1-plant1-plant1-slit-seams-plant1plant-none.json"
+  },
+  {
+   "key": "metal0-metal0-metal0-metal0-metal0-slit-seams-metal0metal-none",
+   "name": "Cobreón",
+   "file": "metal0-metal0-metal0-metal0-metal0-slit-seams-metal0metal-none.json"
+  },
+  {
+   "key": "metal1-metal1-metal1-metal1-metal1-slit-seams-metal1metal-none",
+   "name": "Cobreón",
+   "file": "metal1-metal1-metal1-metal1-metal1-slit-seams-metal1metal-none.json"
+  },
+  {
+   "key": "crystal0-crystal0-crystal0-crystal0-crystal0-slit-seams-crystal0crystal-none",
+   "name": "Prismaino",
+   "file": "crystal0-crystal0-crystal0-crystal0-crystal0-slit-seams-crystal0crystal-none.json"
+  },
+  {
+   "key": "crystal1-crystal1-crystal1-crystal1-crystal1-slit-seams-crystal1crystal-none",
+   "name": "Prismaino",
+   "file": "crystal1-crystal1-crystal1-crystal1-crystal1-slit-seams-crystal1crystal-none.json"
+  },
+  {
+   "key": "ghost0-ghost0-ghost0-ghost0-ghost0-slit-seams-ghost0ghost-none",
+   "name": "Sombraombra",
+   "file": "ghost0-ghost0-ghost0-ghost0-ghost0-slit-seams-ghost0ghost-none.json"
+  },
+  {
+   "key": "ghost1-ghost1-ghost1-ghost1-ghost1-slit-seams-ghost1ghost-none",
+   "name": "Sombraombra",
+   "file": "ghost1-ghost1-ghost1-ghost1-ghost1-slit-seams-ghost1ghost-none.json"
+  },
+  {
+   "key": "water0-water0-water0-water0-water0-slit-seams-water0water-none",
+   "name": "Coralina",
+   "file": "water0-water0-water0-water0-water0-slit-seams-water0water-none.json"
+  },
+  {
+   "key": "water1-water1-water1-water1-water1-slit-seams-water1water-none",
+   "name": "Coralina",
+   "file": "water1-water1-water1-water1-water1-slit-seams-water1water-none.json"
+  },
+  {
+   "key": "gel0-gel0-gel0-gel0-gel0-slit-seams-gel0gel-none",
+   "name": "Mochiuchi",
+   "file": "gel0-gel0-gel0-gel0-gel0-slit-seams-gel0gel-none.json"
+  },
+  {
+   "key": "gel1-gel1-gel1-gel1-gel1-slit-seams-gel1gel-none",
+   "name": "Mochiuchi",
+   "file": "gel1-gel1-gel1-gel1-gel1-slit-seams-gel1gel-none.json"
+  },
+  {
+   "key": "ether0-ether0-ether0-ether0-ether0-slit-seams-ether0ether-none",
+   "name": "Céfiroiel",
+   "file": "ether0-ether0-ether0-ether0-ether0-slit-seams-ether0ether-none.json"
+  },
+  {
+   "key": "ether1-ether1-ether1-ether1-ether1-slit-seams-ether1ether-none",
+   "name": "Céfiroiel",
+   "file": "ether1-ether1-ether1-ether1-ether1-slit-seams-ether1ether-none.json"
+  },
+  {
+   "key": "reptile0-reptile0-reptile0-reptile0-reptile0-slit-seams-reptile0reptile-none",
+   "name": "Dracoex",
+   "file": "reptile0-reptile0-reptile0-reptile0-reptile0-slit-seams-reptile0reptile-none.json"
+  },
+  {
+   "key": "reptile1-reptile1-reptile1-reptile1-reptile1-slit-seams-reptile1reptile-none",
+   "name": "Dracoex",
+   "file": "reptile1-reptile1-reptile1-reptile1-reptile1-slit-seams-reptile1reptile-none.json"
+  },
+  {
+   "key": "water0-plant1-reptile0-water1-fire0-round-facets-plant1plant-none",
+   "name": "Musgina",
+   "file": "water0-plant1-reptile0-water1-fire0-round-facets-plant1plant-none.json"
+  },
+  {
+   "key": "reptile0-metal0-fire1-crystal0-metal0-visor-stripes-gel1metal-albino",
+   "name": "Cobrardo",
+   "file": "reptile0-metal0-fire1-crystal0-metal0-visor-stripes-gel1metal-albino.json"
+  },
+  {
+   "key": "fire1-reptile1-fire1-ether0-metal0-round-spots-metal1crystal-none",
+   "name": "Magmón",
+   "file": "fire1-reptile1-fire1-ether0-metal0-round-spots-metal1crystal-none.json"
+  },
+  {
+   "key": "reptile0-reptile1-gel1-reptile0-reptile1-slit-spots-crystal1reptile-none",
+   "name": "Dracino",
+   "file": "reptile0-reptile1-gel1-reptile0-reptile1-slit-spots-crystal1reptile-none.json"
+  },
+  {
+   "key": "reptile0-reptile0-plant0-fire0-ghost0-slit-stripes-fire0ghost-none",
+   "name": "Magmex",
+   "file": "reptile0-reptile0-plant0-fire0-ghost0-slit-stripes-fire0ghost-none.json"
+  },
+  {
+   "key": "ghost1-fire1-reptile0-metal1-plant0-slit-seams-water2metal-none",
+   "name": "Magmollo",
+   "file": "ghost1-fire1-reptile0-metal1-plant0-slit-seams-water2metal-none.json"
+  },
+  {
+   "key": "ghost1-gel0-water0-crystal0-fire0-twin-none-plant1fire-none",
+   "name": "Magmollo",
+   "file": "ghost1-gel0-water0-crystal0-fire0-twin-none-plant1fire-none.json"
+  },
+  {
+   "key": "metal0-ether1-reptile0-ghost0-ghost0-glow-rivets-reptile1reptile-none",
+   "name": "Sombrex",
+   "file": "metal0-ether1-reptile0-ghost0-ghost0-glow-rivets-reptile1reptile-none.json"
+  },
+  {
+   "key": "ether1-reptile0-metal1-crystal1-water0-glow-facets-water0crystal-none",
+   "name": "Coralón",
+   "file": "ether1-reptile0-metal1-crystal1-water0-glow-facets-water0crystal-none.json"
+  },
+  {
+   "key": "water1-ghost0-reptile0-fire0-water1-twin-spots-plant2water-none",
+   "name": "Coralardo",
+   "file": "water1-ghost0-reptile0-fire0-water1-twin-spots-plant2water-none.json"
+  },
+  {
+   "key": "plant0-reptile0-gel1-fire0-fire0-visor-veins-crystal0fire-none",
+   "name": "Magmollo",
+   "file": "plant0-reptile0-gel1-fire0-fire0-visor-veins-crystal0fire-none.json"
+  },
+  {
+   "key": "metal0-reptile0-plant0-plant0-fire0-slit-spots-water1fire-none",
+   "name": "Musgardo",
+   "file": "metal0-reptile0-plant0-plant0-fire0-slit-spots-water1fire-none.json"
+  },
+  {
+   "key": "ether0-water1-plant0-fire1-ether1-glow-stripes-water1ether-none",
+   "name": "Coraliel",
+   "file": "ether0-water1-plant0-fire1-ether1-glow-stripes-water1ether-none.json"
+  },
+  {
+   "key": "reptile0-reptile0-reptile0-ghost1-fire0-round-spots-water1gel-none",
+   "name": "Dracardo",
+   "file": "reptile0-reptile0-reptile0-ghost1-fire0-round-spots-water1gel-none.json"
+  },
+  {
+   "key": "ghost0-fire0-metal0-fire0-water1-glow-rings-fire0water-none",
+   "name": "Magmón",
+   "file": "ghost0-fire0-metal0-fire0-water1-glow-rings-fire0water-none.json"
+  },
+  {
+   "key": "fire0-reptile0-plant0-fire1-plant0-round-seams-fire1plant-none",
+   "name": "Magmollo",
+   "file": "fire0-reptile0-plant0-fire1-plant0-round-seams-fire1plant-none.json"
+  },
+  {
+   "key": "reptile0-reptile0-fire1-ghost1-gel1-slit-stripes-fire1fire-iridescent",
+   "name": "Magmex",
+   "file": "reptile0-reptile0-fire1-ghost1-gel1-slit-stripes-fire1fire-iridescent.json"
+  },
+  {
+   "key": "reptile0-reptile1-metal1-ghost1-fire0-twin-rings-fire2metal-none",
+   "name": "Magmex",
+   "file": "reptile0-reptile1-metal1-ghost1-fire0-twin-rings-fire2metal-none.json"
+  },
+  {
+   "key": "crystal1-reptile0-fire1-water1-fire0-round-facets-fire1gel-none",
+   "name": "Magmino",
+   "file": "crystal1-reptile0-fire1-water1-fire0-round-facets-fire1gel-none.json"
+  },
+  {
+   "key": "reptile1-reptile0-reptile0-ghost0-fire0-round-stripes-fire0crystal-none",
+   "name": "Dracardo",
+   "file": "reptile1-reptile0-reptile0-ghost0-fire0-round-stripes-fire0crystal-none.json"
+  },
+  {
+   "key": "metal0-reptile0-reptile0-plant1-crystal0-slit-facets-metal1ether-none",
+   "name": "Cobrex",
+   "file": "metal0-reptile0-reptile0-plant1-crystal0-slit-facets-metal1ether-none.json"
+  },
+  {
+   "key": "metal0-fire0-reptile0-reptile1-gel1-slit-stripes-water0gel-none",
+   "name": "Dracardo",
+   "file": "metal0-fire0-reptile0-reptile1-gel1-slit-stripes-water0gel-none.json"
+  },
+  {
+   "key": "ether0-reptile0-reptile0-metal1-crystal0-slit-seams-fire2crystal-none",
+   "name": "Dracardo",
+   "file": "ether0-reptile0-reptile0-metal1-crystal0-slit-seams-fire2crystal-none.json"
+  },
+  {
+   "key": "metal1-metal1-reptile0-fire1-plant1-ring-seams-metal2plant-none",
+   "name": "Cobrardo",
+   "file": "metal1-metal1-reptile0-fire1-plant1-ring-seams-metal2plant-none.json"
+  },
+  {
+   "key": "water1-plant1-reptile0-water1-fire0-twin-spots-ghost0ghost-none",
+   "name": "Coralardo",
+   "file": "water1-plant1-reptile0-water1-fire0-twin-spots-ghost0ghost-none.json"
+  },
+  {
+   "key": "gel1-fire1-water1-fire1-fire1-glow-stripes-water0ether-none",
+   "name": "Magmina",
+   "file": "gel1-fire1-water1-fire1-fire1-glow-stripes-water0ether-none.json"
+  },
+  {
+   "key": "fire0-reptile0-reptile0-crystal0-plant0-slit-spots-plant2metal-none",
+   "name": "Musgex",
+   "file": "fire0-reptile0-reptile0-crystal0-plant0-slit-spots-plant2metal-none.json"
+  },
+  {
+   "key": "reptile0-water1-crystal0-gel0-water1-ring-stripes-fire1water-none",
+   "name": "Coralardo",
+   "file": "reptile0-water1-crystal0-gel0-water1-ring-stripes-fire1water-none.json"
+  },
+  {
+   "key": "fire1-crystal1-ghost0-gel0-crystal1-glow-seams-fire2crystal-none",
+   "name": "Magmino",
+   "file": "fire1-crystal1-ghost0-gel0-crystal1-glow-seams-fire2crystal-none.json"
+  },
+  {
+   "key": "fire1-plant0-ether0-plant0-water0-ring-seams-ghost1water-none",
+   "name": "Musgardo",
+   "file": "fire1-plant0-ether0-plant0-water0-ring-seams-ghost1water-none.json"
+  },
+  {
+   "key": "reptile0-water1-reptile0-ghost1-crystal0-round-spots-plant2crystal-none",
+   "name": "Dracollo",
+   "file": "reptile0-water1-reptile0-ghost1-crystal0-round-spots-plant2crystal-none.json"
+  },
+  {
+   "key": "reptile1-reptile0-fire0-metal0-water1-slit-veins-water1water-none",
+   "name": "Coralex",
+   "file": "reptile1-reptile0-fire0-metal0-water1-slit-veins-water1water-none.json"
+  },
+  {
+   "key": "water0-reptile0-water0-water1-metal1-slit-rings-crystal2ether-none",
+   "name": "Coralón",
+   "file": "water0-reptile0-water0-water1-metal1-slit-rings-crystal2ether-none.json"
+  },
+  {
+   "key": "gel0-gel0-reptile0-ether0-metal0-round-none-crystal1ghost-iridescent",
+   "name": "Mochón",
+   "file": "gel0-gel0-reptile0-ether0-metal0-round-none-crystal1ghost-iridescent.json"
+  },
+  {
+   "key": "plant1-crystal1-fire0-metal0-gel1-twin-spots-crystal2crystal-none",
+   "name": "Prismardo",
+   "file": "plant1-crystal1-fire0-metal0-gel1-twin-spots-crystal2crystal-none.json"
+  },
+  {
+   "key": "metal0-reptile0-metal0-ghost1-ghost0-round-stripes-metal1ghost-none",
+   "name": "Cobrombra",
+   "file": "metal0-reptile0-metal0-ghost1-ghost0-round-stripes-metal1ghost-none.json"
+  },
+  {
+   "key": "crystal0-water1-plant0-ghost1-fire0-round-stripes-gel1plant-none",
+   "name": "Magmollo",
+   "file": "crystal0-water1-plant0-ghost1-fire0-round-stripes-gel1plant-none.json"
+  },
+  {
+   "key": "plant1-crystal0-gel1-fire0-water1-glow-spots-fire1fire-none",
+   "name": "Magmollo",
+   "file": "plant1-crystal0-gel1-fire0-water1-glow-spots-fire1fire-none.json"
+  },
+  {
+   "key": "fire0-metal0-reptile0-fire0-metal1-ring-seams-ether2crystal-none",
+   "name": "Magmón",
+   "file": "fire0-metal0-reptile0-fire0-metal1-ring-seams-ether2crystal-none.json"
+  },
+  {
+   "key": "plant1-plant1-reptile1-fire1-fire0-ring-rivets-fire0crystal-none",
+   "name": "Magmollo",
+   "file": "plant1-plant1-reptile1-fire1-fire0-ring-rivets-fire0crystal-none.json"
+  },
+  {
+   "key": "metal1-reptile0-reptile1-reptile1-ether1-slit-veins-plant0ether-none",
+   "name": "Dracollo",
+   "file": "metal1-reptile0-reptile1-reptile1-ether1-slit-veins-plant0ether-none.json"
+  },
+  {
+   "key": "fire0-reptile0-reptile0-metal1-fire0-round-spots-ghost2fire-none",
+   "name": "Magmex",
+   "file": "fire0-reptile0-reptile0-metal1-fire0-round-spots-ghost2fire-none.json"
+  },
+  {
+   "key": "water1-gel0-ether0-fire0-plant0-slit-spots-ghost0plant-none",
+   "name": "Magmollo",
+   "file": "water1-gel0-ether0-fire0-plant0-slit-spots-ghost0plant-none.json"
+  },
+  {
+   "key": "fire1-reptile0-ghost0-fire0-ghost1-slit-facets-fire2ghost-none",
+   "name": "Magmombra",
+   "file": "fire1-reptile0-ghost0-fire0-ghost1-slit-facets-fire2ghost-none.json"
+  },
+  {
+   "key": "reptile0-crystal1-plant0-ghost1-fire0-glow-none-fire0fire-none",
+   "name": "Magmollo",
+   "file": "reptile0-crystal1-plant0-ghost1-fire0-glow-none-fire0fire-none.json"
+  },
+  {
+   "key": "reptile0-ghost1-reptile0-crystal0-water0-glow-spots-fire2plant-none",
+   "name": "Dracardo",
+   "file": "reptile0-ghost1-reptile0-crystal0-water0-glow-spots-fire2plant-none.json"
+  },
+  {
+   "key": "reptile0-crystal0-reptile0-fire0-fire0-glow-veins-fire2ether-none",
+   "name": "Magmex",
+   "file": "reptile0-crystal0-reptile0-fire0-fire0-glow-veins-fire2ether-none.json"
+  },
+  {
+   "key": "ghost1-fire0-metal1-ghost0-metal0-visor-rings-metal1water-none",
+   "name": "Cobrombra",
+   "file": "ghost1-fire0-metal1-ghost0-metal0-visor-rings-metal1water-none.json"
+  },
+  {
+   "key": "plant1-reptile0-ghost0-fire0-fire0-round-veins-ghost0plant-melanic",
+   "name": "Magmombra",
+   "file": "plant1-reptile0-ghost0-fire0-fire0-round-veins-ghost0plant-melanic.json"
+  },
+  {
+   "key": "metal1-ether0-reptile0-metal0-metal0-round-rivets-water0metal-none",
+   "name": "Cobrina",
+   "file": "metal1-ether0-reptile0-metal0-metal0-round-rivets-water0metal-none.json"
+  },
+  {
+   "key": "fire1-plant1-fire1-crystal1-reptile0-round-seams-fire2gel-none",
+   "name": "Magmollo",
+   "file": "fire1-plant1-fire1-crystal1-reptile0-round-seams-fire2gel-none.json"
+  },
+  {
+   "key": "reptile1-reptile0-reptile1-reptile1-gel1-slit-spots-fire2reptile-none",
+   "name": "Dracardo",
+   "file": "reptile1-reptile0-reptile1-reptile1-gel1-slit-spots-fire2reptile-none.json"
+  },
+  {
+   "key": "crystal1-ghost0-ghost1-ether0-fire0-round-facets-gel1fire-none",
+   "name": "Sombrardo",
+   "file": "crystal1-ghost0-ghost1-ether0-fire0-round-facets-gel1fire-none.json"
+  },
+  {
+   "key": "reptile0-reptile0-gel1-metal0-fire0-round-stripes-metal1reptile-none",
+   "name": "Cobrex",
+   "file": "reptile0-reptile0-gel1-metal0-fire0-round-stripes-metal1reptile-none.json"
+  },
+  {
+   "key": "reptile0-ether1-reptile0-fire0-crystal0-glow-spots-fire2water-none",
+   "name": "Magmex",
+   "file": "reptile0-ether1-reptile0-fire0-crystal0-glow-spots-fire2water-none.json"
+  },
+  {
+   "key": "reptile0-fire0-crystal0-reptile0-fire0-ring-stripes-fire1crystal-none",
+   "name": "Magmex",
+   "file": "reptile0-fire0-crystal0-reptile0-fire0-ring-stripes-fire1crystal-none.json"
+  },
+  {
+   "key": "reptile0-fire0-reptile0-fire0-reptile1-visor-stripes-water1reptile-none",
+   "name": "Dracardo",
+   "file": "reptile0-fire0-reptile0-fire0-reptile1-visor-stripes-water1reptile-none.json"
+  },
+  {
+   "key": "reptile0-ghost0-reptile0-water0-reptile0-twin-stripes-plant0reptile-none",
+   "name": "Dracollo",
+   "file": "reptile0-ghost0-reptile0-water0-reptile0-twin-stripes-plant0reptile-none.json"
+  },
+  {
+   "key": "metal0-crystal0-crystal1-crystal1-fire0-twin-stripes-fire1crystal-none",
+   "name": "Prismardo",
+   "file": "metal0-crystal0-crystal1-crystal1-fire0-twin-stripes-fire1crystal-none.json"
+  },
+  {
+   "key": "fire0-metal1-reptile0-reptile1-ether1-visor-seams-fire0ether-melanic",
+   "name": "Magmex",
+   "file": "fire0-metal1-reptile0-reptile1-ether1-visor-seams-fire0ether-melanic.json"
+  },
+  {
+   "key": "gel1-reptile0-reptile0-ghost1-fire0-round-spots-plant1fire-none",
+   "name": "Dracardo",
+   "file": "gel1-reptile0-reptile0-ghost1-fire0-round-spots-plant1fire-none.json"
+  },
+  {
+   "key": "water0-reptile0-reptile0-fire0-reptile1-twin-seams-fire0crystal-none",
+   "name": "Dracardo",
+   "file": "water0-reptile0-reptile0-fire0-reptile1-twin-seams-fire0crystal-none.json"
+  }
+ ]
+}
