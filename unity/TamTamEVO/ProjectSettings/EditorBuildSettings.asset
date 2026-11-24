@@ -8,5 +8,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/TamTam/Scenes/ChispinLab.unity
     guid: 1d0b8c2d533d1cd4a8c5094482613460
+  - enabled: 1
+    path: Assets/TamTam/Scenes/Arena.unity
+    guid: 9f51ad968c71899439ec4a01fc1e6e6b
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

@@ -1,0 +1,105 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02a57b128cb2e0c4dacd3df8881e822c, type: 3}
+  m_Name: FamilyArt
+  m_EditorClassIdentifier: TamTam.Runtime::TamTam.Evolution.FamilyArt
+  entries:
+  - family: 3
+    stage: final
+    sprite: {fileID: 21300000, guid: 9d5833f3752c8c541a1da4788f8359c3, type: 3}
+  - family: 3
+    stage: initial
+    sprite: {fileID: 21300000, guid: 3e40134d8b877804f9855747a4b4e5d3, type: 3}
+  - family: 3
+    stage: intermediate
+    sprite: {fileID: 21300000, guid: 1c9c9e9e8cdabcb4ab6458c9c4c3be91, type: 3}
+  - family: 2
+    stage: final
+    sprite: {fileID: 21300000, guid: 38061e94a45ccf84da25d5774c759479, type: 3}
+  - family: 2
+    stage: initial
+    sprite: {fileID: 21300000, guid: 29443e4d91662dd47bc94614642ddf74, type: 3}
+  - family: 2
+    stage: intermediate
+    sprite: {fileID: 21300000, guid: 044cff33cce2be74ab5804b55c41b55a, type: 3}
+  - family: 0
+    stage: final
+    sprite: {fileID: 21300000, guid: f14a8d84b5e5de647adad996443228e9, type: 3}
+  - family: 0
+    stage: initial
+    sprite: {fileID: 21300000, guid: c83cba4cfaf40024784ae8fc9f2d3caa, type: 3}
+  - family: 0
+    stage: intermediate
+    sprite: {fileID: 21300000, guid: d27645fe7a89b7b4e93aed25f96852f4, type: 3}
+  - family: 7
+    stage: final
+    sprite: {fileID: 21300000, guid: 94e6f31750c77224e9c45ef470c6913e, type: 3}
+  - family: 7
+    stage: initial
+    sprite: {fileID: 21300000, guid: 7b23eab840953da4fa023023980b01c9, type: 3}
+  - family: 7
+    stage: intermediate
+    sprite: {fileID: 21300000, guid: d8e4c3637c1fd84449daa4f695b30283, type: 3}
+  - family: 9
+    stage: final
+    sprite: {fileID: 21300000, guid: ed3c2c9e79c865440a8412b1c5f11d35, type: 3}
+  - family: 9
+    stage: initial
+    sprite: {fileID: 21300000, guid: e3f6f9dbfc03e4249892b8b5582f9329, type: 3}
+  - family: 9
+    stage: intermediate
+    sprite: {fileID: 21300000, guid: 57569092c5b9d5f43aa155f5f9486257, type: 3}
+  - family: 1
+    stage: final
+    sprite: {fileID: 21300000, guid: 5d0e665b9b81b8b448ad8991e220d6f4, type: 3}
+  - family: 1
+    stage: initial
+    sprite: {fileID: 21300000, guid: 34ba5fcb9ff67fc4bad3c3f1318578b9, type: 3}
+  - family: 1
+    stage: intermediate
+    sprite: {fileID: 21300000, guid: 141a30c866c5d6848980a20c855dcbfa, type: 3}
+  - family: 6
+    stage: final
+    sprite: {fileID: 21300000, guid: 7bb0f2ccad010934cbb71d5c92b10cad, type: 3}
+  - family: 6
+    stage: initial
+    sprite: {fileID: 21300000, guid: 11d1528a4a5d0824ead3a5dcbed8d926, type: 3}
+  - family: 6
+    stage: intermediate
+    sprite: {fileID: 21300000, guid: b5ad269910c648348a780886596cac55, type: 3}
+  - family: 8
+    stage: final
+    sprite: {fileID: 21300000, guid: f8051c542f9c2ca42b593b44142a4a7f, type: 3}
+  - family: 8
+    stage: initial
+    sprite: {fileID: 21300000, guid: 5e0c59cf8b49224438495e822e9f2232, type: 3}
+  - family: 8
+    stage: intermediate
+    sprite: {fileID: 21300000, guid: a00f11e6502e62846a4c2788a8f50783, type: 3}
+  - family: 4
+    stage: final
+    sprite: {fileID: 21300000, guid: 8586666e9a61e0b4a953d30866814648, type: 3}
+  - family: 4
+    stage: initial
+    sprite: {fileID: 21300000, guid: f791e6a4987377640944e16902a88b9f, type: 3}
+  - family: 4
+    stage: intermediate
+    sprite: {fileID: 21300000, guid: 3d33b401b9fe47b4bb454a711ed00dfd, type: 3}
+  - family: 5
+    stage: final
+    sprite: {fileID: 21300000, guid: 830d15f2404ddc14ebd32511e0a26df4, type: 3}
+  - family: 5
+    stage: initial
+    sprite: {fileID: 21300000, guid: b2b0777d22bc4b3419080eb631363694, type: 3}
+  - family: 5
+    stage: intermediate
+    sprite: {fileID: 21300000, guid: 2b9cd7868e79d094da4b3358cdf6ce8a, type: 3}

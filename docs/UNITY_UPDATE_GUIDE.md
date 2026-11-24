@@ -1,6 +1,14 @@
 # Actualizar Unity con las criaturas, evoluciones y entornos actuales
 
-> Estado: **IMPLEMENTADO, PENDIENTE DE PROBAR EN UNITY** (este entorno no tiene Unity; el C# no se ha compilado aquí).
+> Estado (2026-11-24, Unity 6000.3.29f1 en el PC): **COMPILA SIN ERRORES Y PROBADO.** "Actualizar todo" importa
+> 30/30 sprites pintados, construye 80/80 formas, EvolutionLab y NestHouse (7 muebles). EditMode 23/23
+> (GeneticsParityTests 18/18, EvolutionDataTests 2/2, ChispinAssetTests 3/3). PlayMode 2/2 (`LabPlayTests`:
+> los 5 estilos de cuidado llegan a Adulto; capturas en `docs/media/unity/evolution-lab.png` y `nest-house.png`).
+> Escena `Arena.unity` con los 8 biomas: **TamTam ▸ Entornos ▸ 3** (captura `docs/media/unity/arena-biomes.png`).
+> Las 80 formas generadas (~560 MB) **no se suben a git**: tras clonar o hacer pull, ejecuta "Actualizar todo".
+> Línea de comandos: `-executeMethod TamTam.EditorTools.BatchRunner.UpdateEverything` (y `BuildArena`).
+>
+> Estado anterior: IMPLEMENTADO, PENDIENTE DE PROBAR EN UNITY (el C# no se había compilado en la nube).
 > La paridad de datos web↔Unity sí está verificada: las 80 formas exportadas se reensamblan igual desde la biblioteca
 > (0 diferencias), y hay un test EditMode que lo vuelve a comprobar dentro de Unity.
 

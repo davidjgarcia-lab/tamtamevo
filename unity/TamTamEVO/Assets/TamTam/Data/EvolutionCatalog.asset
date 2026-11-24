@@ -1,0 +1,656 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35f19b5d6a1365d45a842a64fb89fcee, type: 3}
+  m_Name: EvolutionCatalog
+  m_EditorClassIdentifier: TamTam.Runtime::TamTam.Evolution.EvolutionCatalog
+  babyPrefab: {fileID: 6446222775167461610, guid: 2a6bcaa0f1c46864ca8e3a6a2fe1c71d, type: 3}
+  entries:
+  - shapeKey: fire0-fire0-fire0-fire0-fire0-slit-seams
+    name: "\xCDgniildo"
+    prefab: {fileID: 8823115830331067907, guid: 85a9af706072ba045aaccf8ad0bc324a, type: 3}
+    parts: 0000000000000000000000000000000000000000
+    variant: 0000000000000000000000000000000000000000
+    eyes: slit
+    pattern: seams
+    floating: 0
+  - shapeKey: fire1-fire1-fire1-fire1-fire1-slit-seams
+    name: "\xCDgniildo"
+    prefab: {fileID: 6809891807934151867, guid: 2a385573f1c39a94e9ae08bb767d1684, type: 3}
+    parts: 0000000000000000000000000000000000000000
+    variant: 0100000001000000010000000100000001000000
+    eyes: slit
+    pattern: seams
+    floating: 0
+  - shapeKey: plant0-plant0-plant0-plant0-plant0-slit-seams
+    name: Ramaaris
+    prefab: {fileID: 8980398263252467874, guid: a540e01d34a01204dacef389ba86ae0e, type: 3}
+    parts: 0100000001000000010000000100000001000000
+    variant: 0000000000000000000000000000000000000000
+    eyes: slit
+    pattern: seams
+    floating: 0
+  - shapeKey: plant1-plant1-plant1-plant1-plant1-slit-seams
+    name: Ramaaris
+    prefab: {fileID: 4539049005108747443, guid: b840fbcfd3009b94f85c52180b84d3ba, type: 3}
+    parts: 0100000001000000010000000100000001000000
+    variant: 0100000001000000010000000100000001000000
+    eyes: slit
+    pattern: seams
+    floating: 0
+  - shapeKey: electric0-electric0-electric0-electric0-electric0-slit-seams
+    name: Rayoix
+    prefab: {fileID: 7643668686247890859, guid: 879812d4a119aae4087efce656fd4343, type: 3}
+    parts: 0200000002000000020000000200000002000000
+    variant: 0000000000000000000000000000000000000000
+    eyes: slit
+    pattern: seams
+    floating: 0
+  - shapeKey: electric1-electric1-electric1-electric1-electric1-slit-seams
+    name: Rayoix
+    prefab: {fileID: 1750093274859623743, guid: 6f116133f272ca44cb98b1a923502f3e, type: 3}
+    parts: 0200000002000000020000000200000002000000
+    variant: 0100000001000000010000000100000001000000
+    eyes: slit
+    pattern: seams
+    floating: 0
+  - shapeKey: crystal0-crystal0-crystal0-crystal0-crystal0-slit-seams
+    name: Prismaor
+    prefab: {fileID: 6837793071576992910, guid: 3672bcaeef5f9b94e99110734696ec15, type: 3}
+    parts: 0300000003000000030000000300000003000000
+    variant: 0000000000000000000000000000000000000000
+    eyes: slit
+    pattern: seams
+    floating: 0
+  - shapeKey: crystal1-crystal1-crystal1-crystal1-crystal1-slit-seams
+    name: Prismaor
+    prefab: {fileID: 8885372342255594518, guid: 8bb7a68cada293e42aa34fc34484b67e, type: 3}
+    parts: 0300000003000000030000000300000003000000
+    variant: 0100000001000000010000000100000001000000
+    eyes: slit
+    pattern: seams
+    floating: 0
+  - shapeKey: shadow0-shadow0-shadow0-shadow0-shadow0-slit-seams
+    name: Sombrarin
+    prefab: {fileID: 7316060920238122285, guid: dc4c515f540925a4cba7c235f633671b, type: 3}
+    parts: 0400000004000000040000000400000004000000
+    variant: 0000000000000000000000000000000000000000
+    eyes: slit
+    pattern: seams
+    floating: 1
+  - shapeKey: shadow1-shadow1-shadow1-shadow1-shadow1-slit-seams
+    name: Sombrarin
+    prefab: {fileID: 952453236948939172, guid: 484375673f483a9418a436b8d60752cb, type: 3}
+    parts: 0400000004000000040000000400000004000000
+    variant: 0100000001000000010000000100000001000000
+    eyes: slit
+    pattern: seams
+    floating: 1
+  - shapeKey: water0-water0-water0-water0-water0-slit-seams
+    name: Mareaalin
+    prefab: {fileID: 8610658465486740495, guid: cfa140d88decd3941b1cc87ea481efb0, type: 3}
+    parts: 0500000005000000050000000500000005000000
+    variant: 0000000000000000000000000000000000000000
+    eyes: slit
+    pattern: seams
+    floating: 0
+  - shapeKey: water1-water1-water1-water1-water1-slit-seams
+    name: Mareaalin
+    prefab: {fileID: 5286437025023444264, guid: c79907625c961084f9850282cc5826e2, type: 3}
+    parts: 0500000005000000050000000500000005000000
+    variant: 0100000001000000010000000100000001000000
+    eyes: slit
+    pattern: seams
+    floating: 0
+  - shapeKey: plasma0-plasma0-plasma0-plasma0-plasma0-slit-seams
+    name: Nebuax
+    prefab: {fileID: 5491575974214357847, guid: c3692547b0bd4ef48801b950efe19216, type: 3}
+    parts: 0600000006000000060000000600000006000000
+    variant: 0000000000000000000000000000000000000000
+    eyes: slit
+    pattern: seams
+    floating: 0
+  - shapeKey: plasma1-plasma1-plasma1-plasma1-plasma1-slit-seams
+    name: Nebuax
+    prefab: {fileID: 6254240791517690828, guid: 43886e0218143de45b19f917f9796004, type: 3}
+    parts: 0600000006000000060000000600000006000000
+    variant: 0100000001000000010000000100000001000000
+    eyes: slit
+    pattern: seams
+    floating: 0
+  - shapeKey: light0-light0-light0-light0-light0-slit-seams
+    name: Auraina
+    prefab: {fileID: 1850033088193856517, guid: 2bcd7546667571d43b0a39aa359d4725, type: 3}
+    parts: 0700000007000000070000000700000007000000
+    variant: 0000000000000000000000000000000000000000
+    eyes: slit
+    pattern: seams
+    floating: 1
+  - shapeKey: light1-light1-light1-light1-light1-slit-seams
+    name: Auraina
+    prefab: {fileID: 2212713707391694923, guid: 4548632dc6231a943af3eeaaaf3688a9, type: 3}
+    parts: 0700000007000000070000000700000007000000
+    variant: 0100000001000000010000000100000001000000
+    eyes: slit
+    pattern: seams
+    floating: 1
+  - shapeKey: rock0-rock0-rock0-rock0-rock0-slit-seams
+    name: Pedraanix
+    prefab: {fileID: 4128566304297207737, guid: 6d1df552ea16ece478163506b7fd9c2e, type: 3}
+    parts: 0800000008000000080000000800000008000000
+    variant: 0000000000000000000000000000000000000000
+    eyes: slit
+    pattern: seams
+    floating: 0
+  - shapeKey: rock1-rock1-rock1-rock1-rock1-slit-seams
+    name: Pedraanix
+    prefab: {fileID: 7178163985024249795, guid: 0b5640e13b39bf5458abc08bf72eff02, type: 3}
+    parts: 0800000008000000080000000800000008000000
+    variant: 0100000001000000010000000100000001000000
+    eyes: slit
+    pattern: seams
+    floating: 0
+  - shapeKey: mystic0-mystic0-mystic0-mystic0-mystic0-slit-seams
+    name: Runaor
+    prefab: {fileID: 7760809801781886840, guid: 209946c216197274ca79b2f8e81644ed, type: 3}
+    parts: 0900000009000000090000000900000009000000
+    variant: 0000000000000000000000000000000000000000
+    eyes: slit
+    pattern: seams
+    floating: 1
+  - shapeKey: mystic1-mystic1-mystic1-mystic1-mystic1-slit-seams
+    name: Runaor
+    prefab: {fileID: 2324252570273801837, guid: 85f0aed29f746ad438b38be73bb20b0d, type: 3}
+    parts: 0900000009000000090000000900000009000000
+    variant: 0100000001000000010000000100000001000000
+    eyes: slit
+    pattern: seams
+    floating: 1
+  - shapeKey: water0-plant1-fire0-plasma1-fire0-round-facets
+    name: "\xCDgnaris"
+    prefab: {fileID: 6232459296877464673, guid: 2e00a822343ff434681d95d717da3dbf, type: 3}
+    parts: 0500000001000000000000000600000000000000
+    variant: 0000000001000000000000000100000000000000
+    eyes: round
+    pattern: facets
+    floating: 0
+  - shapeKey: mystic0-electric0-fire1-crystal0-electric0-visor-rings
+    name: Rayildo
+    prefab: {fileID: 7522956990070327320, guid: a8242a578571f564591b8f748f1b5282, type: 3}
+    parts: 0900000002000000000000000300000002000000
+    variant: 0000000000000000010000000000000000000000
+    eyes: visor
+    pattern: rings
+    floating: 0
+  - shapeKey: fire1-mystic1-fire1-rock0-electric0-twin-spots
+    name: "\xCDgnaris"
+    prefab: {fileID: 7370724809199665520, guid: 0c0c9cfd9d5392c40b368867db51f873, type: 3}
+    parts: 0000000009000000000000000800000002000000
+    variant: 0100000001000000010000000000000000000000
+    eyes: twin
+    pattern: spots
+    floating: 0
+  - shapeKey: fire0-rock1-plasma1-rock0-light1-slit-spots
+    name: Pedrildo
+    prefab: {fileID: 566929422554355227, guid: f7e0501b1e712324e9126ce4fe8795a9, type: 3}
+    parts: 0000000008000000060000000800000007000000
+    variant: 0000000001000000010000000000000001000000
+    eyes: slit
+    pattern: spots
+    floating: 0
+  - shapeKey: rock0-fire0-plant0-fire0-shadow0-slit-stripes
+    name: "\xCDgnaris"
+    prefab: {fileID: 5341868175867254140, guid: 3f77470629fec0645accc56c926c03bd, type: 3}
+    parts: 0800000000000000010000000000000004000000
+    variant: 0000000000000000000000000000000000000000
+    eyes: slit
+    pattern: stripes
+    floating: 0
+  - shapeKey: shadow1-fire1-fire0-electric1-fire0-slit-seams
+    name: "\xCDgnix"
+    prefab: {fileID: 4671883688951268465, guid: f40e0eec2942c5344974334ae1cd5c3a, type: 3}
+    parts: 0400000000000000000000000200000000000000
+    variant: 0100000001000000000000000100000000000000
+    eyes: slit
+    pattern: seams
+    floating: 0
+  - shapeKey: crystal1-light0-water0-electric0-fire0-ring-veins
+    name: "\xCDgnaris"
+    prefab: {fileID: 9013945163311276701, guid: fcc92a8c6be6889448e0cac5676b99a6, type: 3}
+    parts: 0300000007000000050000000200000000000000
+    variant: 0100000000000000000000000000000000000000
+    eyes: ring
+    pattern: veins
+    floating: 0
+  - shapeKey: plant0-rock1-fire0-shadow0-shadow0-slit-veins
+    name: Sombrildo
+    prefab: {fileID: 1576531453886747992, guid: 509cdaa6532ce9c4eb5b7a94d7d0cf2c, type: 3}
+    parts: 0100000008000000000000000400000004000000
+    variant: 0000000001000000000000000000000000000000
+    eyes: slit
+    pattern: veins
+    floating: 0
+  - shapeKey: rock1-fire0-plant1-crystal1-water0-glow-facets
+    name: "\xCDgnaris"
+    prefab: {fileID: 1281691694083046400, guid: 6f4c2d70d8e5244458b7c37a518b94d9, type: 3}
+    parts: 0800000000000000010000000300000005000000
+    variant: 0100000000000000010000000100000000000000
+    eyes: glow
+    pattern: facets
+    floating: 0
+  - shapeKey: shadow1-shadow0-fire0-fire0-shadow1-twin-rings
+    name: "\xCDgnrin"
+    prefab: {fileID: 5381365726383148908, guid: ade27126175a21f43a0ae2da1224ef47, type: 3}
+    parts: 0400000004000000000000000000000004000000
+    variant: 0100000000000000000000000000000001000000
+    eyes: twin
+    pattern: rings
+    floating: 0
+  - shapeKey: plant0-fire0-light1-fire0-fire0-visor-veins
+    name: "\xCDgnaris"
+    prefab: {fileID: 6537113997716489335, guid: 556b49d3d2e498847a7b718958b0836f, type: 3}
+    parts: 0100000000000000070000000000000000000000
+    variant: 0000000000000000010000000000000000000000
+    eyes: visor
+    pattern: veins
+    floating: 1
+  - shapeKey: electric0-fire0-plant0-plant0-fire0-slit-spots
+    name: "\xCDgnaris"
+    prefab: {fileID: 9207422560003789410, guid: ec3e384f7516ef14bb31f044495ebd58, type: 3}
+    parts: 0200000000000000010000000100000000000000
+    variant: 0000000000000000000000000000000000000000
+    eyes: slit
+    pattern: spots
+    floating: 0
+  - shapeKey: light0-water1-plant0-fire1-light1-glow-stripes
+    name: Marina
+    prefab: {fileID: 8845446428268993913, guid: 9d1b45112ba85284895e18800020074c, type: 3}
+    parts: 0700000005000000010000000000000007000000
+    variant: 0000000001000000000000000100000001000000
+    eyes: glow
+    pattern: stripes
+    floating: 0
+  - shapeKey: fire0-fire0-fire0-crystal1-fire0-glow-spots
+    name: "\xCDgnor"
+    prefab: {fileID: 863834111483981345, guid: cf4bf3c021359f748bd9e63ea997033e, type: 3}
+    parts: 0000000000000000000000000300000000000000
+    variant: 0000000000000000000000000100000000000000
+    eyes: glow
+    pattern: spots
+    floating: 0
+  - shapeKey: shadow0-fire0-plant0-fire0-shadow1-glow-rings
+    name: "\xCDgnrin"
+    prefab: {fileID: 6871366561906724148, guid: 242dfd78a4ea0464b8d8b6f44a46b37c, type: 3}
+    parts: 0400000000000000010000000000000004000000
+    variant: 0000000000000000000000000000000001000000
+    eyes: glow
+    pattern: rings
+    floating: 0
+  - shapeKey: fire0-fire0-plant0-fire1-fire0-glow-seams
+    name: "\xCDgnaris"
+    prefab: {fileID: 430040149581344618, guid: de144a417e7461e4eb43c7a88ce0d1de, type: 3}
+    parts: 0000000000000000010000000000000000000000
+    variant: 0000000000000000000000000100000000000000
+    eyes: glow
+    pattern: seams
+    floating: 0
+  - shapeKey: fire0-fire0-fire1-shadow1-water1-slit-seams
+    name: "\xCDgnrin"
+    prefab: {fileID: 1867686641835849909, guid: 0cd928d8b0372ca4986b03b8a92ad37a, type: 3}
+    parts: 0000000000000000000000000400000005000000
+    variant: 0000000000000000010000000100000001000000
+    eyes: slit
+    pattern: seams
+    floating: 0
+  - shapeKey: fire0-rock1-electric1-shadow1-fire0-twin-rings
+    name: "\xCDgnix"
+    prefab: {fileID: 795778966013899875, guid: f1eb8ccbab873c349b27a224d5f068f1, type: 3}
+    parts: 0000000008000000020000000400000000000000
+    variant: 0000000001000000010000000100000000000000
+    eyes: twin
+    pattern: rings
+    floating: 0
+  - shapeKey: crystal1-fire0-fire1-shadow1-fire0-glow-facets
+    name: "\xCDgnor"
+    prefab: {fileID: 4064549086892133206, guid: 7943f7a7ca1f0474d8ea9468c0420857, type: 3}
+    parts: 0300000000000000000000000400000000000000
+    variant: 0100000000000000010000000100000000000000
+    eyes: glow
+    pattern: facets
+    floating: 0
+  - shapeKey: mystic1-fire0-fire0-crystal0-fire0-glow-rings
+    name: "\xCDgnor"
+    prefab: {fileID: 1413085414578459709, guid: 0e89fd15206ebdf49be6a9715bcfcec2, type: 3}
+    parts: 0900000000000000000000000300000000000000
+    variant: 0100000000000000000000000000000000000000
+    eyes: glow
+    pattern: rings
+    floating: 0
+  - shapeKey: electric0-fire0-fire0-plant1-crystal0-slit-facets
+    name: "\xCDgnaris"
+    prefab: {fileID: 2300855001617223304, guid: 12a8eb3f84404e34097f2fa30cfcdd89, type: 3}
+    parts: 0200000000000000000000000100000003000000
+    variant: 0000000000000000000000000100000000000000
+    eyes: slit
+    pattern: facets
+    floating: 0
+  - shapeKey: electric0-fire0-fire0-mystic1-plasma1-slit-stripes
+    name: "\xCDgnix"
+    prefab: {fileID: 7449115328340444241, guid: 4b0089c2cad0c5a40a6a6d62188c03af, type: 3}
+    parts: 0200000000000000000000000900000006000000
+    variant: 0000000000000000000000000100000001000000
+    eyes: slit
+    pattern: stripes
+    floating: 0
+  - shapeKey: rock0-fire0-fire0-plant1-crystal0-slit-seams
+    name: "\xCDgnaris"
+    prefab: {fileID: 6796882509817392938, guid: 8251a91a48edfa0428c405f5451862a1, type: 3}
+    parts: 0800000000000000000000000100000003000000
+    variant: 0000000000000000000000000100000000000000
+    eyes: slit
+    pattern: seams
+    floating: 0
+  - shapeKey: electric1-electric1-fire0-fire1-plant1-ring-seams
+    name: Rayildo
+    prefab: {fileID: 657158715801219680, guid: 87d80c1fbe7017a49907309eeddec939, type: 3}
+    parts: 0200000002000000000000000000000001000000
+    variant: 0100000001000000000000000100000001000000
+    eyes: ring
+    pattern: seams
+    floating: 0
+  - shapeKey: water1-plant1-rock0-water1-fire0-twin-spots
+    name: Marildo
+    prefab: {fileID: 7049905269796723687, guid: 35f52bd104455094595e366dde6bf5a7, type: 3}
+    parts: 0500000001000000080000000500000000000000
+    variant: 0100000001000000000000000100000000000000
+    eyes: twin
+    pattern: spots
+    floating: 0
+  - shapeKey: plasma1-fire1-water1-fire1-fire1-glow-stripes
+    name: "\xCDgnalin"
+    prefab: {fileID: 7187239638051101817, guid: 019fea430c073fb489c1940ea9fa3f88, type: 3}
+    parts: 0600000000000000050000000000000000000000
+    variant: 0100000001000000010000000100000001000000
+    eyes: glow
+    pattern: stripes
+    floating: 0
+  - shapeKey: fire0-fire0-fire0-electric0-fire0-slit-spots
+    name: "\xCDgnix"
+    prefab: {fileID: 1678823734144302518, guid: 96f224e8173af3340adcfde22ab6963b, type: 3}
+    parts: 0000000000000000000000000200000000000000
+    variant: 0000000000000000000000000000000000000000
+    eyes: slit
+    pattern: spots
+    floating: 0
+  - shapeKey: fire0-water1-electric0-plasma0-water1-ring-seams
+    name: "\xCDgnalin"
+    prefab: {fileID: 6559283794344080232, guid: a71bcbc0bd0e1c2428a1a5cc5379cefa, type: 3}
+    parts: 0000000005000000020000000600000005000000
+    variant: 0000000001000000000000000000000001000000
+    eyes: ring
+    pattern: seams
+    floating: 0
+  - shapeKey: fire1-crystal1-shadow0-water0-crystal1-glow-seams
+    name: "\xCDgnor"
+    prefab: {fileID: 2729258496646647498, guid: 146c012e543a54642b835b7f26ec1bab, type: 3}
+    parts: 0000000003000000040000000500000003000000
+    variant: 0100000001000000000000000000000001000000
+    eyes: glow
+    pattern: seams
+    floating: 1
+  - shapeKey: fire1-plant0-rock0-fire0-water0-ring-seams
+    name: "\xCDgnaris"
+    prefab: {fileID: 5053969581409351087, guid: fd8c6a1491610a34f9779c03d3c929e3, type: 3}
+    parts: 0000000001000000080000000000000005000000
+    variant: 0100000000000000000000000000000000000000
+    eyes: ring
+    pattern: seams
+    floating: 0
+  - shapeKey: fire0-water1-rock0-crystal1-electric0-round-spots
+    name: "\xCDgnaris"
+    prefab: {fileID: 518288410927398126, guid: b93d7f6698b0cbf4587abc191e62907d, type: 3}
+    parts: 0000000005000000080000000300000002000000
+    variant: 0000000001000000000000000100000000000000
+    eyes: round
+    pattern: spots
+    floating: 0
+  - shapeKey: mystic1-fire0-fire0-crystal0-water1-slit-veins
+    name: "\xCDgnalin"
+    prefab: {fileID: 8981895859342025418, guid: 85268217889f6184e98e0a02c2c1d982, type: 3}
+    parts: 0900000000000000000000000300000005000000
+    variant: 0100000000000000000000000000000001000000
+    eyes: slit
+    pattern: veins
+    floating: 0
+  - shapeKey: water0-fire0-water0-water1-electric1-slit-rings
+    name: Marildo
+    prefab: {fileID: 8627193933616136618, guid: 1b736daaf5cf94e4cbe193778c4987ad, type: 3}
+    parts: 0500000000000000050000000500000002000000
+    variant: 0000000000000000000000000100000001000000
+    eyes: slit
+    pattern: rings
+    floating: 0
+  - shapeKey: plasma0-plasma0-fire0-plasma0-electric0-round-none
+    name: Nebix
+    prefab: {fileID: 210484634184049817, guid: 173262eb07d488b429d38701302193dd, type: 3}
+    parts: 0600000006000000000000000600000002000000
+    variant: 0000000000000000000000000000000000000000
+    eyes: round
+    pattern: none
+    floating: 0
+  - shapeKey: fire1-shadow1-fire0-electric0-light1-twin-spots
+    name: "\xCDgnix"
+    prefab: {fileID: 1560603770000952535, guid: 402e3c67b46193642b525c4eb323b01a, type: 3}
+    parts: 0000000004000000000000000200000007000000
+    variant: 0100000001000000000000000000000001000000
+    eyes: twin
+    pattern: spots
+    floating: 0
+  - shapeKey: crystal0-fire0-electric0-shadow1-water0-glow-veins
+    name: Rayildo
+    prefab: {fileID: 3941512355210669413, guid: 9bb59c6d4ffe9004f88585794a43bd04, type: 3}
+    parts: 0300000000000000020000000400000005000000
+    variant: 0000000000000000000000000100000000000000
+    eyes: glow
+    pattern: veins
+    floating: 0
+  - shapeKey: crystal0-water1-plant0-shadow1-fire0-round-stripes
+    name: "\xCDgnaris"
+    prefab: {fileID: 766183401711098353, guid: eb616748017ead24e933e445e1409629, type: 3}
+    parts: 0300000005000000010000000400000000000000
+    variant: 0000000001000000000000000100000000000000
+    eyes: round
+    pattern: stripes
+    floating: 0
+  - shapeKey: plant1-electric0-water1-fire0-water1-visor-spots
+    name: "\xCDgnalin"
+    prefab: {fileID: 4521584349709957793, guid: 48639a78a1223a740bd342ba94bbc46e, type: 3}
+    parts: 0100000002000000050000000000000005000000
+    variant: 0100000000000000010000000000000001000000
+    eyes: visor
+    pattern: spots
+    floating: 0
+  - shapeKey: fire0-plant0-fire0-fire0-electric1-ring-seams
+    name: "\xCDgnaris"
+    prefab: {fileID: 1816011413899773073, guid: 9bd99c3541dd23d4c8d06f6ed13368ec, type: 3}
+    parts: 0000000001000000000000000000000002000000
+    variant: 0000000000000000000000000000000001000000
+    eyes: ring
+    pattern: seams
+    floating: 0
+  - shapeKey: plant1-fire1-mystic1-fire1-fire0-glow-rivets
+    name: "\xCDgnaris"
+    prefab: {fileID: 8215595038032760151, guid: ebae679063b3e14499a88b997571a326, type: 3}
+    parts: 0100000000000000090000000000000000000000
+    variant: 0100000001000000010000000100000000000000
+    eyes: glow
+    pattern: rivets
+    floating: 1
+  - shapeKey: plant1-fire0-plasma1-plasma1-rock1-slit-veins
+    name: "\xCDgnax"
+    prefab: {fileID: 7297878142260569457, guid: c6185e7dd672b684b816c80d7977442f, type: 3}
+    parts: 0100000000000000060000000600000008000000
+    variant: 0100000000000000010000000100000001000000
+    eyes: slit
+    pattern: veins
+    floating: 0
+  - shapeKey: fire0-mystic0-fire0-plant1-fire0-twin-spots
+    name: "\xCDgnaris"
+    prefab: {fileID: 4910948619249331886, guid: 2a52dda2c1eeac84091256f863bc6855, type: 3}
+    parts: 0000000009000000000000000100000000000000
+    variant: 0000000000000000000000000100000000000000
+    eyes: twin
+    pattern: spots
+    floating: 0
+  - shapeKey: water1-water0-light0-fire0-plant0-slit-spots
+    name: Marildo
+    prefab: {fileID: 4018216235177389870, guid: 13dad52cf401f6244b1ed1dfb0615092, type: 3}
+    parts: 0500000005000000070000000000000001000000
+    variant: 0100000000000000000000000000000000000000
+    eyes: slit
+    pattern: spots
+    floating: 1
+  - shapeKey: fire1-fire0-shadow0-fire0-shadow1-slit-facets
+    name: "\xCDgnrin"
+    prefab: {fileID: 2583623283704836796, guid: e01d45d0a85fa7c4ca8bcd0b32c1920a, type: 3}
+    parts: 0000000000000000040000000000000004000000
+    variant: 0100000000000000000000000000000001000000
+    eyes: slit
+    pattern: facets
+    floating: 1
+  - shapeKey: fire0-crystal1-plant0-water1-fire0-glow-none
+    name: "\xCDgnaris"
+    prefab: {fileID: 8318387083254015495, guid: dd3a15603feaa0844a3a236046ab1430, type: 3}
+    parts: 0000000003000000010000000500000000000000
+    variant: 0000000001000000000000000100000000000000
+    eyes: glow
+    pattern: none
+    floating: 0
+  - shapeKey: fire0-shadow1-fire0-crystal0-shadow0-glow-spots
+    name: "\xCDgnrin"
+    prefab: {fileID: 4025243509614047754, guid: 08cc1d8d73f139444bf0a4fd4d94430f, type: 3}
+    parts: 0000000004000000000000000300000004000000
+    variant: 0000000001000000000000000000000000000000
+    eyes: glow
+    pattern: spots
+    floating: 0
+  - shapeKey: fire0-crystal0-fire0-fire0-fire0-glow-veins
+    name: "\xCDgnor"
+    prefab: {fileID: 5832790168098103883, guid: 18fa11c5213fc32428c2c0df766c9ba3, type: 3}
+    parts: 0000000003000000000000000000000000000000
+    variant: 0000000000000000000000000000000000000000
+    eyes: glow
+    pattern: veins
+    floating: 0
+  - shapeKey: shadow1-fire0-electric1-shadow0-electric0-visor-rings
+    name: Rayrin
+    prefab: {fileID: 9183940546992257608, guid: 82be5168ac9496440a87e1b438913837, type: 3}
+    parts: 0400000000000000020000000400000002000000
+    variant: 0100000000000000010000000000000000000000
+    eyes: visor
+    pattern: rings
+    floating: 0
+  - shapeKey: fire1-fire0-shadow0-fire0-fire0-glow-seams
+    name: "\xCDgnrin"
+    prefab: {fileID: 6824178630229915554, guid: 82c964048cf291349b94c287b1563119, type: 3}
+    parts: 0000000000000000040000000000000000000000
+    variant: 0100000000000000000000000000000000000000
+    eyes: glow
+    pattern: seams
+    floating: 1
+  - shapeKey: electric1-light0-fire0-plant0-plant0-round-rivets
+    name: Ramildo
+    prefab: {fileID: 7828300194907528103, guid: 2fabcfc28209f1e4d8542fc764dafcdc, type: 3}
+    parts: 0200000007000000000000000100000001000000
+    variant: 0100000000000000000000000000000000000000
+    eyes: round
+    pattern: rivets
+    floating: 0
+  - shapeKey: fire1-fire1-fire1-electric1-mystic0-slit-seams
+    name: "\xCDgnix"
+    prefab: {fileID: 2199619801721541500, guid: c64e8d9566abad64493cae6a5451cbf7, type: 3}
+    parts: 0000000000000000000000000200000009000000
+    variant: 0100000001000000010000000100000000000000
+    eyes: slit
+    pattern: seams
+    floating: 0
+  - shapeKey: mystic1-fire0-light1-rock1-plasma1-slit-veins
+    name: "\xCDgnax"
+    prefab: {fileID: 7330460680911032675, guid: cf22bded5f7565a4b9eb3f7f0fcc30e2, type: 3}
+    parts: 0900000000000000070000000800000006000000
+    variant: 0100000000000000010000000100000001000000
+    eyes: slit
+    pattern: veins
+    floating: 1
+  - shapeKey: crystal1-shadow0-electric1-plasma0-fire0-round-facets
+    name: Nebildo
+    prefab: {fileID: 6512693885659761682, guid: 9787dbe28a8ac164aac7ad14c3f4f2fa, type: 3}
+    parts: 0300000004000000020000000600000000000000
+    variant: 0100000000000000010000000000000000000000
+    eyes: round
+    pattern: facets
+    floating: 0
+  - shapeKey: fire0-fire0-plasma1-electric0-fire0-round-seams
+    name: "\xCDgnix"
+    prefab: {fileID: 8262522551240785339, guid: ffe831c1da3684b4494c4a63f160b196, type: 3}
+    parts: 0000000000000000060000000200000000000000
+    variant: 0000000000000000010000000000000000000000
+    eyes: round
+    pattern: seams
+    floating: 0
+  - shapeKey: fire0-rock1-fire0-fire0-crystal0-slit-spots
+    name: "\xCDgnor"
+    prefab: {fileID: 5555548046224522755, guid: f61c1b93d5d8b94428a7598f6a3b3eae, type: 3}
+    parts: 0000000008000000000000000000000003000000
+    variant: 0000000001000000000000000000000000000000
+    eyes: slit
+    pattern: spots
+    floating: 0
+  - shapeKey: fire0-fire0-crystal0-mystic0-fire0-ring-seams
+    name: "\xCDgnor"
+    prefab: {fileID: 2332087658798617416, guid: a8358fc5cf7d657408302b4939c38381, type: 3}
+    parts: 0000000000000000030000000900000000000000
+    variant: 0000000000000000000000000000000000000000
+    eyes: ring
+    pattern: seams
+    floating: 0
+  - shapeKey: fire0-fire0-fire0-fire0-mystic1-visor-seams
+    name: "\xCDgnax"
+    prefab: {fileID: 7365097633898761860, guid: 28b4ad3e641583f4aadbda1653eae9f2, type: 3}
+    parts: 0000000000000000000000000000000009000000
+    variant: 0000000000000000000000000000000001000000
+    eyes: visor
+    pattern: seams
+    floating: 0
+  - shapeKey: fire0-shadow0-fire0-water0-mystic0-twin-seams
+    name: "\xCDgnrin"
+    prefab: {fileID: 7924395218309811299, guid: 98ea3d34caef2684db59e84a674341ab, type: 3}
+    parts: 0000000004000000000000000500000009000000
+    variant: 0000000000000000000000000000000000000000
+    eyes: twin
+    pattern: seams
+    floating: 0
+  - shapeKey: electric0-crystal0-crystal1-crystal1-fire0-twin-stripes
+    name: Prismildo
+    prefab: {fileID: 2192946366277707240, guid: 48b34e6a73364044a879386211f394d2, type: 3}
+    parts: 0200000003000000030000000300000000000000
+    variant: 0000000000000000010000000100000000000000
+    eyes: twin
+    pattern: stripes
+    floating: 0
+  - shapeKey: fire0-electric1-rock0-rock1-light1-visor-seams
+    name: "\xCDgnanix"
+    prefab: {fileID: 7729883309286397017, guid: 9edd389cf4c38e641b2421b4aa730ecc, type: 3}
+    parts: 0000000002000000080000000800000007000000
+    variant: 0000000001000000000000000100000001000000
+    eyes: visor
+    pattern: seams
+    floating: 0
