@@ -1,5 +1,5 @@
 import { Canvas, createPicture, Picture, Skia, TileMode, useImage, vec } from "@shopify/react-native-skia";
-import { DIFF, fight, makeRivals, playerFighter, rankOf, type BattleEvent, type Difficulty, type Fighter } from "@tamtam/core";
+import { arenaGate, arenaXpFor, canChooseSchool, cardInfo, chooseCard, chooseSchool, DIFF, equipFighter, FAMILIES, fight, fighterFamily, makeRivals, matchup, narrate, peekArenaPro, playerFighter, rankOf, SCHOOLS, weeklyBoard, type BattleEvent, type CardId, type Difficulty, type Fighter, type SchoolId } from "@tamtam/core";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useDerivedValue, useSharedValue, withSequence, withTiming } from "react-native-reanimated";
@@ -20,6 +20,11 @@ interface Battle {
   winner: 0 | 1 | -1;
   pc: number;
   coins: number;
+  /** Fight as dealt to the simulator (rival before equipment), for revenge. */
+  base: Fighter;
+  levelUp: boolean;
+  consolation: boolean;
+  replay: number;
 }
 
 /** Arena: ranked real-time auto-battles against rivals of similar power (simulated, deterministic). */
@@ -27,6 +32,7 @@ export function ArenaScreen({ toast, onBattle }: { toast: (t: string) => void; o
   const { state, act, now } = useGame();
   const [battle, setBattle] = useState<Battle | null>(null);
   const t = state.tamtam;
+  const pro = peekArenaPro(state);
   if (!t) {
     return (
       <View style={a.center}>
@@ -35,20 +41,43 @@ export function ArenaScreen({ toast, onBattle }: { toast: (t: string) => void; o
       </View>
     );
   }
-  const me = playerFighter(state);
+  const me = equipFighter(state, playerFighter(state));
   const rank = rankOf(state.arena.pc);
   const day = Math.floor(now() / 86_400_000);
-  const rivals = makeRivals(me, day * 7919 + state.arena.pc + state.arena.wins * 31 + state.arena.losses * 17);
+  const rivals = makeRivals(playerFighter(state), day * 7919 + state.arena.pc + state.arena.wins * 31 + state.arena.losses * 17);
+  const gate = arenaGate(state, now());
+  const myFam = fighterFamily(state);
+  const board = weeklyBoard(state, now());
 
   const start = (rival: Fighter, d: Difficulty) => {
-    if (state.care.asleep) return toast("Está dormido. Despiértalo primero.");
-    if (state.care.needs.energy < 8) return toast("Está agotado para combatir. Una siesta le vendrá bien.");
+    if (!gate.ok) return toast(gate.reason ?? "No puede combatir ahora.");
     const r = act((s) => fight(s, rival, d, { fightId: newId(), seed: Math.floor(Math.random() * 1e9), now: now() }));
-    setBattle({ me: r.me, rival, d, events: r.result.events, winner: r.result.winner, pc: r.pc, coins: r.coins });
+    setBattle({ me: r.me, rival: r.foe, base: rival, d, events: r.result.events, winner: r.result.winner, pc: r.pc, coins: r.coins, levelUp: !!r.progress?.levelUp, consolation: !!r.progress?.consolation, replay: 0 });
     onBattle(true);
   };
+  const consolationRival = (): Fighter => {
+    const easy = rivals[0]!.fighter;
+    return { ...easy, name: `${easy.name} (consuelo)`, hp: Math.round(easy.hp * 0.8), str: Math.round(easy.str * 0.8) };
+  };
 
-  if (battle) return <BattleView b={battle} myAllele={state.alleleId} onExit={() => { setBattle(null); onBattle(false); }} />;
+  if (battle)
+    return (
+      <BattleView
+        key={battle.replay}
+        b={battle}
+        myAllele={state.alleleId}
+        canRevenge={!battle.consolation && battle.winner !== 0 && gate.ok}
+        onRevenge={() => start(battle.base, battle.d)}
+        onReplay={() => setBattle({ ...battle, replay: battle.replay + 1 })}
+        onExit={() => { setBattle(null); onBattle(false); }}
+      />
+    );
+
+  const famTag = (f?: Fighter) => {
+    const fam = f?.genome?.parts.back ?? "fire";
+    const m = matchup(myFam, fam);
+    return { fam, m, label: m > 1 ? "Ventaja +15 %" : m < 1 ? "Desventaja −13 %" : "Neutral", color: m > 1 ? brand.mint : m < 1 ? brand.pink : colors.inkSoft };
+  };
 
   return (
     <ScrollView contentContainerStyle={a.root}>
@@ -61,8 +90,19 @@ export function ArenaScreen({ toast, onBattle }: { toast: (t: string) => void; o
           <Text style={a.desc}>Victorias {state.arena.wins} · Derrotas {state.arena.losses}{state.arena.streak > 1 ? ` · racha ${state.arena.streak}` : ""}</Text>
         </View>
       </View>
+      <View style={a.levelBox}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <Text style={a.name}>Arena nivel {pro.level}</Text>
+          <Text style={a.desc} testID="arena-energy">Energía {gate.left}/5{gate.consolation ? " · consuelo disponible" : ""}</Text>
+        </View>
+        <View style={a.hpTrack}><View style={[a.hpFill, { width: `${(pro.xp / arenaXpFor(pro.level)) * 100}%`, backgroundColor: brand.cyan }]} /></View>
+        <View style={a.pips}>{[0, 1, 2, 3, 4].map((i) => <View key={i} style={[a.pip, i < gate.left && { backgroundColor: brand.orange }]} />)}</View>
+        {pro.cards.length > 0 && <Text style={a.desc}>Cartas: {pro.cards.map((c) => cardInfo(c).name).join(" · ")}</Text>}
+        {pro.school && <Text style={a.desc}>{SCHOOLS[pro.school].name}: {SCHOOLS[pro.school].desc}</Text>}
+        {!gate.ok && gate.reason && <Text style={[a.desc, { color: brand.pink }]}>{gate.reason}</Text>}
+      </View>
       <Text style={a.desc}>
-        {t.name}: Vida {me.hp} · Fuerza {me.str} · Defensa {me.def} · Velocidad {me.spd}. Los combates son automáticos y en tiempo real; tu Tamtam lucha con lo que ha entrenado.
+        {t.name} ({myFam ? FAMILIES[myFam].name : "Fuego"}): Vida {me.hp} · Fuerza {me.str} · Defensa {me.def} · Velocidad {me.spd}. Los combates son automáticos y en tiempo real; tu Tamtam lucha con lo que ha entrenado.
       </Text>
       <Text style={a.section}>Rivales de hoy</Text>
       {rivals.map(({ fighter, difficulty }) => (
@@ -75,23 +115,83 @@ export function ArenaScreen({ toast, onBattle }: { toast: (t: string) => void; o
             <Text style={[a.diff, { color: difficulty === "easy" ? brand.mint : difficulty === "even" ? brand.gold : brand.pink }]}>{DIFF[difficulty].label}</Text>
             <Text style={a.desc}>Vida {fighter.hp} · Fuerza {fighter.str}</Text>
             <Text style={a.desc}>Victoria: +{DIFF[difficulty].win} PC · {DIFF[difficulty].coins} TC</Text>
+            <Text style={[a.diff, { color: famTag(fighter).color }]}>{FAMILIES[famTag(fighter).fam].name} · {famTag(fighter).label}</Text>
           </View>
           <Btn small label="Combatir" tone="pink" onPress={() => start(fighter, difficulty)} testID={`fight-${difficulty}`} />
         </View>
       ))}
+      {gate.consolation && (
+        <View style={[a.card, { borderColor: brand.mint }]}>
+          <View style={{ flex: 1 }}>
+            <Text style={a.name}>Combate de consuelo</Text>
+            <Text style={a.desc}>Tres derrotas hoy: un rival más flojo para acabar el día con buen sabor.</Text>
+          </View>
+          <Btn small label="Combatir" tone="mint" onPress={() => start(consolationRival(), "easy")} testID="fight-consolation" />
+        </View>
+      )}
+      <Text style={a.section}>Líderes de la semana</Text>
+      <Text style={a.desc}>Tabla local con rivales del dispositivo (sin servidor todavía).</Text>
+      {board.map((row, i) => (
+        <Text key={row.name + i} style={[a.desc, row.me && { color: brand.gold, fontFamily: fonts.bodyBold }]}>
+          {i + 1}. {row.name} · {FAMILIES[row.family].name} · {row.wins} victorias
+        </Text>
+      ))}
+      {pro.badges.length > 0 && <Text style={a.desc}>Insignias: {pro.badges.join(" · ")}</Text>}
       {state.arena.history.length > 0 && <Text style={a.section}>Últimos combates</Text>}
       {state.arena.history.slice(-5).reverse().map((hi, i) => (
         <Text key={i} style={a.desc}>
           {hi.won ? "Victoria" : "Derrota"} contra {hi.rival} · {hi.pc >= 0 ? "+" : ""}{hi.pc} PC · +{hi.coins} TC
         </Text>
       ))}
+      {pro.offer && <CardChoice offer={pro.offer} level={pro.level} onPick={(c) => { act((s) => chooseCard(s, c)); toast(`Nueva carta: ${cardInfo(c).name}`); }} />}
+      {!pro.offer && canChooseSchool(state) && <SchoolChoice onPick={(sc) => { act((s) => chooseSchool(s, sc)); toast(`Te unes a la ${SCHOOLS[sc].name}`); }} />}
     </ScrollView>
+  );
+}
+
+function CardChoice({ offer, level, onPick }: { offer: CardId[]; level: number; onPick: (c: CardId) => void }) {
+  return (
+    <View style={a.choice} testID="arena-cards">
+      <Text style={a.section}>¡Arena nivel {level}! Elige una carta</Text>
+      <View style={{ flexDirection: "row", gap: 10 }}>
+        {offer.map((c, i) => {
+          const info = cardInfo(c);
+          return (
+            <View key={c} style={[a.cardPick, { borderColor: info.kind === "tech" ? brand.orange : info.kind === "companion" ? brand.mint : brand.cyan }]}>
+              <Icon name={info.kind === "tech" ? "arena" : info.kind === "companion" ? "heart" : "gym"} size={34} accent={info.kind === "tech" ? brand.orange : brand.cyan} />
+              <Text style={a.name}>{info.name}</Text>
+              <Text style={[a.desc, { textAlign: "center" }]}>{info.desc}</Text>
+              <Btn small label="Elegir" tone="coral" onPress={() => onPick(c)} testID={`card-${i}`} />
+            </View>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+function SchoolChoice({ onPick }: { onPick: (s: SchoolId) => void }) {
+  return (
+    <View style={a.choice} testID="arena-school">
+      <Text style={a.section}>Elige escuela de lucha</Text>
+      <Text style={a.desc}>Solo se elige una vez.</Text>
+      {(Object.keys(SCHOOLS) as SchoolId[]).map((k) => (
+        <View key={k} style={a.card}>
+          <View style={{ flex: 1 }}>
+            <Text style={a.name}>{SCHOOLS[k].name}</Text>
+            <Text style={a.desc}>{SCHOOLS[k].desc}</Text>
+          </View>
+          <Btn small label="Unirse" tone="pink" onPress={() => onPick(k)} testID={`school-${k}`} />
+        </View>
+      ))}
+    </View>
   );
 }
 
 type Floating = { id: number; side: 0 | 1; text: string; color: string };
 
-function BattleView({ b, myAllele, onExit }: { b: Battle; myAllele: string; onExit: () => void }) {
+function BattleView({ b, myAllele, onExit, onRevenge, onReplay, canRevenge }: { b: Battle; myAllele: string; onExit: () => void; onRevenge: () => void; onReplay: () => void; canRevenge: boolean }) {
+  const [log, setLog] = useState<string[]>([]);
   const A = useCreature(myAllele, undefined, b.me.genome);
   const B = useCreature(b.rival.alleleId, undefined, b.rival.genome);
   const [size, setSize] = useState({ w: 0, h: 0 });
@@ -119,6 +219,14 @@ function BattleView({ b, myAllele, onExit }: { b: Battle; myAllele: string; onEx
       bt += 0.05 * SPEED;
       while (i < b.events.length && b.events[i]!.t <= bt) {
         const e = b.events[i++]!;
+        const line = narrate(e as never, [b.me.name, b.rival.name]);
+        if (line) setLog((l) => [...l.slice(-2), line]);
+        if (e.type === "technique" || e.type === "companion") {
+          setBanner(e.type === "technique" ? e.name : `${e.name} ayuda`);
+          timers.push(setTimeout(() => setBanner(null), 1000));
+          float(e.by, e.type === "technique" ? e.name : "¡Ayuda!", brand.orange);
+          continue;
+        }
         if (e.type === "attack" || e.type === "skill") {
           creature[e.by]!.play("attack");
           lunge[e.by]!.value = withSequence(withTiming(1, { duration: 140 }), withTiming(0, { duration: 260 }));
@@ -231,10 +339,18 @@ function BattleView({ b, myAllele, onExit }: { b: Battle; myAllele: string; onEx
               <Coin />
               <Text style={a.reward}>+{b.coins} Tamcoins</Text>
             </View>
+            {b.levelUp && <Text style={[a.desc, { textAlign: "center", color: brand.cyan }]}>¡Sube el nivel de Arena! Elige una carta al volver.</Text>}
+            <View style={{ flexDirection: "row", gap: 8, justifyContent: "center" }}>
+              <Btn small label="Repetir" tone="dark" onPress={onReplay} testID="battle-replay" />
+              {canRevenge && <Btn small label="¡Revancha!" tone="pink" onPress={onRevenge} testID="battle-revenge" />}
+            </View>
             <Btn label="Volver a la Arena" tone="coral" onPress={onExit} testID="battle-exit" />
           </>
         ) : (
-          <Text style={a.desc}>Combate automático en curso · {DIFF[b.d].label}</Text>
+          <>
+            <Text style={a.desc}>Combate automático en curso · {DIFF[b.d].label}</Text>
+            {log.map((l, i) => <Text key={i} style={[a.desc, { opacity: 0.5 + i * 0.25 }]}>{l}</Text>)}
+          </>
         )}
       </View>
     </View>
@@ -266,4 +382,9 @@ const a = StyleSheet.create({
   result: { fontFamily: fonts.displayBold, fontSize: 30, textAlign: "center" },
   rewardRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10 },
   reward: { fontFamily: fonts.display, fontSize: 18, color: colors.ink },
+  levelBox: { backgroundColor: brand.panel, borderRadius: 18, padding: 12, gap: 6, borderWidth: 1.5, borderColor: brand.line },
+  pips: { flexDirection: "row", gap: 6 },
+  pip: { width: 18, height: 8, borderRadius: 4, backgroundColor: brand.line },
+  choice: { backgroundColor: brand.core, borderRadius: 20, padding: 14, gap: 10, borderWidth: 2, borderColor: brand.gold },
+  cardPick: { flex: 1, alignItems: "center", gap: 6, backgroundColor: brand.panel, borderRadius: 16, borderWidth: 2, padding: 10 },
 });

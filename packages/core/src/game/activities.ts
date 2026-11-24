@@ -8,6 +8,7 @@ import { FAMILIES } from "../genetics/families";
 import { genomeStats } from "../genetics/genome";
 import { canEvolve, evolveTamtam, type EvolutionRoll } from "../genetics/evolve";
 import { rankOf } from "./arena";
+import { afterFight, arenaGate, equipFighter, equipRival } from "./arenaPro";
 import { payCare } from "./life";
 import { addAlbumPiece, medalFor, praiseFor, recordPlayDay, starsFor, type Medal, type Metrics } from "./play";
 import { recordFight, simulateBattle, type Difficulty, type Fighter } from "./arena";
@@ -113,10 +114,17 @@ export function playerFighter(s: Readonly<GameState>): Fighter {
 /** Runs and records a fight. Costs energy (fatigue). */
 export function fight(s: GameState, rival: Fighter, d: Difficulty, input: { fightId: string; seed: number; now: number }) {
   if (s.phase !== "home" || !s.tamtam) throw new GameRuleError("no_tamtam");
-  const me = playerFighter(s);
-  const result = simulateBattle(me, rival, input.seed);
+  if (!s.arena.applied.includes(input.fightId)) {
+    const gate = arenaGate(s, input.now);
+    if (!gate.ok) throw new GameRuleError("arena_closed");
+  }
+  const me = equipFighter(s, playerFighter(s));
+  const foe = equipRival(rival, rankOf(s.arena.pc).index);
+  const result = simulateBattle(me, foe, input.seed);
   const rec = recordFight(s.arena, input.fightId, rival.name, d, result.winner === 0, input.now);
+  let progress: ReturnType<typeof afterFight> | null = null;
   if (!rec.duplicate) {
+    progress = afterFight(s, input.now, result.winner === 0, { rival, difficulty: d, seed: input.seed, won: result.winner === 0 });
     if (rec.coins > 0) credit(s.economy.wallet, { key: `reward:arena:${input.fightId}`, currency: "tamcoin", amount: rec.coins, kind: "reward", source: "arena", ts: input.now });
     advanceCare(s.care, input.now);
     s.care.needs.energy = Math.max(0, s.care.needs.energy - 8);
@@ -127,7 +135,7 @@ export function fight(s: GameState, rival: Fighter, d: Difficulty, input: { figh
     payCare(s, "fight", input.now);
     if (result.winner === 0) bumpStage(s.care, "wins");
   }
-  return { me, result, ...rec };
+  return { me, foe, result, progress, ...rec };
 }
 
 /** Granja: swap the active Tamtam with one resting on the farm. Needs pause while on the farm. */

@@ -6,7 +6,7 @@
  */
 import { CHISPIN_GENOME, type Genome } from "../genetics/genome";
 import { rollEvolution } from "../genetics/evolve";
-import { FAMILIES } from "../genetics/families";
+import { FAMILIES, type FamilyId } from "../genetics/families";
 
 export interface Fighter {
   name: string;
@@ -23,6 +23,34 @@ export interface Fighter {
   /** Evolved body plan (absent = baby Chispín). */
   genome?: Genome;
   stage?: string;
+  /** Arena techniques (cards) and dominant family for matchups. */
+  techniques?: TechniqueId[];
+  family?: FamilyId;
+  /** Companion from the Granja: extra small hits every few seconds. */
+  companion?: { name: string; power: number } | null;
+  /** First strike (ether technique or Rayo school). */
+  firstStrike?: boolean;
+  dodgeBonus?: number;
+}
+
+/** Techniques: one per family (references batch 3: My Brute skills, redesigned). */
+export type TechniqueId = "embers" | "armor" | "reflect" | "phantom" | "roots" | "whirl" | "bounce" | "gust" | "fierce";
+export const TECHNIQUES: Record<TechniqueId, { family: FamilyId; name: string; desc: string }> = {
+  embers: { family: "fire", name: "Ascuas", desc: "Su habilidad deja quemaduras: daño extra durante 3 s." },
+  armor: { family: "metal", name: "Coraza", desc: "Recibe un 12 % menos de daño." },
+  reflect: { family: "crystal", name: "Reflejo", desc: "20 % de probabilidad de devolver la mitad del golpe." },
+  phantom: { family: "ghost", name: "Esquiva fantasma", desc: "+10 % de esquiva." },
+  roots: { family: "plant", name: "Raíces", desc: "Una vez por combate inmoviliza al rival 2 s." },
+  whirl: { family: "water", name: "Torbellino", desc: "Su habilidad retrasa el siguiente ataque rival." },
+  bounce: { family: "gel", name: "Rebote", desc: "Una vez por combate sobrevive con 1 de vida." },
+  gust: { family: "ether", name: "Corriente", desc: "Golpea primero y es más rápido." },
+  fierce: { family: "reptile", name: "Mordisco feroz", desc: "Sus ataques no se pueden esquivar." },
+};
+/** Matchups: each family beats the next one in its triangle (+15 % damage). */
+export const BEATS: Record<FamilyId, FamilyId> = { fire: "plant", plant: "water", water: "fire", metal: "crystal", crystal: "ghost", ghost: "metal", gel: "reptile", reptile: "ether", ether: "gel" };
+export function matchup(att?: FamilyId, def?: FamilyId): number {
+  if (!att || !def) return 1;
+  return BEATS[att] === def ? 1.15 : BEATS[def] === att ? 0.87 : 1;
 }
 
 export type BattleEvent =
@@ -30,6 +58,8 @@ export type BattleEvent =
   | { t: number; type: "skill"; by: 0 | 1; name: string }
   | { t: number; type: "hit"; on: 0 | 1; dmg: number; crit: boolean; hp: number }
   | { t: number; type: "dodge"; by: 0 | 1 }
+  | { t: number; type: "technique"; by: 0 | 1; name: string }
+  | { t: number; type: "companion"; by: 0 | 1; name: string }
   | { t: number; type: "end"; winner: 0 | 1 | -1 };
 
 export interface BattleResult {
@@ -56,6 +86,21 @@ export function simulateBattle(a: Fighter, b: Fighter, seed: number): BattleResu
   // Symmetric, seeded openings: neither side always strikes first.
   const next = [0.6 / (1 + a.spd / 120) + r() * 0.4, 0.6 / (1 + b.spd / 120) + r() * 0.4];
   const skillAt = [a.skillCooldown * (0.5 + r() * 0.2), b.skillCooldown * (0.5 + r() * 0.2)];
+  const has = (i: number, tq: TechniqueId) => !!f[i]!.techniques?.includes(tq);
+  for (const i of [0, 1]) if (f[i]!.firstStrike || has(i, "gust")) next[i] = 0.1;
+  const burns: { on: 0 | 1; at: number; dmg: number }[] = [];
+  const rootsUsed = [false, false];
+  const bounceUsed = [false, false];
+  const compAt = [3, 3];
+  const deal = (to: 0 | 1, dmg: number, at: number, crit: boolean) => {
+    if (hp[to] - dmg <= 0 && has(to, "bounce") && !bounceUsed[to]) {
+      bounceUsed[to] = true;
+      dmg = hp[to] - 1;
+      events.push({ t: at, type: "technique", by: to, name: TECHNIQUES.bounce.name });
+    }
+    hp[to] = Math.max(0, hp[to] - dmg);
+    events.push({ t: at, type: "hit", on: to, dmg, crit, hp: hp[to] });
+  };
   let tick = 0;
   const events: BattleEvent[] = [];
   const dt = 0.05;
@@ -68,6 +113,26 @@ export function simulateBattle(a: Fighter, b: Fighter, seed: number): BattleResu
       const me = f[i]!;
       const foe = f[1 - i]!;
       const o = (1 - i) as 0 | 1;
+      // Burns (embers) tick on the foe.
+      for (let k = burns.length - 1; k >= 0; k--) if (burns[k]!.on === o && t >= burns[k]!.at) {
+        deal(o, burns[k]!.dmg, t, false);
+        burns.splice(k, 1);
+      }
+      if (hp[o] <= 0) break;
+      // Roots: once per fight, a few seconds in.
+      if (has(i, "roots") && !rootsUsed[i] && t >= 4) {
+        rootsUsed[i] = true;
+        next[o] = Math.max(next[o]!, t + 2);
+        skillAt[o] = Math.max(skillAt[o]!, t + 2);
+        events.push({ t, type: "technique", by: i, name: TECHNIQUES.roots.name });
+      }
+      // Companion from the Granja.
+      if (me.companion && t >= compAt[i]!) {
+        compAt[i] = t + 3.2;
+        events.push({ t, type: "companion", by: i, name: me.companion.name });
+        deal(o, Math.max(1, Math.round(me.companion.power * (100 / (100 + foe.def)))), t + 0.2, false);
+        if (hp[o] <= 0) break;
+      }
       let power = 0;
       if (t >= skillAt[i]!) {
         power = me.skillPower;
@@ -79,16 +144,26 @@ export function simulateBattle(a: Fighter, b: Fighter, seed: number): BattleResu
       }
       if (power === 0) continue;
       next[i] = t + 1.8 / (1 + me.spd / 120);
-      const dodge = Math.min(0.25, Math.max(0.02, 0.04 + (foe.spd - me.spd) / 400));
-      if (r() < dodge) {
+      const isSkill = power !== 1;
+      if (isSkill && has(i, "whirl")) {
+        next[o] = next[o]! + 0.8;
+        events.push({ t, type: "technique", by: i, name: TECHNIQUES.whirl.name });
+      }
+      const dodge = Math.min(0.35, Math.max(0.02, 0.04 + (foe.spd - me.spd) / 400 + (foe.dodgeBonus ?? 0) + (has(o, "phantom") ? 0.1 : 0)));
+      if (!has(i, "fierce") && r() < dodge) {
         events.push({ t: t + 0.25, type: "dodge", by: o });
         continue;
       }
       const crit = r() < Math.min(0.35, 0.05 + me.crit / 400);
       const variance = 0.92 + r() * 0.16;
-      const dmg = Math.max(1, Math.round(me.str * power * variance * (crit ? 1.5 : 1) * (100 / (100 + foe.def)) * 0.9));
-      hp[o] = Math.max(0, hp[o] - dmg);
-      events.push({ t: t + 0.25, type: "hit", on: o, dmg, crit, hp: hp[o] });
+      let dmg = Math.max(1, Math.round(me.str * power * variance * (crit ? 1.5 : 1) * (100 / (100 + foe.def)) * 0.9 * matchup(me.family, foe.family) * (has(o, "armor") ? 0.88 : 1)));
+      deal(o, dmg, t + 0.25, crit);
+      if (isSkill && has(i, "embers")) burns.push({ on: o, at: t + 1, dmg: Math.max(1, Math.round(foe.hp * 0.04)) }, { on: o, at: t + 2, dmg: Math.max(1, Math.round(foe.hp * 0.04)) }, { on: o, at: t + 3, dmg: Math.max(1, Math.round(foe.hp * 0.04)) });
+      if (has(o, "reflect") && hp[o] > 0 && r() < 0.2) {
+        dmg = Math.max(1, Math.round(dmg * 0.5));
+        events.push({ t: t + 0.3, type: "technique", by: o, name: TECHNIQUES.reflect.name });
+        deal(i, dmg, t + 0.35, false);
+      }
     }
   }
   const winner: 0 | 1 | -1 = hp[1] <= 0 ? 0 : hp[0] <= 0 ? 1 : hp[0] / a.hp > hp[1] / b.hp ? 0 : hp[1] / b.hp > hp[0] / a.hp ? 1 : -1;
