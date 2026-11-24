@@ -1,4 +1,4 @@
-import { Canvas, createPicture, Picture, Skia, TileMode, useImage, vec } from "@shopify/react-native-skia";
+import { BlendMode, Canvas, createPicture, Picture, Skia, TileMode, useImage, vec } from "@shopify/react-native-skia";
 import { arenaGate, arenaXpFor, canChooseSchool, cardInfo, chooseCard, chooseSchool, DIFF, equipFighter, FAMILIES, fight, fighterFamily, makeRivals, matchup, narrate, peekArenaPro, playerFighter, rankOf, SCHOOLS, weeklyBoard, type BattleEvent, type CardId, type Difficulty, type Fighter, type SchoolId } from "@tamtam/core";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -290,10 +290,26 @@ function BattleView({ b, myAllele, onExit, onRevenge, onReplay, canRevenge }: { 
     () =>
       createPicture((c) => {
         if (den) {
-          // Painted biome, cover-fit (bottom-aligned).
+          // Painted biome: blurred cover behind, sharp width-fit at the bottom (where the fight happens).
+          const src = Skia.XYWHRect(0, 0, den.width(), den.height());
           const k = Math.max(W / den.width(), H / den.height());
           const dw = den.width() * k, dh = den.height() * k;
-          c.drawImageRect(den, Skia.XYWHRect(0, 0, den.width(), den.height()), Skia.XYWHRect((W - dw) / 2, H - dh, dw, dh), Skia.Paint());
+          const soft = Skia.Paint();
+          soft.setImageFilter(Skia.ImageFilter.MakeBlur(14, 14, TileMode.Clamp, null));
+          soft.setColorFilter(Skia.ColorFilter.MakeMatrix([0.7, 0, 0, 0, 0, 0, 0.7, 0, 0, 0, 0, 0, 0.75, 0, 0, 0, 0, 0, 1, 0]));
+          c.drawImageRect(den, src, Skia.XYWHRect((W - dw) / 2, H - dh, dw, dh), soft);
+          const kw = Math.max(W / den.width(), (H * 0.62) / den.height());
+          const sw = den.width() * kw, sh = den.height() * kw;
+          const sharp = Skia.Paint();
+          sharp.setAntiAlias(true);
+          // Sharp scene faded in from the top (no visible seam with the blurred sky).
+          c.saveLayer();
+          c.drawImageRect(den, src, Skia.XYWHRect((W - sw) / 2, H - sh, sw, sh), sharp);
+          const mask = Skia.Paint();
+          mask.setBlendMode(BlendMode.DstIn);
+          mask.setShader(Skia.Shader.MakeLinearGradient(vec(0, H - sh), vec(0, H - sh + sh * 0.35), [Skia.Color("transparent"), Skia.Color("#000000")], null, TileMode.Clamp));
+          c.drawRect(Skia.XYWHRect(0, H - sh, W, sh), mask);
+          c.restore();
           return;
         }
         const p = Skia.Paint();
