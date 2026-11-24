@@ -1,4 +1,4 @@
-import { Canvas, createPicture, Picture, Skia, TileMode, vec } from "@shopify/react-native-skia";
+import { Canvas, createPicture, Picture, Skia, TileMode, useImage, vec } from "@shopify/react-native-skia";
 import { DIFF, fight, makeRivals, playerFighter, rankOf, type BattleEvent, type Difficulty, type Fighter } from "@tamtam/core";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -158,9 +158,17 @@ function BattleView({ b, myAllele, onExit }: { b: Battle; myAllele: string; onEx
 
   const W = Math.max(1, size.w);
   const H = Math.max(1, size.h);
+  const den = useImage(require("../../assets/creatures/fire_den.webp")); // eslint-disable-line @typescript-eslint/no-require-imports
   const bg = useMemo(
     () =>
       createPicture((c) => {
+        if (den) {
+          // Painted fire den (from the Unity project), cover-fit.
+          const k = Math.max(W / den.width(), H / den.height());
+          const dw = den.width() * k, dh = den.height() * k;
+          c.drawImageRect(den, Skia.XYWHRect(0, 0, den.width(), den.height()), Skia.XYWHRect((W - dw) / 2, H - dh, dw, dh), Skia.Paint());
+          return;
+        }
         const p = Skia.Paint();
         p.setShader(Skia.Shader.MakeLinearGradient(vec(0, 0), vec(0, H), [Skia.Color("#2A1C5C"), Skia.Color("#17132B")], null, TileMode.Clamp));
         c.drawRect(Skia.XYWHRect(0, 0, W, H), p);
@@ -176,7 +184,7 @@ function BattleView({ b, myAllele, onExit }: { b: Battle; myAllele: string; onEx
         ring.setAlphaf(0.45);
         c.drawOval(Skia.XYWHRect(W * 0.06, H * 0.68, W * 0.88, H * 0.24), ring);
       }, Skia.XYWHRect(0, 0, W, H)),
-    [W, H],
+    [W, H, den],
   );
   const scale = Math.min(W / 560, H / 300);
   const pic = useDerivedValue(() => {

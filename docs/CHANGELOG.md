@@ -4,6 +4,17 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+### Chispín pintado en la app web (2026-11-24)
+#### Añadido
+- El Chispín **pintado con IA** del proyecto Unity (PaintedChispinBuilder) ahora también en la app/prototipo web:
+  malla deformable (902 vértices) con los mismos 16 huesos y pesos que en Unity, piel calculada en cada frame sobre el
+  esqueleto compartido → los 14 clips, respiración, parpadeo (ojos cerrados pintados) y cola/llamas con inercia.
+  Generado con `tools/gen_painted_chispin.py` desde los assets de Unity.
+- Alelos de color sobre la pintura (Ceniza, Oro Fundido, Rubí, Azul Llama) por cambio de tono/saturación; brillo extra con Lustre alto.
+- Arena con el fondo pintado de la **guarida de fuego**.
+#### Limitaciones
+- La boca sigue pintada cerrada (al comer, la comida se ve pero la mandíbula no se abre); las formas evolucionadas siguen siendo vectoriales.
+
 ### Casa-nido de bosque (2026-11-19)
 #### Añadido
 - **Paredes y suelos editables** (Decorar ▸ Paredes / Suelo, y Tienda ▸ Paredes y suelos): nido trenzado, troncos, piedra con musgo, papel de hojas, corazón del árbol · tablones, musgo, losas de río, anillos de árbol. `setFinish` en core.

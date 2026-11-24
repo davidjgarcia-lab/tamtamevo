@@ -1,6 +1,7 @@
 import { BlurStyle, ClipOp, PaintStyle, Skia, TileMode, vec, type SkCanvas } from "@shopify/react-native-skia";
 import { evalEmitter, type EmitterDef, type Frame } from "@tamtam/rig";
 import type { CreatureResources } from "./resources";
+import { drawPainted } from "./painted";
 
 export interface Placement {
   x: number;
@@ -96,6 +97,7 @@ export function drawCreature(canvas: SkCanvas, res: CreatureResources, frame: Fr
   canvas.save();
   canvas.translate(at.x, at.y);
   canvas.scale(at.scale * at.dir, at.scale);
+  if (res.painted) drawPainted(canvas, res.painted, frame);
   for (let i = 0; i < res.ops.length; i++) {
     const op = res.ops[i]!;
     if (op.faceSlot !== null) {

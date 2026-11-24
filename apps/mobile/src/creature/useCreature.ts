@@ -1,7 +1,9 @@
 import type { SkCanvas } from "@shopify/react-native-skia";
-import { chispinClips, chispinEmitters, chispinRig, fireColorAlleles, genomeEmitters, genomePalette, genomeRig, type ChispinClipId, type GenomeLike } from "@tamtam/art";
+import { chispinClips, chispinEmitters, chispinPaintedRig, chispinRig, CHISPIN_PAINTED, fireColorAlleles, genomeEmitters, genomePalette, genomeRig, type ChispinClipId, type GenomeLike } from "@tamtam/art";
 import { compileClip, compileRig, derivePalette, evaluateFrame, switchClip, type CompiledClip, type CompiledRig, type EmitterDef, type Frame, type PlaybackState } from "@tamtam/rig";
+import { useImage } from "@shopify/react-native-skia";
 import { useCallback, useMemo } from "react";
+import { buildPainted } from "./painted";
 import { useFrameCallback, useSharedValue, type SharedValue } from "react-native-reanimated";
 import { drawCreature, drawParticles, type ActiveEmitters, type Placement } from "./draw";
 import { buildResources, DEFAULT_LOOK, type CreatureResources, type Look } from "./resources";
@@ -20,6 +22,18 @@ interface Model {
   float: boolean;
 }
 const models = new Map<string, Model>();
+
+/** Painted Chispín (baby): AI painting from the Unity project, skinned on the shared skeleton. */
+const paintedRig = compileRig(chispinPaintedRig);
+const CREST_SHIFT = { x: CHISPIN_PAINTED.crestTip[0] - 46, y: CHISPIN_PAINTED.crestTip[1] + 96 };
+const paintedEmitters = Object.fromEntries(
+  Object.entries(chispinEmitters).map(([k, list]) => [k, list.map((e) => (e.id === "embers" || e.id === "smoke" ? { ...e, x: e.x + CREST_SHIFT.x, y: e.y + CREST_SHIFT.y } : e))]),
+) as Record<ChispinClipId, EmitterDef[]>;
+const PAINTED_MODEL: Model = { rig: paintedRig, clips: chispinClips.map((c) => compileClip(paintedRig, c)), emitters: paintedEmitters, float: false };
+/* eslint-disable @typescript-eslint/no-require-imports */
+const PAINTED_SRC = require("../../assets/creatures/chispin_painted.webp");
+const EYES_SRC = require("../../assets/creatures/chispin_eyes_closed.webp");
+/* eslint-enable @typescript-eslint/no-require-imports */
 function modelFor(genome?: GenomeLike | null): Model {
   if (!genome) return { rig, clips, emitters: chispinEmitters, float: false };
   const key = JSON.stringify(genome);
@@ -46,16 +60,25 @@ export interface CreatureHandle {
 /** Shared animation clock + playback state for one Tamtam on screen. */
 export function useCreature(alleleId: string, look: Look = DEFAULT_LOOK, genome?: GenomeLike | null): CreatureHandle {
   const gkey = genome ? JSON.stringify(genome) : "";
+  const paintedImg = useImage(PAINTED_SRC);
+  const eyesImg = useImage(EYES_SRC);
+  const usePainted = !genome && !!paintedImg && !!eyesImg;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const model = useMemo(() => modelFor(genome), [gkey]);
+  const model = useMemo(() => (usePainted ? PAINTED_MODEL : modelFor(genome)), [gkey, usePainted]);
   const palette = useMemo(
     () => derivePalette(genome ? genomePalette(genome) : (fireColorAlleles.find((a) => a.id === alleleId) ?? fireColorAlleles[0]!).genes),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [alleleId, gkey],
   );
   const res = useMemo<ModelResources>(
-    () => ({ ...buildResources(model.rig, palette, Object.values(model.emitters).flat(), look), rig: model.rig, clips: model.clips }),
-    [model, palette, look],
+    () => ({
+      ...buildResources(model.rig, palette, Object.values(model.emitters).flat(), look),
+      rig: model.rig,
+      clips: model.clips,
+      painted: usePainted ? buildPainted(paintedImg!, eyesImg!, alleleId, look.emissive) : null,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [model, palette, look, usePainted, alleleId],
   );
   const particleMul = look.particles;
   const clock = useSharedValue(0);

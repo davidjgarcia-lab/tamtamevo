@@ -18,7 +18,7 @@ const root = resolve(process.env.DIST ?? resolve(import.meta.dirname, "../apps/m
 const prefix = process.env.PREFIX ?? "/";
 const out = resolve(process.argv[2] ?? "playthrough");
 mkdirSync(out, { recursive: true });
-const types = { ".html": "text/html", ".js": "text/javascript", ".wasm": "application/wasm", ".ttf": "font/ttf", ".png": "image/png", ".ico": "image/x-icon" };
+const types = { ".html": "text/html", ".js": "text/javascript", ".wasm": "application/wasm", ".ttf": "font/ttf", ".png": "image/png", ".ico": "image/x-icon", ".webp": "image/webp" };
 const server = createServer(async (req, res) => {
   let url = decodeURIComponent((req.url ?? "/").split("?")[0]);
   if (!url.startsWith(prefix)) { res.writeHead(404).end(); return; }

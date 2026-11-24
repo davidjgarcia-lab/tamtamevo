@@ -52,3 +52,19 @@ describe("Chispín", () => {
     }
   });
 });
+
+import { compileClip as cc2, compileRig as cr2, evaluateFrame as ef2 } from "@tamtam/rig";
+import { chispinPaintedRig, CHISPIN_PAINTED } from "./fire/chispinPainted";
+import { chispinRig as baseRig, chispinClips as baseClips } from "./fire/chispin";
+describe("painted Chispín (from Unity)", () => {
+  it("has the same bones in the same order as the vector rig and plays all clips", () => {
+    expect(chispinPaintedRig.bones.map((b) => b.id)).toEqual(baseRig.bones.map((b) => b.id));
+    const r = cr2(chispinPaintedRig);
+    const clips = baseClips.map((c) => cc2(r, c));
+    for (let i = 0; i < clips.length; i++) expect(ef2(r, clips, { clip: i, start: 0, prevClip: -1, prevStart: 0 }, { time: 0.3, vx: 0, seed: 1 }).world.every(Number.isFinite)).toBe(true);
+  });
+  it("skins every vertex with normalised weights", () => {
+    expect(CHISPIN_PAINTED.vertices.length).toBe(CHISPIN_PAINTED.weights.length);
+    for (const w of CHISPIN_PAINTED.weights) expect(w.reduce((a, [, x]) => a + x, 0)).toBeCloseTo(1, 2);
+  });
+});
