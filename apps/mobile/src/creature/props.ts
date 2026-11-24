@@ -439,3 +439,46 @@ export function drawCarried(c: SkCanvas, pic: SkPicture, x: number, y: number, s
   c.drawPicture(pic);
   c.restore();
 }
+
+/** Wardrobe accessory worn on the head (follows the head bone). */
+export function drawAccessory(c: SkCanvas, frame: Frame, headBone: number, at: { x: number; y: number; scale: number; dir: number }, id: string) {
+  "worklet";
+  const s = at.scale;
+  const [hx, hy] = transformPoint(frame.world, headBone, 6, -30);
+  const cx = at.x + hx * s * at.dir;
+  const cy = at.y + hy * s;
+  const p = (col: string, stroke = 0) => {
+    const q = Skia.Paint();
+    q.setAntiAlias(true);
+    q.setColor(Skia.Color(col));
+    if (stroke) {
+      q.setStyle(1);
+      q.setStrokeWidth(stroke);
+      q.setStrokeCap(1);
+    }
+    return q;
+  };
+  const path = (d: string) => Skia.Path.MakeFromSVGString(d)!;
+  if (id === "acc_leaf_hat") {
+    c.drawPath(path(`M ${cx - 30 * s} ${cy + 4 * s} C ${cx - 26 * s} ${cy - 26 * s} ${cx + 26 * s} ${cy - 26 * s} ${cx + 30 * s} ${cy + 4 * s} Q ${cx} ${cy + 12 * s} ${cx - 30 * s} ${cy + 4 * s} Z`), p("#5E9A3A"));
+    c.drawPath(path(`M ${cx} ${cy + 6 * s} L ${cx} ${cy - 18 * s} M ${cx} ${cy - 4 * s} L ${cx - 16 * s} ${cy - 12 * s} M ${cx} ${cy - 4 * s} L ${cx + 16 * s} ${cy - 12 * s}`), p("#2E5A1E", 2 * s));
+    c.drawLine(cx, cy - 18 * s, cx + 6 * at.dir * s, cy - 28 * s, p("#6B4220", 3 * s));
+  } else if (id === "acc_flower") {
+    const fx = cx + 18 * s * at.dir, fy = cy - 2 * s;
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2;
+      c.drawCircle(fx + Math.cos(a) * 7 * s, fy + Math.sin(a) * 7 * s, 6 * s, p("#FF8FC0"));
+    }
+    c.drawCircle(fx, fy, 5 * s, p("#FFD166"));
+  } else if (id === "acc_crown") {
+    c.drawPath(path(`M ${cx - 24 * s} ${cy + 6 * s} L ${cx - 26 * s} ${cy - 14 * s} L ${cx - 12 * s} ${cy - 2 * s} L ${cx} ${cy - 22 * s} L ${cx + 12 * s} ${cy - 2 * s} L ${cx + 26 * s} ${cy - 14 * s} L ${cx + 24 * s} ${cy + 6 * s} Z`), p("#8A5A32"));
+    c.drawPath(path(`M ${cx - 24 * s} ${cy + 6 * s} L ${cx + 24 * s} ${cy + 6 * s}`), p("#5A3418", 4 * s));
+    for (const dx of [-26, 0, 26]) c.drawCircle(cx + dx * s, cy + (dx === 0 ? -22 : -14) * s, 4 * s, p("#7FD0E8"));
+  } else if (id === "acc_scarf") {
+    const [bx, by] = transformPoint(frame.world, headBone, 0, 26);
+    const sx = at.x + bx * s * at.dir, sy = at.y + by * s;
+    c.drawPath(path(`M ${sx - 30 * s} ${sy - 4 * s} Q ${sx} ${sy + 12 * s} ${sx + 30 * s} ${sy - 4 * s} L ${sx + 30 * s} ${sy + 6 * s} Q ${sx} ${sy + 22 * s} ${sx - 30 * s} ${sy + 6 * s} Z`), p("#E2574C"));
+    c.drawPath(path(`M ${sx + 14 * s * at.dir} ${sy + 10 * s} L ${sx + 20 * s * at.dir} ${sy + 34 * s} L ${sx + 8 * s * at.dir} ${sy + 32 * s} Z`), p("#C23E36"));
+    for (let i = -2; i <= 2; i++) c.drawLine(sx + i * 12 * s, sy, sx + i * 12 * s, sy + 12 * s, p("#FFFFFF", 1.5 * s));
+  }
+}

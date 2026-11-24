@@ -8,6 +8,7 @@ import { FAMILIES } from "../genetics/families";
 import { genomeStats } from "../genetics/genome";
 import { canEvolve, evolveTamtam, type EvolutionRoll } from "../genetics/evolve";
 import { rankOf } from "./arena";
+import { recordSeen } from "./house";
 import { afterFight, arenaGate, equipFighter, equipRival } from "./arenaPro";
 import { payCare } from "./life";
 import { addAlbumPiece, medalFor, praiseFor, recordPlayDay, starsFor, type Medal, type Metrics } from "./play";
@@ -124,6 +125,7 @@ export function fight(s: GameState, rival: Fighter, d: Difficulty, input: { figh
   const rec = recordFight(s.arena, input.fightId, rival.name, d, result.winner === 0, input.now);
   let progress: ReturnType<typeof afterFight> | null = null;
   if (!rec.duplicate) {
+    recordSeen(s, rival.genome, rival.name, false, input.now);
     progress = afterFight(s, input.now, result.winner === 0, { rival, difficulty: d, seed: input.seed, won: result.winner === 0 });
     if (rec.coins > 0) credit(s.economy.wallet, { key: `reward:arena:${input.fightId}`, currency: "tamcoin", amount: rec.coins, kind: "reward", source: "arena", ts: input.now });
     advanceCare(s.care, input.now);
@@ -166,5 +168,6 @@ export function evolve(s: GameState, now: number, force = false): EvolutionRoll 
   advanceCare(s.care, now);
   const { tamtam, roll } = evolveTamtam(s.tamtam, s.care, now, arenaRecord(s), force);
   s.tamtam = tamtam;
+  recordSeen(s, tamtam.genome, tamtam.name, true, now);
   return roll;
 }

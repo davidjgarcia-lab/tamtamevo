@@ -26,7 +26,7 @@ export const FAMILY_COLORS: Record<Fam, { bases: string[]; accent: string; eye: 
 };
 
 /** Parts shared by every form (mouth, brows, closed eyes, quality ornaments, props) — taken from Chispín v3. */
-const SHARED = new Set([
+export const SHARED_PART_IDS = new Set([
   "jaw", "jawBelly", "mouthIn", "tongue", "teeth", "drool", "mouthLine", "mouthSmile", "fang", "nostril",
   "browN", "browH", "browA", "browS", "browU", "eyeClosed", "eyeHappy",
   "sootA", "sootB", "sootC", "goldSeam", "goldScaleA", "goldScaleB", "rune", "runeGlow", "crown0", "crown1", "crown2",
@@ -51,7 +51,7 @@ export function genomePalette(g: GenomeLike): PaletteGenes {
 export function genomeRig(g: GenomeLike): { rig: RigDef; float: boolean } {
   const legs = legParts(g.parts.legs, g.variant.legs);
   const parts: PartDef[] = [
-    ...chispinRig.parts.filter((p) => SHARED.has(p.id)),
+    ...chispinRig.parts.filter((p) => SHARED_PART_IDS.has(p.id)),
     ...bodyParts(g.parts.body, g.variant.body),
     ...headParts(g.parts.head, g.variant.head),
     ...eyeParts(g.eyes),

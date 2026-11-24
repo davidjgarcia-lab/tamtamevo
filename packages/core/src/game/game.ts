@@ -6,7 +6,7 @@ import {
 import { credit, debit, emptyWallet } from "../economy/wallet";
 import { applyEvolution, hatchTamtam, renameTamtam, type Tamtam } from "../identity/tamtam";
 import { addItem, emptyInventory, quantity, removeItem } from "../inventory/inventory";
-import { emptyRoom, mirrorItem, moveItem, placeItem, removePlacement, type Placement, type RoomLayout } from "../home/placement";
+import { emptyRoom, mirrorItem, moveItem, placeItem, PlacementRejected, removePlacement, type Placement, type RoomLayout } from "../home/placement";
 import { addAttributeXp, attributeArenaBonuses, upgradeActivity } from "../progression/progression";
 import { emptyRewardLog, grantActivityReward, type RewardLog } from "../rewards/rewards";
 import { purchase, type PlayerEconomyState } from "../shop/shop";
@@ -14,6 +14,7 @@ import { FOODS, GYM, SLICE_CATALOG, STARTER_COINS, STARTER_ITEMS } from "./conte
 import { newArenaState, type ArenaState } from "./arena";
 import { FORM_QUALITY, formQuality, lustre } from "../appearance/appearance";
 import { payCare, tickLife } from "./life";
+import { placedEverywhere, roomFoodBonus, tickHouse } from "./house";
 
 /**
  * Game state and actions of the first-Tamtam vertical slice.
@@ -132,6 +133,7 @@ export function tick(s: GameState, now: number, cfg: CareConfig = DEFAULT_CARE_C
   if (s.phase === "home") {
     advanceCare(s.care, now, cfg);
     tickLife(s, now);
+    tickHouse(s, now);
   }
 }
 
@@ -160,7 +162,8 @@ export function feedFood(s: GameState, foodId: string, now: number): CareReactio
   const food = FOODS[foodId];
   if (!food) throw new GameRuleError("unknown_food");
   if (quantity(s.economy.inventory, foodId) < 1) throw new GameRuleError("no_food");
-  const r = feed(s.care, food, s.tamtam.speciesId, now);
+  const bonus = roomFoodBonus(s);
+  const r = feed(s.care, bonus === 1 ? food : { ...food, hunger: Math.round(food.hunger * bonus) }, s.tamtam.speciesId, now);
   if (r === "refuse_full" || r === "already_asleep") return r;
   removeItem(s.economy.inventory, foodId, 1);
   payCare(s, "feed", now);
@@ -223,6 +226,7 @@ export function buy(s: GameState, itemId: string, key: string, now: number, qty 
 }
 
 export function place(s: GameState, p: Placement): void {
+  if (placedEverywhere(s, p.itemId) >= quantity(s.economy.inventory, p.itemId)) throw new PlacementRejected("not_owned");
   placeItem(s.room, SLICE_CATALOG, s.economy.inventory, p);
 }
 export function move(s: GameState, uid: string, x: number, y: number): void {

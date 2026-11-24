@@ -2,7 +2,7 @@ import { BlurStyle, Canvas, createPicture, PaintStyle, Picture, Skia } from "@sh
 import type { ChispinClipId } from "@tamtam/art";
 import {
   buy, careAction, checkPlacement, readyToEvolve, setFinish, mopPoop, finishBath, peekLife, solveProblem, speechFor, quantity, cloneData, eggProgress, feedFood, FOODS, hatch, lustre, mirror, mood, move, napCooldownLeft, place, PlacementRejected, poopSpot, PROBLEMS,
-  SLICE_CATALOG, unplace, type CareKind, type CareReaction, type CatalogItem, type Placement,
+  SLICE_CATALOG, unplace, ROOMS, ROOM_ORDER, roomUnlocked, switchRoom, toggleLights, takePhoto, peekHouse, roomEffects, type CareKind, type CareReaction, type CatalogItem, type Placement,
 } from "@tamtam/core";
 import { transformPoint } from "@tamtam/rig";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -10,7 +10,7 @@ import { Pressable, StyleSheet, Text, View, type GestureResponderEvent, type Lay
 import { Easing, useDerivedValue, useSharedValue, withTiming } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import { composeLook } from "../creature/look";
-import { drawCarried, drawDirt, drawEgg, drawFoam, drawMeal, drawMop, drawShower, drawSoap, drawTowel, drawTowelAt, foodPicture } from "../creature/props";
+import { drawAccessory, drawCarried, drawDirt, drawEgg, drawFoam, drawMeal, drawMop, drawShower, drawSoap, drawTowel, drawTowelAt, foodPicture } from "../creature/props";
 import { FoodIcon } from "../ui/FoodIcon";
 import { ProblemPanel } from "./ProblemPanel";
 import { BONE, drawTamtam, STAGE_SCALE, useCreature } from "../creature/useCreature";
@@ -24,6 +24,9 @@ import { NamingPanel } from "./NamingPanel";
 import { FinishTray, FoodSheet, InventoryTray } from "./sheets";
 import { StudyPanel } from "./StudyPanel";
 import { IconAction } from "./IconAction";
+import { CollectionPanel } from "./CollectionPanel";
+import { Platform } from "react-native";
+import { useCanvasRef } from "@shopify/react-native-skia";
 
 const REACTION: Record<CareReaction, { clip: ChispinClipId; ms: number; text: string | null }> = {
   eat: { clip: "eat", ms: 2300, text: "¡Ñam!" },
@@ -63,6 +66,8 @@ type Mode =
   | { kind: "bath"; step: 0 | 1 | 2 }
   | { kind: "feed"; food: string | null }
   | { kind: "problem" }
+  | { kind: "photo" }
+  | { kind: "collection" }
   | { kind: "decor"; selectedUid: string | null; pendingItem: string | null }
   | { kind: "preview"; item: CatalogItem; x: number; y: number; mirrored: boolean };
 
@@ -302,6 +307,7 @@ export function HomeScreen({
   const W = Math.max(1, size.w);
   const H = Math.max(1, size.h);
   const eggX = g ? g.w * 0.5 : 0;
+  const accessory = peekHouse(state).accessory;
   const dynamic = useDerivedValue(() => {
     const tt = clock.value;
     const f = fx.value;
@@ -313,6 +319,7 @@ export function HomeScreen({
       }
       const at = { x: posX.value, y: laneY, scale, dir: dir.value };
       const frame = drawTamtam(c, res, playback.value, emitters.value, tt, at, vx.value);
+      if (accessory) drawAccessory(c, frame, BONE.head, at, accessory);
       drawDirt(c, frame, BONE.body, BONE.head, at, f.hygiene, tt);
       if (f.food >= 0) {
         const [mx, my] = transformPoint(frame.world, BONE.head, 42, 4);
@@ -331,12 +338,13 @@ export function HomeScreen({
       }
       if (f.carry >= 0) drawCarried(c, FOOD_PICS[f.carry]!, f.tx, f.ty, scale, tt);
     }, Skia.XYWHRect(0, 0, W, H));
-  }, [W, H, laneY, scale, eggX, res]);
+  }, [W, H, laneY, scale, eggX, res, accessory]);
 
   // ── Input: tap, stroke (mimos) and mop ──────────────────────────────────
   const offset = useRef({ x: 0, y: 0 });
   type Measurable = { measure: (cb: (x: number, y: number, w: number, h: number, px: number, py: number) => void) => void };
   const stageRef = useRef<Measurable | null>(null);
+  const canvasRef = useCanvasRef();
   const gesture = useRef({ sx: 0, sy: 0, lx: 0, ly: 0, moved: 0, stroke: 0, lastPet: 0, scrub: new Map<number, number>() });
   const local = (e: GestureResponderEvent) => ({ x: e.nativeEvent.pageX - offset.current.x, y: e.nativeEvent.pageY - offset.current.y });
   const overCreature = (x: number, y: number) => !!t && Math.abs(x - posX.value) < 85 * scale && y > laneY - 115 * scale && y < laneY + 12;
@@ -585,12 +593,51 @@ export function HomeScreen({
     ["Cariño", needs.affection, brand.pink], ["Energía", needs.energy, brand.violet], ["Actividad", needs.activity, brand.mint],
   ];
   const napLeft = napCooldownLeft(state.care, now());
+  const hs = peekHouse(state);
+  const snapPhoto = () => {
+    const n = act((s) => takePhoto(s));
+    const img = canvasRef.current?.makeImageSnapshot();
+    if (img && Platform.OS === "web" && typeof document !== "undefined") {
+      const a = document.createElement("a");
+      a.href = `data:image/png;base64,${img.encodeToBase64()}`;
+      a.download = `tamtam-${t?.name ?? "foto"}-${n}.png`;
+      a.click();
+    }
+    toast(`¡Foto ${n} guardada!`);
+  };
   const problem = t ? peekLife(state).problem : null;
   const problemMin = problem ? Math.max(0, Math.ceil((problem.until - now()) / 60_000)) : 0;
 
   return (
     <View style={h.root}>
-      {t && (
+      {t && mode.kind === "play" && (
+        <View style={h.rooms}>
+          {ROOM_ORDER.map((id) => {
+            const open = roomUnlocked(state, id);
+            const on = hs.current === id;
+            return (
+              <Pressable key={id} onPress={() => (open ? act((s) => switchRoom(s, id)) : toast(`${ROOMS[id].name}: nivel ${ROOMS[id].level} de cuidador`))} style={[h.roomChip, on && h.roomOn, !open && { opacity: 0.5 }]} accessibilityRole="button" testID={`room-${id}`}>
+                {!open && <Icon name="lock" size={14} />}
+                <Text style={[h.roomText, on && { color: brand.core }]}>{ROOMS[id].name}</Text>
+              </Pressable>
+            );
+          })}
+          {hs.current === "bedroom" && (
+            <Pressable onPress={() => { const off = act((s) => toggleLights(s)); toast(off ? "Luz apagada" : "Luz encendida"); }} style={h.roomChip} accessibilityLabel="Interruptor de luz" testID="light-switch">
+              <Icon name="bulb" size={18} accent={state.lightsOn ? brand.gold : brand.textDim} />
+            </Pressable>
+          )}
+          {state.economy.caretakerLevel >= 5 && (
+            <Pressable onPress={() => setMode({ kind: "photo" })} style={h.roomChip} accessibilityLabel="Modo foto" testID="photo-mode">
+              <Icon name="camera" size={18} />
+            </Pressable>
+          )}
+          <Pressable onPress={() => setMode({ kind: "collection" })} style={h.roomChip} accessibilityLabel="Colección" testID="open-collection">
+            <Icon name="book" size={18} accent={brand.gold} />
+          </Pressable>
+        </View>
+      )}
+      {t && mode.kind !== "photo" && (
         <View style={h.pills}>
           {pills.map(([label, v, color]) => (
             <View key={label} style={h.pill} accessibilityLabel={`${label} ${Math.round(v)}`}>
@@ -615,11 +662,16 @@ export function HomeScreen({
         testID="stage"
       >
         {roomPic && overlay && g && (
-          <Canvas style={StyleSheet.absoluteFill} pointerEvents="none">
+          <Canvas ref={canvasRef} style={StyleSheet.absoluteFill} pointerEvents="none">
             <Picture picture={roomPic} />
             <Picture picture={overlay} />
             <Picture picture={dynamic} />
           </Canvas>
+        )}
+        {mode.kind === "photo" && t && (
+          <View style={h.photoFrame} pointerEvents="none">
+            <Text style={h.photoText}>{t.name} · {t.formName ?? "Chispín"} · {new Date(now()).toLocaleDateString("es-ES")}</Text>
+          </View>
         )}
         {mode.kind === "mop" && <Text style={h.stageHint} pointerEvents="none">Frota con la fregona sobre la suciedad</Text>}
         {mode.kind === "feed" && <Text style={h.stageHint} pointerEvents="none">{mode.food ? "Arrastra la comida hasta su boca" : "Elige una comida abajo"}</Text>}
@@ -711,6 +763,16 @@ export function HomeScreen({
         </View>
       )}
 
+      {mode.kind === "photo" && (
+        <View style={h.panel}>
+          <Text style={h.panelTitle}>Modo foto · fotos hechas: {hs.photos}</Text>
+          <View style={h.row}>
+            <Btn small label="Hacer foto" tone="coral" icon={<Icon name="camera" size={18} color={brand.core} accent={brand.core} />} onPress={snapPhoto} style={h.flex} testID="photo-snap" />
+            <Btn small label="Salir" onPress={() => setMode({ kind: "play" })} style={h.flex} testID="photo-exit" />
+          </View>
+        </View>
+      )}
+      {mode.kind === "collection" && <CollectionPanel onClose={() => setMode({ kind: "play" })} toast={toast} />}
       {mode.kind === "mop" && (
         <View style={h.panel}>
           <Text style={h.panelTitle}>Limpiando · {state.care.poops.length} por recoger</Text>
@@ -723,7 +785,8 @@ export function HomeScreen({
 
       {mode.kind === "decor" && (
         <View style={h.panel}>
-          <Text style={h.panelTitle}>Decorar · toca un objeto y luego una casilla</Text>
+          <Text style={h.panelTitle}>Decorar {ROOMS[hs.current].name} · toca un objeto y luego una casilla</Text>
+          <Text style={h.effects}>{roomEffects(state).join(" ")}</Text>
           <View style={h.row}>
             {(["Muebles", "Paredes", "Suelo"] as const).map((tb) => (
               <Btn key={tb} small label={tb} tone={decorTab === tb ? "dark" : "light"} onPress={() => setDecorTab(tb)} style={h.flex} testID={`decor-tab-${tb}`} />
@@ -778,6 +841,13 @@ export function HomeScreen({
 }
 
 const h = StyleSheet.create({
+  rooms: { flexDirection: "row", flexWrap: "wrap", gap: 6, paddingHorizontal: 10, paddingTop: 6 },
+  roomChip: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, backgroundColor: brand.panel, borderWidth: 1.5, borderColor: brand.line },
+  roomOn: { backgroundColor: brand.cyan, borderColor: brand.cyan },
+  effects: { fontFamily: fonts.body, fontSize: 12, color: colors.inkSoft, lineHeight: 16 },
+  roomText: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.ink },
+  photoFrame: { position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderWidth: 10, borderColor: "#F5EBDD", justifyContent: "flex-end", alignItems: "center", paddingBottom: 8 },
+  photoText: { fontFamily: fonts.displayBold, fontSize: 15, color: "#3A2A1A", backgroundColor: "#F5EBDD", paddingHorizontal: 12, paddingVertical: 3, borderRadius: 8, overflow: "hidden" },
   root: { flex: 1 },
   pills: { flexDirection: "row", flexWrap: "wrap", gap: 4, paddingHorizontal: 12, paddingTop: 6 },
   pill: { width: "32.4%", height: 22, borderRadius: 11, backgroundColor: brand.panel, overflow: "hidden", justifyContent: "center" },

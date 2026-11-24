@@ -378,6 +378,59 @@ export function drawFurniture(c: SkCanvas, itemId: string, r: { x: number; y: nu
       c.drawCircle(lx - w * 0.03, top - u * 0.64, u * 0.3, paint("#FFD166", 0.25, { blur: 8 }));
       break;
     }
+    case "furn_litter_moss": {
+      // Low woven tray full of moss.
+      const th = u * 0.55, top = base - th;
+      shadow(c, cx, base, w * 0.5, u * 0.14);
+      fillStroke(c, `M ${x + w * 0.04} ${top} L ${x + w * 0.96} ${top} L ${x + w * 0.88} ${base} L ${x + w * 0.12} ${base} Z`, grad(0, top, 0, base, ["#9A6A3A", "#5A3418"]), lw);
+      for (let i = 0; i < 4; i++) c.drawLine(x + w * 0.08, top + th * (0.25 + i * 0.2), x + w * 0.92, top + th * (0.25 + i * 0.2), paint("#3A2010", 0.4, { stroke: u * 0.03 }));
+      for (let i = 0; i < 9; i++) c.drawCircle(x + w * (0.14 + i * 0.09), top - u * 0.02 + Math.sin(i * 2.1) * u * 0.04, u * 0.11, paint(i % 2 ? "#6E9A3E" : "#4E7A2E"));
+      break;
+    }
+    case "furn_toy_ball": {
+      const r0 = Math.min(w, u) * 0.32, by = base - r0;
+      shadow(c, cx, base, r0 * 1.1, u * 0.1);
+      c.drawCircle(cx, by, r0, grad(cx - r0, by - r0, cx + r0, by + r0, ["#E8C07A", "#9A6A3A"]));
+      c.save();
+      c.clipPath(P(`M ${cx - r0} ${by} A ${r0} ${r0} 0 1 0 ${cx + r0} ${by} A ${r0} ${r0} 0 1 0 ${cx - r0} ${by} Z`), ClipOp.Intersect, true);
+      for (let i = -3; i <= 3; i++) {
+        c.drawLine(cx + i * r0 * 0.35 - r0, by - r0, cx + i * r0 * 0.35 + r0, by + r0, paint("#6B4220", 0.7, { stroke: u * 0.04 }));
+        c.drawLine(cx + i * r0 * 0.35 + r0, by - r0, cx + i * r0 * 0.35 - r0, by + r0, paint("#6B4220", 0.5, { stroke: u * 0.03 }));
+      }
+      c.restore();
+      c.drawCircle(cx, by, r0, paint("#3A2010", 1, { stroke: lw }));
+      break;
+    }
+    case "furn_toy_spinner": {
+      const sh = u * 0.9, top = base - sh;
+      shadow(c, cx, base, w * 0.25, u * 0.08);
+      fillStroke(c, `M ${cx} ${base} L ${cx - w * 0.32} ${top + sh * 0.45} C ${cx - w * 0.34} ${top + sh * 0.1} ${cx + w * 0.34} ${top + sh * 0.1} ${cx + w * 0.32} ${top + sh * 0.45} Z`, grad(0, top, 0, base, ["#C88A4A", "#7A4A22"]), lw);
+      fillStroke(c, `M ${cx - w * 0.3} ${top + sh * 0.3} C ${cx - w * 0.3} ${top - sh * 0.05} ${cx + w * 0.3} ${top - sh * 0.05} ${cx + w * 0.3} ${top + sh * 0.3} Z`, grad(0, top, 0, top + sh * 0.3, ["#8A5A32", "#5A3418"]), lw);
+      c.drawLine(cx, top + sh * 0.05, cx, top - sh * 0.18, paint("#4E2E16", 1, { stroke: lw * 1.4 }));
+      break;
+    }
+    case "furn_stove_clay": {
+      const sh = u * 1.35, top = base - sh;
+      shadow(c, cx, base, w * 0.5, u * 0.18);
+      fillStroke(c, `M ${x + w * 0.06} ${base} L ${x + w * 0.1} ${top + sh * 0.2} Q ${cx} ${top - sh * 0.05} ${x + w * 0.9} ${top + sh * 0.2} L ${x + w * 0.94} ${base} Z`, grad(0, top, 0, base, ["#C27A4E", "#7A3E22"]), lw);
+      fillStroke(c, `M ${cx - w * 0.16} ${base} L ${cx - w * 0.16} ${top + sh * 0.6} Q ${cx} ${top + sh * 0.42} ${cx + w * 0.16} ${top + sh * 0.6} L ${cx + w * 0.16} ${base} Z`, paint("#2A120A"), lw);
+      c.drawCircle(cx, base - sh * 0.15, u * 0.22, paint("#FF8A2A", 0.9, { blur: 4 }));
+      c.drawCircle(cx, base - sh * 0.12, u * 0.12, paint("#FFD166"));
+      // Pot on top.
+      fillStroke(c, `M ${cx - w * 0.2} ${top + sh * 0.12} L ${cx + w * 0.2} ${top + sh * 0.12} L ${cx + w * 0.16} ${top - sh * 0.22} L ${cx - w * 0.16} ${top - sh * 0.22} Z`, grad(0, top - sh * 0.2, 0, top, ["#5C6470", "#2E333B"]), lw);
+      break;
+    }
+    case "furn_tub_wood": {
+      const th = u * 1.05, top = base - th;
+      shadow(c, cx, base, w * 0.5, u * 0.16);
+      const tub = `M ${x + w * 0.04} ${top} L ${x + w * 0.96} ${top} L ${x + w * 0.88} ${base} L ${x + w * 0.12} ${base} Z`;
+      fillStroke(c, tub, grad(0, top, 0, base, ["#B07A44", "#6B4220"]), lw);
+      for (let i = 1; i < 7; i++) c.drawLine(x + w * (0.04 + i * 0.13), top, x + w * (0.12 + i * 0.108), base, paint("#4E2E16", 0.5, { stroke: u * 0.03 }));
+      for (const k of [0.3, 0.75]) c.drawLine(x + w * (0.04 + 0.08 * k), top + th * k, x + w * (0.96 - 0.08 * k), top + th * k, paint("#3E3A40", 1, { stroke: u * 0.08 }));
+      c.drawOval(Skia.XYWHRect(x + w * 0.08, top - u * 0.12, w * 0.84, u * 0.26), paint("#7FD0E8", 0.9));
+      for (let i = 0; i < 5; i++) c.drawCircle(x + w * (0.2 + i * 0.15), top - u * 0.08, u * (0.08 + 0.04 * (i % 2)), paint("#FFFFFF", 0.85));
+      break;
+    }
     default:
       outlinedRRect(c, x, base - u, w, u, u * 0.1, paint("#CCCCCC"), lw);
   }

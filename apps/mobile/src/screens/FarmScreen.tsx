@@ -1,4 +1,4 @@
-import { ageInDays, swapWithFarm, type Tamtam } from "@tamtam/core";
+import { ageInDays, berryReadyIn, harvestBerries, peekHouse, swapWithFarm, type Tamtam } from "@tamtam/core";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Portrait } from "../creature/Portrait";
 import { useGame } from "../game/GameProvider";
@@ -15,6 +15,7 @@ const STAGE: Record<string, string> = { baby: "Bebé", child: "Infantil", juveni
 export function FarmScreen({ toast, goHome }: { toast: (t: string) => void; goHome: () => void }) {
   const { state, act, now } = useGame();
   const t = state.tamtam;
+  const berryLeft = berryReadyIn(state, now());
   const card = (tt: Tamtam, allele: string, active: boolean, index: number) => (
     <View key={tt.id} style={[f.card, active && f.active]}>
       <View style={f.portrait}>
@@ -50,6 +51,30 @@ export function FarmScreen({ toast, goHome }: { toast: (t: string) => void; goHo
           <Text style={f.desc}>Tu primer huevo está en casa. Ábrelo para empezar.</Text>
         </View>
       )}
+      <View style={[f.card, { borderColor: brand.mint }]} testID="berry-tree">
+        <Icon name="farm" size={44} accent={brand.mint} />
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text style={f.name}>Árbol de bayas</Text>
+          {state.economy.caretakerLevel < 3 ? (
+            <Text style={f.desc}>Crece en el nivel 3 de cuidador.</Text>
+          ) : berryLeft > 0 ? (
+            <Text style={f.desc}>Madura en {Math.ceil(berryLeft / 60_000)} min · cosechas: {peekHouse(state).berry.harvested}</Text>
+          ) : (
+            <Text style={[f.desc, { color: brand.mint }]}>¡Hay bayas maduras!</Text>
+          )}
+        </View>
+        <Btn
+          small
+          label="Cosechar"
+          tone="mint"
+          disabled={state.economy.caretakerLevel < 3 || berryLeft > 0}
+          testID="berry-harvest"
+          onPress={() => {
+            const r = act((s) => harvestBerries(s, now()));
+            toast(r.kind === "food" ? "+1 Bollito de bayas" : `+${r.amount} Tamcoins`);
+          }}
+        />
+      </View>
       {state.farm.map((e, i) => card(e.tamtam, e.alleleId, false, i))}
       {state.farm.length === 0 && (
         <View style={f.empty}>

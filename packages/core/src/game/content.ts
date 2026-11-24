@@ -70,6 +70,11 @@ export const FURNITURE: CatalogItem[] = [
   furn("furn_plant_fern", "Helecho de fuego", "Fire fern", "decoration", 180, "uncommon", { layer: "floor", w: 1, h: 1, mirrorable: true, rotatable: false, comfort: 2, interactions: [{ kind: "look", dx: 0, dy: 0, capacity: 1 }] }),
   furn("furn_sofa_cushion", "Sofá de cojines", "Cushion sofa", "furniture", 650, "uncommon", { layer: "floor", w: 3, h: 1, mirrorable: true, rotatable: false, comfort: 3, interactions: [{ kind: "sit", dx: 1, dy: 0, capacity: 2 }] }, 1),
   furn("furn_brazier", "Brasero de cobre", "Copper brazier", "lighting", 1200, "rare", { layer: "floor", w: 1, h: 1, mirrorable: false, rotatable: false, comfort: 3 }, 2),
+  furn("furn_litter_moss", "Arenero de musgo", "Moss litter box", "furniture", 260, "common", { layer: "floor", w: 1, h: 1, mirrorable: false, rotatable: false, comfort: 1 }, 1),
+  furn("furn_toy_ball", "Pelota de mimbre", "Wicker ball", "decoration", 90, "common", { layer: "floor", w: 1, h: 1, mirrorable: false, rotatable: false, comfort: 1, interactions: [{ kind: "look", dx: 0, dy: 0, capacity: 1 }] }, 2),
+  furn("furn_toy_spinner", "Peonza de bellota", "Acorn spinner", "decoration", 180, "uncommon", { layer: "floor", w: 1, h: 1, mirrorable: false, rotatable: false, comfort: 2, interactions: [{ kind: "look", dx: 0, dy: 0, capacity: 1 }] }, 1),
+  furn("furn_stove_clay", "Fogón de barro", "Clay stove", "furniture", 400, "uncommon", { layer: "floor", w: 2, h: 1, mirrorable: true, rotatable: false, comfort: 2 }, 1),
+  furn("furn_tub_wood", "Tina de madera", "Wooden tub", "furniture", 450, "uncommon", { layer: "floor", w: 2, h: 1, mirrorable: true, rotatable: false, comfort: 2 }, 1),
   furn("gym_dumbbells", "Mancuernas", "Dumbbells", "equipment", 0, "common", { layer: "floor", w: 2, h: 1, mirrorable: true, rotatable: false, interactions: [{ kind: "train", dx: 0, dy: 0, capacity: 1 }] }, 1),
   furn("study_desk", "Escritorio de estudio", "Study desk", "equipment", 0, "common", { layer: "floor", w: 2, h: 1, mirrorable: true, rotatable: false, interactions: [{ kind: "study", dx: 0, dy: 0, capacity: 1 }] }, 1),
 ];
@@ -93,11 +98,23 @@ export const FLOOR_FINISHES: CatalogItem[] = [
   finish("floor_rings", "Anillos de árbol", "Tree rings", 210, "rare", "Rodajas de tronco con sus anillos."),
 ];
 
+/** Wardrobe accessories (worn on the head; caretaker level 8). */
+const acc = (id: string, es: string, en: string, price: number, rarity: CatalogItem["rarity"]): CatalogItem => ({
+  ...base, id, name: { es, en }, description: { es: "Accesorio para el armario.", en: "Wardrobe accessory." }, image: `wardrobe/${id}`,
+  price: { currency: "tamcoin", amount: price }, category: "special", rarity, level: 8, maxOwned: 1, stackable: false,
+});
+export const ACCESSORIES: CatalogItem[] = [
+  acc("acc_leaf_hat", "Gorro de hoja", "Leaf hat", 300, "common"),
+  acc("acc_scarf", "Bufanda tejida", "Knitted scarf", 350, "common"),
+  acc("acc_flower", "Flor de pelo", "Hair flower", 250, "common"),
+  acc("acc_crown", "Corona de ramas", "Twig crown", 900, "rare"),
+];
+
 /** Caretaker level needed to buy each item (unlock progression, PLAN_MEJORAS A2). */
-export const ITEM_LEVELS: Record<string, number> = {"furn_poster_stars": 3, "furn_poster_sea": 2, "furn_poster_mountains": 4, "furn_poster_aurora": 8, "furn_poster_waterfall": 5, "furn_poster_desert": 6, "furn_plant_fern": 2, "furn_brazier": 7, "wall_logs": 2, "wall_moss": 5, "wall_leaves": 3, "wall_treeheart": 9, "floor_moss": 3, "floor_stone": 5, "floor_rings": 8, "food_roast_skewer": 3};
+export const ITEM_LEVELS: Record<string, number> = {"furn_poster_stars": 3, "furn_poster_sea": 2, "furn_poster_mountains": 4, "furn_poster_aurora": 8, "furn_poster_waterfall": 5, "furn_poster_desert": 6, "furn_plant_fern": 2, "furn_brazier": 7, "wall_logs": 2, "wall_moss": 5, "wall_leaves": 3, "wall_treeheart": 9, "floor_moss": 3, "floor_stone": 5, "floor_rings": 8, "food_roast_skewer": 3, "furn_toy_ball": 2, "furn_stove_clay": 2, "furn_litter_moss": 4, "furn_tub_wood": 4, "furn_toy_spinner": 6};
 for (const it of [...FURNITURE, ...WALL_FINISHES, ...FLOOR_FINISHES, ...Object.values(FOODS).map((f) => f.item)]) it.level = ITEM_LEVELS[it.id] ?? 1;
 
-export const SLICE_CATALOG = validateCatalog([...FURNITURE, ...WALL_FINISHES, ...FLOOR_FINISHES, ...Object.values(FOODS).map((f) => f.item)]);
+export const SLICE_CATALOG = validateCatalog([...FURNITURE, ...WALL_FINISHES, ...FLOOR_FINISHES, ...Object.values(FOODS).map((f) => f.item), ...ACCESSORIES]);
 
 /** Items granted at the start of the game (welcome pack). */
 export const STARTER_ITEMS: Record<string, number> = {

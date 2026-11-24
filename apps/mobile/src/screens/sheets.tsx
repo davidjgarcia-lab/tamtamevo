@@ -3,6 +3,7 @@ import {
   careProfile, CHISPIN_GENOME, FAMILIES, familyOdds, type FamilyId,
   arenaStrength, ageInDays, DEFAULT_CARE_CONFIG, FORM_QUALITY, formQuality, lifeMark, LUSTRE_NAMES, MARK_NAMES, lustre, SKILL_VARIANT_NAMES, FOODS, history, itemStatus, placedCount, quantity, rename, satisfaction, SLICE_CATALOG,
   validateName, xpToNext, type CatalogItem, type ShopCategory,
+  furnitureStars,
 } from "@tamtam/core";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
@@ -54,6 +55,7 @@ const CATS: { id: ShopCategory; label: string }[] = [
   { id: "lighting", label: "Iluminación" },
   { id: "equipment", label: "Equipamiento" },
   { id: "surfaces", label: "Paredes y suelos" },
+  { id: "special", label: "Armario" },
 ];
 
 /** Tienda (its own section of the app, outside the room). */
@@ -85,7 +87,7 @@ export function ShopView({ onBuy, onPreview }: { onBuy: (item: CatalogItem) => v
                 <Text style={k.name}>{it.name.es}</Text>
                 <Text style={k.desc}>
                   {RARITY[it.rarity]} · {it.price.amount} TC{owned ? ` · Tienes ${owned}` : ""}
-                  {it.furniture?.comfort ? ` · Confort +${it.furniture.comfort}` : ""}
+                  {it.furniture?.comfort ? ` · ${"★".repeat(furnitureStars(it))}${"☆".repeat(3 - furnitureStars(it))}` : ""}
                 </Text>
                 {it.description.es ? <Text style={k.desc}>{it.description.es}</Text> : null}
               </View>

@@ -41,6 +41,8 @@ const shot = (n) => page.screenshot({ path: join(out, `${n}.png`) });
 const coins = async () => Number((await page.locator('[aria-label$="Tamcoins, ver historial"]').getAttribute("aria-label")).split(" ")[0]);
 const need = async (label) => Number((await page.locator(`[aria-label^="${label} "]`).first().getAttribute("aria-label")).split(" ").pop());
 
+// Level-up popups can appear after any rewarded action: dismiss them automatically.
+page.addLocatorHandler(page.getByTestId("levelup-ok"), async (l) => { await l.click(); });
 const stageBox = async () => page.getByTestId("stage").boundingBox();
 const sweep = async (y, times = 4, x0 = 0.12, x1 = 0.88) => {
   const b = await stageBox();
@@ -90,18 +92,36 @@ try {
   const foodImgs = await page.locator('img[src^="data:image/png"]').count();
   await shot("05-food-sheet");
   await page.getByTestId("feed-food_ember_pepper").click();
-  await page.waitForTimeout(650);
+  // Drag the food from the tray to the mouth (try both sides: the Tamtam may face either way).
+  {
+    const st = await stageBox();
+    for (const fx of [0.62, 0.38, 0.68, 0.32, 0.56, 0.44]) {
+      if ((await need("Hambre")) > h0) break;
+      await page.mouse.move(st.x + st.width * 0.5, st.y + st.height * 0.95);
+      await page.mouse.down();
+      await page.mouse.move(st.x + st.width * fx, st.y + st.height * 0.7, { steps: 10 });
+      if (fx === 0.62) await shot("05b-carrying-food");
+      await page.mouse.up();
+      await page.waitForTimeout(700);
+    }
+  }
   await shot("06-eating-pepper");
   await page.waitForTimeout(2500);
+  await page.getByTestId("feed-close").click().catch(() => {});
   check("E2E-06", "Cada comida tiene imagen y el Tamtam come (hambre sube)", foodImgs >= 2 && (await need("Hambre")) > h0, `imgs ${foodImgs}, ${h0}→${await need("Hambre")}`);
 
-  // Shower and towel.
+  // Bath in three steps: soap → rinse → towel (rubbing).
+  const cBath = await coins();
   await page.getByTestId("care-bathe").click();
-  await page.waitForTimeout(900);
-  await shot("07-shower");
-  await page.waitForTimeout(1300);
-  await shot("08-towel");
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(300);
+  for (let step = 0; step < 4 && (await page.getByTestId("bath-done").isVisible().catch(() => false)); step++) {
+    await sweep(0.78, 6, 0.25, 0.75);
+    await page.waitForTimeout(300);
+    await shot(`07-bath-step${step}`);
+  }
+  if (await page.getByTestId("bath-done").isVisible().catch(() => false)) await page.getByTestId("bath-done").click();
+  await page.waitForTimeout(1500);
+  check("E2E-21", "Baño por pasos (jabón, aclarado, toalla) que paga Tamcoins", (await coins()) > cBath, `${cBath}→${await coins()}`);
 
   // Stroke to pet.
   const a0 = await need("Cariño");
@@ -134,6 +154,49 @@ try {
   const left = await page.getByText(/Limpiando · \d+ por recoger/).isVisible().catch(() => false);
   if (left) { await shot("11b-mop-left"); await page.getByTestId("mop-done").click(); }
   check("E2E-09", "Fregona: frotando con el dedo se limpian las cacas", !left);
+
+  // Problem of the day (pinchos: pull them up).
+  await dev("dbg-problem-thorn");
+  const hasProblem = await page.getByTestId("problem").isVisible();
+  await page.getByTestId("problem").click();
+  await page.waitForTimeout(500);
+  await shot("11c-problem");
+  await page.getByTestId("problem-later").click();
+  check("E2E-22", "Problemas que resolver (aviso + panel de solución)", hasProblem);
+
+  // Caretaker levels unlock rooms, photo mode and wardrobe.
+  for (let i = 0; i < 8; i++) await dev("dbg-xp");
+  await page.waitForTimeout(500);
+  const lvlText = await page.getByText(/Cuidador nv \d+/).first().textContent();
+  await page.getByTestId("room-kitchen").click();
+  await page.waitForTimeout(600);
+  await shot("11d-kitchen");
+  await page.getByTestId("room-bedroom").click();
+  await page.waitForTimeout(400);
+  await page.getByTestId("light-switch").click();
+  await page.waitForTimeout(600);
+  await shot("11e-bedroom-dark");
+  await page.getByTestId("light-switch").click();
+  await page.getByTestId("room-living").click();
+  await page.waitForTimeout(400);
+  check("E2E-23", "Habitaciones por nivel (cocina, baño, dormitorio con interruptor)", (await page.getByTestId("light-switch").count()) === 0 && /nv ([6-9]|\d\d)/.test(lvlText ?? ""), lvlText ?? "");
+  await page.getByTestId("photo-mode").click();
+  await page.waitForTimeout(500);
+  await shot("11f-photo-mode");
+  await page.getByTestId("photo-snap").click();
+  await page.waitForTimeout(400);
+  const photoOk = await page.getByText(/Foto 1 guardada/).isVisible();
+  await page.getByTestId("photo-exit").click();
+  await page.getByTestId("open-collection").click();
+  await page.waitForTimeout(500);
+  await page.getByTestId("collection-album").click();
+  await page.waitForTimeout(300);
+  await shot("11g-album");
+  await page.getByTestId("collection-wardrobe").click();
+  await page.waitForTimeout(300);
+  await shot("11h-wardrobe");
+  await page.getByTestId("collection-close").click();
+  check("E2E-24", "Modo foto, álbum de paisajes y armario", photoOk);
 
   // Jugar → minigames (icons only).
   await page.getByTestId("care-play").click();
@@ -230,6 +293,13 @@ try {
   const swapped = farmName > 0 && (before !== after || (await page.getByText(/vuelve a casa/).isVisible()));
   check("E2E-15", "Granja: los Tamtams que no juegan; se pueden intercambiar", swapped);
   await page.getByTestId("tab-farm").click();
+  await page.waitForTimeout(300);
+  const berryOn = await page.getByTestId("berry-harvest").isEnabled();
+  if (berryOn) await page.getByTestId("berry-harvest").click();
+  await page.waitForTimeout(300);
+  await shot("20b-berry-tree");
+  check("E2E-26", "Árbol de bayas en la Granja (cosecha con espera)", berryOn && (await page.getByText(/Madura en \d+ min/).isVisible()));
+  await page.getByTestId("tab-farm").click();
   await page.getByTestId("farm-swap-0").click();
   await page.waitForTimeout(600);
 
@@ -247,6 +317,26 @@ try {
   await page.getByTestId("battle-exit").click();
   await page.waitForTimeout(500);
   check("E2E-16", "Arena: combate automático en tiempo real con resultado y PC", (await page.getByText(/^(Victoria|Derrota) contra/).count()) > 0, won ? "victoria" : "derrota");
+  const energy = await page.getByTestId("arena-energy").textContent();
+  // Two more fights to reach Arena level 2 and pick a card.
+  for (let i = 0; i < 3 && !(await page.getByTestId("arena-cards").isVisible().catch(() => false)); i++) {
+    await dev("dbg-energy");
+    await page.getByTestId("tab-arena").click();
+    await page.getByTestId("fight-easy").click();
+    await page.getByTestId("battle-exit").waitFor({ timeout: 60000 });
+    if (i === 0) await shot("23b-battle-replay-revenge");
+    await page.getByTestId("battle-exit").click();
+    await page.waitForTimeout(400);
+  }
+  const cardsShown = await page.getByTestId("arena-cards").isVisible().catch(() => false);
+  if (cardsShown) {
+    await page.getByTestId("arena-cards").scrollIntoViewIfNeeded();
+    await shot("23c-arena-cards");
+    await page.getByTestId("card-0").click();
+  }
+  await page.waitForTimeout(300);
+  await shot("23d-arena-after");
+  check("E2E-25", "Arena: energía diaria, nivel de Arena y carta 1 de 2", /Energía 4\/5/.test(energy ?? "") && cardsShown, energy ?? "");
 
   // Conectar.
   await page.getByTestId("tab-connect").click();
@@ -274,7 +364,7 @@ try {
   await page.waitForTimeout(800);
   await shot("29-evolved-home");
   const sub = await page.getByTestId("profile").getAttribute("aria-label");
-  check("E2E-20", "Evoluciona según los cuidados (aviso + ritual + forma nueva Infantil)", ready && (await page.getByText(/· Infantil · Nv/).isVisible()), sub ?? "");
+  check("E2E-20", "Evoluciona según los cuidados (aviso + ritual + forma nueva Infantil)", ready && (await page.getByText(/· Infantil ·/).first().isVisible()), sub ?? "");
   await page.getByTestId("dev").click();
   await page.getByTestId("dbg-evolab").click();
   await page.waitForTimeout(1500);

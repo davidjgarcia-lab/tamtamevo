@@ -1,6 +1,7 @@
 import { advanceCare, bathe, type CareReaction } from "../care/needs";
 import { credit } from "../economy/wallet";
 import { GameRuleError, type GameState } from "./game";
+import { roomBathBonus } from "./house";
 
 /**
  * "Feels alive" layer (references batch 2, PLAN_MEJORAS phase A):
@@ -110,7 +111,7 @@ export const hasFeature = (s: GameState, id: string) => (LEVEL_FEATURES.find((f)
 export function finishBath(s: GameState, quality: number, now: number): { reaction: CareReaction; pay: PayResult | null } {
   if (!s.tamtam) throw new GameRuleError("no_tamtam");
   const q = Math.max(0, Math.min(1, quality));
-  const reaction = bathe(s.care, now, undefined, Math.round(25 + 45 * q));
+  const reaction = bathe(s.care, now, undefined, Math.round((25 + 45 * q) * roomBathBonus(s)));
   if (reaction !== "bathe") return { reaction, pay: null };
   return { reaction, pay: payCare(s, "bath", now, 0.6 + 0.6 * q) };
 }
