@@ -43,7 +43,8 @@ export function exportEnvironmentAssets(): ExportedAsset[] {
     const f = it.furniture!;
     const wall = f.layer === "wall";
     const rw = f.w * (wall ? wallCell : cellW), rh = f.h * (wall ? wallCell : cellH);
-    const padX = Math.round(cellW), padTop = Math.round(wall ? 16 : cellH * 2.2), padBottom = 16;
+    // Generous margins: glows and contact shadows must fade out inside the image (no visible box in Unity).
+    const padX = Math.round(cellW * 3.2), padTop = Math.round(wall ? cellH * 0.6 : cellH * 3), padBottom = Math.round(cellH * 1.8);
     const W2 = rw + padX * 2, H2 = rh + padTop + padBottom;
     const r = { x: padX, y: padTop, w: rw, h: rh };
     out.push({
