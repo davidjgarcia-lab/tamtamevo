@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useDerivedValue, useSharedValue, withSequence, withTiming } from "react-native-reanimated";
 import { Portrait } from "../creature/Portrait";
+import { dominantFamily } from "../creature/familySprites";
 import { drawTamtam, useCreature } from "../creature/useCreature";
 import { newId, useGame } from "../game/GameProvider";
 import { brand, colors, fonts } from "../theme";
@@ -11,6 +12,23 @@ import { Btn, Coin } from "../ui/kit";
 import { Icon } from "../ui/icons";
 
 const SPEED = 1.6;
+
+/* eslint-disable @typescript-eslint/no-require-imports */
+const BIOMES: Record<string, number> = {
+  forest: require("../../assets/biomes/forest.webp"),
+  waterfall: require("../../assets/biomes/waterfall.webp"),
+  lava: require("../../assets/biomes/lava.webp"),
+  crystal_cave: require("../../assets/biomes/crystal_cave.webp"),
+  mushroom_shadow: require("../../assets/biomes/mushroom_shadow.webp"),
+  ruins_sunset: require("../../assets/biomes/ruins_sunset.webp"),
+  sky_islands: require("../../assets/biomes/sky_islands.webp"),
+  colosseum: require("../../assets/biomes/colosseum.webp"),
+};
+/* eslint-enable @typescript-eslint/no-require-imports */
+const BIOME_OF: Record<string, string> = {
+  fire: "lava", water: "waterfall", plant: "forest", crystal: "crystal_cave", shadow: "mushroom_shadow",
+  rock: "ruins_sunset", light: "sky_islands", electric: "sky_islands", plasma: "mushroom_shadow", mystic: "colosseum",
+};
 
 interface Battle {
   me: Fighter;
@@ -108,7 +126,7 @@ export function ArenaScreen({ toast, onBattle }: { toast: (t: string) => void; o
       {rivals.map(({ fighter, difficulty }) => (
         <View key={difficulty} style={a.card}>
           <View style={a.portrait}>
-            <Portrait alleleId={fighter.alleleId} size={84} dir={-1} genome={fighter.genome} />
+            <Portrait alleleId={fighter.alleleId} size={84} dir={-1} genome={fighter.genome} stage={fighter.stage} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={a.name}>{fighter.name}</Text>
@@ -192,8 +210,8 @@ type Floating = { id: number; side: 0 | 1; text: string; color: string };
 
 function BattleView({ b, myAllele, onExit, onRevenge, onReplay, canRevenge }: { b: Battle; myAllele: string; onExit: () => void; onRevenge: () => void; onReplay: () => void; canRevenge: boolean }) {
   const [log, setLog] = useState<string[]>([]);
-  const A = useCreature(myAllele, undefined, b.me.genome);
-  const B = useCreature(b.rival.alleleId, undefined, b.rival.genome);
+  const A = useCreature(myAllele, undefined, b.me.genome, b.me.stage);
+  const B = useCreature(b.rival.alleleId, undefined, b.rival.genome, b.rival.stage);
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [hp, setHp] = useState<[number, number]>([b.me.hp, b.rival.hp]);
   const [floats, setFloats] = useState<Floating[]>([]);
@@ -266,12 +284,13 @@ function BattleView({ b, myAllele, onExit, onRevenge, onReplay, canRevenge }: { 
 
   const W = Math.max(1, size.w);
   const H = Math.max(1, size.h);
-  const den = useImage(require("../../assets/creatures/fire_den.webp")); // eslint-disable-line @typescript-eslint/no-require-imports
+  // Painted biome of the rival's family (TamTam EVO art sheets); the colosseum by default.
+  const den = useImage(BIOMES[BIOME_OF[b.rival.genome ? dominantFamily(b.rival.genome) : "fire"] ?? "colosseum"]!);
   const bg = useMemo(
     () =>
       createPicture((c) => {
         if (den) {
-          // Painted fire den (from the Unity project), cover-fit.
+          // Painted biome, cover-fit (bottom-aligned).
           const k = Math.max(W / den.width(), H / den.height());
           const dw = den.width() * k, dh = den.height() * k;
           c.drawImageRect(den, Skia.XYWHRect(0, 0, den.width(), den.height()), Skia.XYWHRect((W - dw) / 2, H - dh, dw, dh), Skia.Paint());

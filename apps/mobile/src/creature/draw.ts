@@ -2,6 +2,7 @@ import { BlurStyle, ClipOp, PaintStyle, Skia, TileMode, vec, type SkCanvas } fro
 import { evalEmitter, type EmitterDef, type Frame } from "@tamtam/rig";
 import type { CreatureResources } from "./resources";
 import { drawPainted } from "./painted";
+import { drawSprite } from "./familySprites";
 
 export interface Placement {
   x: number;
@@ -98,6 +99,7 @@ export function drawCreature(canvas: SkCanvas, res: CreatureResources, frame: Fr
   canvas.translate(at.x, at.y);
   canvas.scale(at.scale * at.dir, at.scale);
   if (res.painted) drawPainted(canvas, res.painted, frame);
+  if (res.sprite) drawSprite(canvas, res.sprite, frame, t);
   for (let i = 0; i < res.ops.length; i++) {
     const op = res.ops[i]!;
     if (op.faceSlot !== null) {

@@ -19,7 +19,7 @@ namespace TamTam
 
         public SlotResolver[] slots;
         public Transform body;
-        [Tooltip("Floating families (ghost, ether) hover this high, in units.")]
+        [Tooltip("Floating families (shadow, light) hover this high, in units.")]
         public float floatHeight = 0.18f;
         public Renderer[] tintedRenderers;
 

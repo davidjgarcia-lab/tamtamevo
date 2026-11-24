@@ -9,9 +9,9 @@ const FAMS = Object.keys(FAMILY_COLORS) as Fam[];
 const EYES = ["slit", "round", "ring", "glow", "twin", "visor"];
 const PATS = ["seams", "spots", "stripes", "veins", "rings", "facets", "rivets", "none"];
 const g = (f: Fam, v = 0, i = 0): GenomeLike => ({
-  parts: { body: f, head: FAMS[(i + 1) % 9]!, legs: FAMS[(i + 2) % 9]!, tail: FAMS[(i + 3) % 9]!, back: FAMS[(i + 4) % 9]! },
+  parts: { body: f, head: FAMS[(i + 1) % 10]!, legs: FAMS[(i + 2) % 10]!, tail: FAMS[(i + 3) % 10]!, back: FAMS[(i + 4) % 10]! },
   variant: { body: v, head: v, legs: v, tail: v, back: v },
-  eyes: EYES[i % EYES.length]!, pattern: PATS[i % PATS.length]!, palette: { base: f, shade: i % 3, accent: FAMS[(i + 5) % 9]! }, mutation: "none",
+  eyes: EYES[i % EYES.length]!, pattern: PATS[i % PATS.length]!, palette: { base: f, shade: i % 3, accent: FAMS[(i + 5) % 10]! }, mutation: "none",
 });
 
 describe("modular evolved forms", () => {
@@ -31,13 +31,13 @@ describe("modular evolved forms", () => {
         }
       }
     }
-    expect(n).toBe(162);
+    expect(n).toBe(200);
   });
 
   it("floating families hover and replace particles by the back family", () => {
-    const ghost = { ...g("ghost"), parts: { ...g("ghost").parts, legs: "ghost" as Fam, back: "plant" as Fam } };
-    expect(genomeRig(ghost).float).toBe(true);
-    expect(genomeEmitters(ghost).idle[0]!.color).toBe(FAMILY_COLORS.plant.particle.color);
+    const shadow = { ...g("shadow"), parts: { ...g("shadow").parts, legs: "shadow" as Fam, back: "plant" as Fam } };
+    expect(genomeRig(shadow).float).toBe(true);
+    expect(genomeEmitters(shadow).idle[0]!.color).toBe(FAMILY_COLORS.plant.particle.color);
   });
 
   it("colours are the same as the families in @tamtam/core", () => {

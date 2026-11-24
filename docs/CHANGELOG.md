@@ -4,6 +4,30 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+### Arte pintado de las 10 familias (2026-11-24)
+#### Cambiado
+- **10 familias** según las hojas de arte del usuario: Brasildo (fuego), Aqualin (agua), Foliaris (planta), Voltix (eléctrico),
+  Rocanix (roca), Umbrin (sombra), Lúmina (luz), Diamor (cristal), Plasmax (plasma) y Mistor (místico, nueva).
+  Ids internos: metal→electric, reptile→rock, ghost→shadow, ether→light, gel→plasma, más mystic.
+  Hay 230.400 millones de combinaciones genéticas. El bebé Chispín pasa a ser de fuego puro (línea Brasildo).
+- Afinidades: entrenar lleva a Rocanix, entrenar jugando a Voltix, estudiar a Mistor y los mimos a Lúmina/Foliaris.
+  Técnicas de Arena reasignadas: Relámpago (Voltix), Coraza de roca (Rocanix) y Haz de luz (Lúmina).
+  Nueva técnica **Ilusión** (Mistor). Ventajas: fuego>planta>roca>eléctrico>agua>fuego, luz>sombra>místico>luz, cristal>plasma>eléctrico.
+#### Añadido
+- **Las formas evolucionadas usan el arte pintado** (30 criaturas: 10 familias × inicial/intermedia/final), recortado
+  de la hoja con fondo transparente y **escalado ×4 con superresolución (EDSR)**: de unos 120 px a unos 500 px. Infantil →
+  inicial, Juvenil → intermedia, Adulto → final. La familia que se ve es la dominante del genoma. Se anima con el
+  esqueleto compartido (respira, camina, ataca, salta y come), y las mutaciones tiñen el sprite.
+- **Biomas pintados** (bosque, cascada, lava, cueva de cristal, setas de sombra, ruinas, islas del cielo y coliseo), también escalados ×4,
+  como escenario de la Arena según la familia del rival.
+- Unity: `Art/Creatures/Families` (30 PNG), `Art/Environments/Biomes` (8 PNG), menú **TamTam ▸ Evoluciones ▸ 0 · Importar arte
+  pintado de familias**, `FamilyArt` y `PaintedCreature` (animación procedural). `TamtamPresenter` usa el arte pintado si está.
+- `tools/import-family-sheet.py` repite el recorte y el escalado. Las hojas originales están en `docs/media/concept/sheets/`.
+#### Limitaciones
+- La mezcla de piezas del genoma sigue en las estadísticas, el nombre y las piezas vectoriales, pero el dibujo pintado muestra la **familia dominante**
+  (una ilustración entera no se puede mezclar por piezas).
+- Los objetos de entorno, los iconos y la habitación morada de las hojas **no se han importado** (fondo oscuro con brillos y muy baja resolución).
+
 ### Fases C y D del plan de mejoras + puente a Unity (2026-11-24)
 #### Añadido
 - **Arena (fase C):** una técnica por familia (Ascuas, Coraza, Reflejo, Esquiva fantasma, Raíces, Torbellino, Rebote,

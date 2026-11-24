@@ -101,7 +101,7 @@ export function HomeScreen({
   const liveTier = t ? lustre(state.care, t).tier : "plain";
   const formTier = !t || t.stage === "baby" ? liveTier : t.formQuality ?? liveTier;
   const look = useMemo(() => composeLook(formTier, liveTier), [formTier, liveTier]);
-  const creature = useCreature(t ? state.alleleId : state.egg?.alleleId ?? state.alleleId, look, t?.genome);
+  const creature = useCreature(t ? state.alleleId : state.egg?.alleleId ?? state.alleleId, look, t?.genome, t?.stage);
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [food, setFood] = useState(false);
   const [mode, setMode] = useState<Mode>({ kind: "play" });

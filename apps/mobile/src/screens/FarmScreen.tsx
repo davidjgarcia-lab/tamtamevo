@@ -19,7 +19,7 @@ export function FarmScreen({ toast, goHome }: { toast: (t: string) => void; goHo
   const card = (tt: Tamtam, allele: string, active: boolean, index: number) => (
     <View key={tt.id} style={[f.card, active && f.active]}>
       <View style={f.portrait}>
-        <Portrait alleleId={allele} size={92} clip={active ? "idle" : "sleep"} genome={tt.genome} />
+        <Portrait alleleId={allele} size={92} clip={active ? "idle" : "sleep"} genome={tt.genome} stage={tt.stage} />
       </View>
       <View style={{ flex: 1, gap: 2 }}>
         <Text style={f.name}>{tt.name}</Text>

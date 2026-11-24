@@ -53,14 +53,15 @@ const sat = (s: CareState) => (s.needs.hunger + s.needs.hygiene + s.needs.happin
 /** How strongly each family "calls" this Tamtam (weights per axis). */
 export const AFFINITY_WEIGHTS: Record<FamilyId, Partial<Record<keyof CareProfile, number>> & { base: number }> = {
   fire: { fighting: 1.3, training: 0.7, care: 0.2, base: 0.1 },
-  metal: { training: 1.3, fighting: 0.5, study: 0.4, base: 0.1 },
+  electric: { training: 1.0, play: 0.8, fighting: 0.3, base: 0.1 },
   crystal: { hygiene: 1.2, study: 0.9, care: 0.3, base: 0.08 },
   plant: { care: 0.5, affection: 1.0, hygiene: 0.2, base: 0.08 },
-  ghost: { neglect: 1.4, base: 0.06 },
+  shadow: { neglect: 1.4, base: 0.06 },
   water: { hygiene: 0.9, play: 0.9, affection: 0.2, base: 0.1 },
-  gel: { play: 1.1, neglect: 0.3, base: 0.12 },
-  ether: { affection: 1.0, study: 0.8, care: 0.2, base: 0.08 },
-  reptile: { training: 0.5, fighting: 0.5, care: 0.4, base: 0.2 },
+  plasma: { play: 1.1, neglect: 0.3, base: 0.12 },
+  light: { affection: 1.0, care: 0.6, hygiene: 0.2, base: 0.08 },
+  rock: { training: 0.8, fighting: 0.4, care: 0.3, base: 0.14 },
+  mystic: { study: 1.2, affection: 0.4, hygiene: 0.2, base: 0.06 },
 };
 
 export function familyAffinity(p: CareProfile, lineage: Genome = CHISPIN_GENOME): Record<FamilyId, number> {
@@ -71,7 +72,7 @@ export function familyAffinity(p: CareProfile, lineage: Genome = CHISPIN_GENOME)
     let v = w.base;
     for (const k of Object.keys(w) as (keyof typeof w)[]) if (k !== "base") v += (w[k] ?? 0) * p[k as keyof CareProfile];
     // A lonely, dirty Tamtam drifts away from the "bright" families.
-    if (f === "crystal" || f === "ether") v *= 1 - 0.5 * p.neglect;
+    if (f === "crystal" || f === "light" || f === "mystic") v *= 1 - 0.5 * p.neglect;
     out[f] = v + 0.35 * share[f];
   }
   return out;

@@ -16,9 +16,9 @@ namespace TamTam.Tests
         public void CatalogHasAllFamiliesSlotsAndStyles()
         {
             var cat = JsonUtility.FromJson<CatalogJson>(File.ReadAllText($"{Dir}/catalog.json"));
-            Assert.AreEqual(9, cat.families.Length);
+            Assert.AreEqual(10, cat.families.Length);
             foreach (var slot in new[] { "body", "head", "legs", "tail", "back" })
-                Assert.AreEqual(18, cat.library.Count(e => e.slot == slot), slot);
+                Assert.AreEqual(20, cat.library.Count(e => e.slot == slot), slot);
             Assert.AreEqual(cat.eyeStyles.Length, cat.library.Count(e => e.slot == "eyes"));
             Assert.AreEqual(cat.patterns.Length, cat.library.Count(e => e.slot == "pattern"));
             Assert.Greater(cat.combinations, 500);
@@ -29,7 +29,7 @@ namespace TamTam.Tests
         {
             var cat = JsonUtility.FromJson<CatalogJson>(File.ReadAllText($"{Dir}/catalog.json"));
             var index = JsonUtility.FromJson<FormsIndexJson>(File.ReadAllText($"{Dir}/forms_index.json"));
-            Assert.Greater(index.forms.Length, 18);
+            Assert.Greater(index.forms.Length, 20);
             foreach (var item in index.forms)
             {
                 var form = JsonUtility.FromJson<FormJson>(File.ReadAllText($"{Dir}/Forms/{item.file}"));

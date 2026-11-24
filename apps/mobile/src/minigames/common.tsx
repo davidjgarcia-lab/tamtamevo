@@ -34,7 +34,7 @@ export function GameFrame({ id, score, children, onExit, over, onReplay, extra, 
         <View style={{ flex: 1, alignItems: "center" }}>
           {state.tamtam && (
             <View style={g.mini} accessibilityLabel="Tu Tamtam te anima">
-              <Portrait alleleId={state.alleleId} genome={state.tamtam.genome} size={56} clip={over ? (res && res.stars >= 2 ? "celebrate" : "sad") : cheer === "happy" ? "celebrate" : cheer === "worried" ? "hungry" : "idle"} />
+              <Portrait alleleId={state.alleleId} genome={state.tamtam.genome} stage={state.tamtam.stage} size={56} clip={over ? (res && res.stars >= 2 ? "celebrate" : "sad") : cheer === "happy" ? "celebrate" : cheer === "worried" ? "hungry" : "idle"} />
             </View>
           )}
         </View>

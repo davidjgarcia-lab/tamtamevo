@@ -35,7 +35,7 @@ export function CollectionPanel({ onClose, toast }: { onClose: () => void; toast
             <View style={c.grid}>
               {entries.slice(0, 6).map((e) => (
                 <View key={e.name + e.first} style={[c.cell, e.mine && { borderColor: brand.gold }]}>
-                  <Portrait alleleId={state.alleleId} size={72} genome={e.genome} />
+                  <Portrait alleleId={state.alleleId} size={72} genome={e.genome} stage="adult" />
                   <Text style={c.small} numberOfLines={1}>{e.name}</Text>
                   <Text style={[c.small, { color: brand.textDim }]}>{FAMILIES[e.family].name}</Text>
                 </View>

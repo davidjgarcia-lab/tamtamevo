@@ -14,15 +14,16 @@ export interface GenomeLike {
 
 /** Family colours (kept in sync with core/genetics/families.ts — checked by a test). */
 export const FAMILY_COLORS: Record<Fam, { bases: string[]; accent: string; eye: string; glow: string; particle: { shape: EmitterDef["shape"]; color: string } }> = {
-  fire: { bases: ["#7D2430", "#5A1E1A", "#9A3412"], accent: "#FF7A24", eye: "#FFC247", glow: "#FFB347", particle: { shape: "ember", color: "#FFD166" } },
-  plant: { bases: ["#2F5D3A", "#4A6B2A", "#5B4632"], accent: "#9BE15D", eye: "#E8FFB0", glow: "#C8FF8A", particle: { shape: "crumb", color: "#9BE15D" } },
-  metal: { bases: ["#4E5A6B", "#6B5A4A", "#3A4458"], accent: "#FFB547", eye: "#9FE8FF", glow: "#FFD27A", particle: { shape: "spark", color: "#FFD27A" } },
-  crystal: { bases: ["#3B3A7A", "#2A5C7A", "#6A3A7A"], accent: "#7CF4FF", eye: "#FFFFFF", glow: "#B8F8FF", particle: { shape: "spark", color: "#B8F8FF" } },
-  ghost: { bases: ["#2A2340", "#1E1B2E", "#3A2B4F"], accent: "#B983FF", eye: "#E9DDFF", glow: "#C9A2FF", particle: { shape: "bubble", color: "#8C6BC8" } },
-  water: { bases: ["#1F4E79", "#16606A", "#2B3F86"], accent: "#4FE3FF", eye: "#E6FBFF", glow: "#8FF0FF", particle: { shape: "bubble", color: "#9FE6FF" } },
-  gel: { bases: ["#3E8F7A", "#8A4F9E", "#B0603E"], accent: "#FFE08A", eye: "#FFFFFF", glow: "#FFF1B8", particle: { shape: "bubble", color: "#FFF1B8" } },
-  ether: { bases: ["#5E6AA8", "#7A6AB8", "#4F7FA8"], accent: "#FFF3B0", eye: "#FFFFFF", glow: "#FFFBE0", particle: { shape: "spark", color: "#FFFBE0" } },
-  reptile: { bases: ["#5C3A2E", "#3F5A3A", "#6B4A2A"], accent: "#E8B04A", eye: "#FFD580", glow: "#FFE0A0", particle: { shape: "crumb", color: "#C9A27A" } },
+  fire: { bases: ["#8A2A22", "#6E1E1A", "#A8361E"], accent: "#FF8A2A", eye: "#FFC247", glow: "#FFB347", particle: { shape: "ember", color: "#FFD166" } },
+  water: { bases: ["#2A6FD6", "#1E5AB8", "#3A86E8"], accent: "#5CE6FF", eye: "#E6FBFF", glow: "#9FF0FF", particle: { shape: "bubble", color: "#9FE6FF" } },
+  plant: { bases: ["#6E8F2E", "#4F7A2A", "#7A6A3A"], accent: "#B6E35D", eye: "#E8FFB0", glow: "#D4FF8A", particle: { shape: "crumb", color: "#9BE15D" } },
+  electric: { bases: ["#2B356B", "#232B5A", "#3A4488"], accent: "#FFD23F", eye: "#9FE8FF", glow: "#FFF07A", particle: { shape: "spark", color: "#FFE45C" } },
+  rock: { bases: ["#6B5340", "#5A4A3C", "#7A5E44"], accent: "#FF8A2A", eye: "#FFD580", glow: "#FFB866", particle: { shape: "crumb", color: "#C9A27A" } },
+  shadow: { bases: ["#3A1F6B", "#2A1650", "#4B2A86"], accent: "#C77DFF", eye: "#F2E6FF", glow: "#D9A8FF", particle: { shape: "bubble", color: "#9B6BE0" } },
+  light: { bases: ["#F1C6D4", "#F5D8B8", "#E9C0E6"], accent: "#FFD36E", eye: "#FFFFFF", glow: "#FFF3C4", particle: { shape: "spark", color: "#FFF0B0" } },
+  crystal: { bases: ["#2C4E9A", "#3A5FB8", "#24407E"], accent: "#9FE4FF", eye: "#FFFFFF", glow: "#C8F4FF", particle: { shape: "spark", color: "#C8F4FF" } },
+  plasma: { bases: ["#6A2FB8", "#5226A0", "#7B3FD0"], accent: "#FF7BE0", eye: "#FFFFFF", glow: "#E3A6FF", particle: { shape: "bubble", color: "#E3A6FF" } },
+  mystic: { bases: ["#2A2E7A", "#3B3F9A", "#4A3E8E"], accent: "#9EE8FF", eye: "#FFFFFF", glow: "#FFC2EC", particle: { shape: "spark", color: "#FFC2EC" } },
 };
 
 /** Parts shared by every form (mouth, brows, closed eyes, quality ornaments, props) — taken from Chispín v3. */

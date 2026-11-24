@@ -53,6 +53,7 @@ export interface CreatureResources {
   accentColor: string;
   /** Painted mesh (baby Chispín from the Unity painting); null for vector forms. */
   painted?: import("./painted").PaintedRes | null;
+  sprite?: import("./familySprites").SpriteRes | null;
 }
 
 /** Luminance-preserving saturation matrix (4×5, row-major). */

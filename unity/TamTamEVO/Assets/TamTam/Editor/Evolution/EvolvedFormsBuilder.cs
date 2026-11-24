@@ -24,6 +24,46 @@ namespace TamTam.EditorTools.Evolution
         const string PrefabDir = "Assets/TamTam/Prefabs/Forms";
         const string ScenePath = "Assets/TamTam/Scenes/EvolutionLab.unity";
 
+        const string FamilyArtDir = "Assets/TamTam/Art/Creatures/Families";
+        const string FamilyArtPath = "Assets/TamTam/Data/FamilyArt.asset";
+
+        /// Imports the painted family art (10 families × initial/intermediate/final) as sprites (pivot at the feet,
+        /// about 2.6 units tall like Chispín) and fills Data/FamilyArt.asset.
+        [MenuItem("TamTam/Evoluciones/0 · Importar arte pintado de familias")]
+        public static FamilyArt ImportFamilyArt()
+        {
+            AssetDatabase.Refresh();
+            var art = AssetDatabase.LoadAssetAtPath<FamilyArt>(FamilyArtPath);
+            if (!art)
+            {
+                art = ScriptableObject.CreateInstance<FamilyArt>();
+                Directory.CreateDirectory(Path.GetDirectoryName(FamilyArtPath));
+                AssetDatabase.CreateAsset(art, FamilyArtPath);
+            }
+            art.entries.Clear();
+            foreach (var png in Directory.GetFiles(FamilyArtDir, "*.png").Select(p => p.Replace('\\', '/')))
+            {
+                var name = Path.GetFileNameWithoutExtension(png);
+                var parts = name.Split('_');
+                if (parts.Length != 2 || !Enum.TryParse(parts[0], out Family fam)) continue;
+                var ti = (TextureImporter)AssetImporter.GetAtPath(png);
+                var tex = new Texture2D(2, 2); tex.LoadImage(File.ReadAllBytes(png));
+                ti.textureType = TextureImporterType.Sprite; ti.spriteImportMode = SpriteImportMode.Single;
+                ti.mipmapEnabled = true; ti.alphaIsTransparency = true; ti.textureCompression = TextureImporterCompression.CompressedHQ;
+                var st = new TextureImporterSettings(); ti.ReadTextureSettings(st);
+                float height = parts[1] == "final" ? 3.0f : parts[1] == "intermediate" ? 2.7f : 2.5f;
+                st.spritePixelsPerUnit = tex.height / height; st.spriteAlignment = (int)SpriteAlignment.BottomCenter;
+                st.spriteMeshType = SpriteMeshType.Tight;
+                ti.SetTextureSettings(st); ti.SaveAndReimport();
+                UnityEngine.Object.DestroyImmediate(tex);
+                art.entries.Add(new FamilyArt.Entry { family = fam, stage = parts[1], sprite = AssetDatabase.LoadAssetAtPath<Sprite>(png) });
+            }
+            EditorUtility.SetDirty(art);
+            AssetDatabase.SaveAssets();
+            Debug.Log($"TamTam: painted family art imported ({art.entries.Count} sprites, expected 30).");
+            return art;
+        }
+
         static CatalogJson LoadCatalog() => JsonUtility.FromJson<CatalogJson>(File.ReadAllText($"{DataDir}/catalog.json"));
 
         [MenuItem("TamTam/Evoluciones/1 · Construir formas exportadas (todas)")]
@@ -153,10 +193,11 @@ namespace TamTam.EditorTools.Evolution
         [MenuItem("TamTam/Actualizar todo (criaturas, evoluciones y entornos)", priority = 0)]
         public static void UpdateEverything()
         {
+            ImportFamilyArt();
             BuildAll();
             BuildScene();
             TamTam.EditorTools.Environments.NestHouseBuilder.BuildScene();
-            EditorUtility.DisplayDialog("TamTam", "Actualizado: formas evolucionadas, escena EvolutionLab y casa-nido.\nAbre Assets/TamTam/Scenes/EvolutionLab.unity y pulsa Play.", "Vale");
+            EditorUtility.DisplayDialog("TamTam", "Actualizado: arte pintado de las 10 familias, formas evolucionadas, escena EvolutionLab y casa-nido.\nAbre Assets/TamTam/Scenes/EvolutionLab.unity y pulsa Play.", "Vale");
         }
 
         // ── Lab scene ──────────────────────────────────────────────────────
@@ -176,6 +217,7 @@ namespace TamTam.EditorTools.Evolution
             var go = new GameObject("Tamtam");
             var presenter = go.AddComponent<TamtamPresenter>();
             presenter.catalog = catalog;
+            presenter.familyArt = AssetDatabase.LoadAssetAtPath<FamilyArt>(FamilyArtPath) ?? ImportFamilyArt();
             go.AddComponent<EvolutionLabDemo>().presenter = presenter;
             Directory.CreateDirectory(Path.GetDirectoryName(ScenePath));
             EditorSceneManager.SaveScene(scene, ScenePath);

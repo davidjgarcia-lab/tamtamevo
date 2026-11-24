@@ -24,7 +24,7 @@ export function EvolutionRitual({ onClose, force }: { onClose: () => void; force
   const t = state.tamtam!;
   const shown = roll ? t : before;
   const look = useMemo(() => composeLook(shown.formQuality ?? "plain", shown.formQuality ?? "plain"), [shown.formQuality]);
-  const c = useCreature(state.alleleId, look, shown.genome);
+  const c = useCreature(state.alleleId, look, shown.genome, shown.stage);
   const [size, setSize] = useState({ w: 0, h: 0 });
   const flash = useSharedValue(0);
   const charge = useSharedValue(0);

@@ -49,7 +49,7 @@ function Grid({ rolls }: { rolls: EvolutionRoll[] }) {
   const { state } = useGame();
   // One canvas for all nine (each <Canvas> is a WebGL context on the web).
   const hs: CreatureHandle[] = [];
-  for (let i = 0; i < N; i++) hs.push(useCreature(state.alleleId, undefined, rolls[i]!.genome)); // eslint-disable-line react-hooks/rules-of-hooks
+  for (let i = 0; i < N; i++) hs.push(useCreature(state.alleleId, undefined, rolls[i]!.genome, "juvenile")); // eslint-disable-line react-hooks/rules-of-hooks
   const [size, setSize] = useState({ w: 0, h: 0 });
   const W = Math.max(1, size.w), H = Math.max(1, size.h);
   const cw = W / 3, ch = H / 3;

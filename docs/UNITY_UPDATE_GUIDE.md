@@ -43,6 +43,14 @@ pnpm unity:export
 ```
 Regenera `Data/Evolution/` y `Art/Environments/NestHouse/`. Después, en Unity, repite el paso 3.
 
+## Arte pintado de las 10 familias (2026-11-24)
+
+- `Art/Creatures/Families/{familia}_{initial|intermediate|final}.png`: 30 criaturas recortadas de tus hojas y escaladas ×4.
+- **TamTam ▸ Evoluciones ▸ 0 · Importar arte pintado de familias** crea `Data/FamilyArt.asset`. "Actualizar todo" ya lo incluye.
+- `TamtamPresenter.familyArt`: cuando está asignado, las formas evolucionadas usan el sprite pintado de la familia dominante,
+  con animación procedural (`PaintedCreature`). Si no hay sprite, usa las formas vectoriales.
+- `Art/Environments/Biomes/`: 8 biomas escalados ×4 (bosque, cascada, lava, cueva de cristal, setas, ruinas, islas del cielo y coliseo).
+
 ## Limitación honesta: el aspecto de las formas evolucionadas
 
 - Las formas evolucionadas usan las **piezas modulares vectoriales** de las 9 familias, pintadas por el rasterizador

@@ -7,8 +7,8 @@ import { drawTamtam, useCreature } from "./useCreature";
 import type { Look } from "./resources";
 
 /** Live animated portrait of a Tamtam (used in Granja, Arena and the header). */
-export function Portrait({ alleleId, size = 96, clip = "idle", dir = 1, look, genome }: { alleleId: string; size?: number; clip?: ChispinClipId; dir?: number; look?: Look; genome?: GenomeLike | null }) {
-  const c = useCreature(alleleId, look, genome);
+export function Portrait({ alleleId, size = 96, clip = "idle", dir = 1, look, genome, stage }: { alleleId: string; size?: number; clip?: ChispinClipId; dir?: number; look?: Look; genome?: GenomeLike | null; stage?: string }) {
+  const c = useCreature(alleleId, look, genome, stage);
   useEffect(() => c.play(clip), [clip, c.play]);
   const { res, clock, playback, emitters } = c;
   const scale = size / 215;

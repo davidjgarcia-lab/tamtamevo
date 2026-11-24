@@ -16,9 +16,9 @@ export interface Genome {
   mutation: Mutation;
 }
 
-/** Chispín (baby) expressed as a genome: reptile body with fire crest and fire tail. */
+/** Chispín (baby) expressed as a genome: a pure fire hatchling (Brasildo line, art sheets 2026-11-24). */
 export const CHISPIN_GENOME: Genome = {
-  parts: { body: "reptile", head: "reptile", legs: "reptile", tail: "fire", back: "fire" },
+  parts: { body: "fire", head: "fire", legs: "fire", tail: "fire", back: "fire" },
   variant: { body: 0, head: 0, legs: 0, tail: 0, back: 0 },
   eyes: "slit",
   pattern: "seams",
@@ -48,7 +48,7 @@ export function dominantFamily(g: Genome): { family: FamilyId; share: number; hy
   return { family: sorted[0]!, share: share[sorted[0]!], second: share[sorted[1]!] > 0 ? sorted[1]! : sorted[0]!, hybrid: share[sorted[0]!] < 0.5 };
 }
 
-/** Readable form name from the two strongest families (e.g. "Ferrino" = metal + crystal). */
+/** Readable form name from the two strongest families (e.g. "Ferrino" = electric + crystal). */
 export function formName(g: Genome, seed: number): string {
   const d = dominantFamily(g);
   const a = FAMILIES[d.family];

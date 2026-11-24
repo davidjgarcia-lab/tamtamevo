@@ -14,7 +14,7 @@ describe("arena techniques and matchups", () => {
   it("matchup triangles", () => {
     expect(matchup("fire", "plant")).toBeCloseTo(1.15);
     expect(matchup("plant", "fire")).toBeCloseTo(0.87);
-    expect(matchup("fire", "metal")).toBe(1);
+    expect(matchup("fire", "electric")).toBe(1);
   });
   it("advantage and techniques change the odds", () => {
     expect(winRate({ ...base, family: "fire" }, { ...base, name: "B", family: "plant" })).toBeGreaterThan(0.6);

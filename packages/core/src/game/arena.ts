@@ -28,26 +28,31 @@ export interface Fighter {
   family?: FamilyId;
   /** Companion from the Granja: extra small hits every few seconds. */
   companion?: { name: string; power: number } | null;
-  /** First strike (ether technique or Rayo school). */
+  /** First strike (light technique or Rayo school). */
   firstStrike?: boolean;
   dodgeBonus?: number;
 }
 
 /** Techniques: one per family (references batch 3: My Brute skills, redesigned). */
-export type TechniqueId = "embers" | "armor" | "reflect" | "phantom" | "roots" | "whirl" | "bounce" | "gust" | "fierce";
+export type TechniqueId = "embers" | "armor" | "reflect" | "phantom" | "roots" | "whirl" | "bounce" | "gust" | "fierce" | "illusion";
 export const TECHNIQUES: Record<TechniqueId, { family: FamilyId; name: string; desc: string }> = {
   embers: { family: "fire", name: "Ascuas", desc: "Su habilidad deja quemaduras: daño extra durante 3 s." },
-  armor: { family: "metal", name: "Coraza", desc: "Recibe un 12 % menos de daño." },
+  armor: { family: "rock", name: "Coraza de roca", desc: "Recibe un 12 % menos de daño." },
   reflect: { family: "crystal", name: "Reflejo", desc: "20 % de probabilidad de devolver la mitad del golpe." },
-  phantom: { family: "ghost", name: "Esquiva fantasma", desc: "+10 % de esquiva." },
+  phantom: { family: "shadow", name: "Esquiva fantasma", desc: "+10 % de esquiva." },
   roots: { family: "plant", name: "Raíces", desc: "Una vez por combate inmoviliza al rival 2 s." },
   whirl: { family: "water", name: "Torbellino", desc: "Su habilidad retrasa el siguiente ataque rival." },
-  bounce: { family: "gel", name: "Rebote", desc: "Una vez por combate sobrevive con 1 de vida." },
-  gust: { family: "ether", name: "Corriente", desc: "Golpea primero y es más rápido." },
-  fierce: { family: "reptile", name: "Mordisco feroz", desc: "Sus ataques no se pueden esquivar." },
+  bounce: { family: "plasma", name: "Rebote", desc: "Una vez por combate sobrevive con 1 de vida." },
+  gust: { family: "electric", name: "Relámpago", desc: "Golpea primero y es más rápido." },
+  fierce: { family: "light", name: "Haz de luz", desc: "Sus ataques no se pueden esquivar." },
+  illusion: { family: "mystic", name: "Ilusión", desc: "Una vez por combate, un golpe rival atraviesa su ilusión sin hacerle daño." },
 };
 /** Matchups: each family beats the next one in its triangle (+15 % damage). */
-export const BEATS: Record<FamilyId, FamilyId> = { fire: "plant", plant: "water", water: "fire", metal: "crystal", crystal: "ghost", ghost: "metal", gel: "reptile", reptile: "ether", ether: "gel" };
+export const BEATS: Record<FamilyId, FamilyId> = {
+  fire: "plant", plant: "rock", rock: "electric", electric: "water", water: "fire", // the five elements
+  light: "shadow", shadow: "mystic", mystic: "light", // light, shadow and the arcane
+  crystal: "plasma", plasma: "electric",
+};
 export function matchup(att?: FamilyId, def?: FamilyId): number {
   if (!att || !def) return 1;
   return BEATS[att] === def ? 1.15 : BEATS[def] === att ? 0.87 : 1;
@@ -91,8 +96,14 @@ export function simulateBattle(a: Fighter, b: Fighter, seed: number): BattleResu
   const burns: { on: 0 | 1; at: number; dmg: number }[] = [];
   const rootsUsed = [false, false];
   const bounceUsed = [false, false];
+  const illusionUsed = [false, false];
   const compAt = [3, 3];
   const deal = (to: 0 | 1, dmg: number, at: number, crit: boolean) => {
+    if (has(to, "illusion") && !illusionUsed[to] && dmg >= 3) {
+      illusionUsed[to] = true;
+      events.push({ t: at, type: "technique", by: to, name: TECHNIQUES.illusion.name });
+      return;
+    }
     if (hp[to] - dmg <= 0 && has(to, "bounce") && !bounceUsed[to]) {
       bounceUsed[to] = true;
       dmg = hp[to] - 1;

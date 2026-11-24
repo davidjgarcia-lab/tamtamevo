@@ -37,9 +37,11 @@ describe("genetic evolution", () => {
 
   it("care style steers the families (warrior, sage-clean, neglected, cuddled, player)", () => {
     expect(top(tally(prof({ care: 0.7, fighting: 1, training: 0.9 })).c)).toEqual(expect.arrayContaining(["fire"]));
-    expect(top(tally(prof({ care: 0.7, training: 1, study: 0.5 })).c, 1)).toEqual(["metal"]);
+    expect(top(tally(prof({ care: 0.7, training: 1, study: 0.5 })).c)).toEqual(expect.arrayContaining(["rock"]));
+    expect(top(tally(prof({ care: 0.7, training: 1, play: 1 })).c)).toEqual(expect.arrayContaining(["electric"]));
+    expect(top(tally(prof({ care: 0.8, study: 1, affection: 0.5 })).c)).toEqual(expect.arrayContaining(["mystic"]));
     expect(top(tally(prof({ care: 0.9, hygiene: 1, study: 1 })).c, 1)).toEqual(["crystal"]);
-    expect(top(tally(prof({ care: 0.05, affection: 0, hygiene: 0.1 })).c, 1)).toEqual(["ghost"]);
+    expect(top(tally(prof({ care: 0.05, affection: 0, hygiene: 0.1 })).c, 1)).toEqual(["shadow"]);
     expect(top(tally(prof({ care: 0.9, affection: 1, hygiene: 0.6 })).c)).toEqual(expect.arrayContaining(["plant"]));
     expect(top(tally(prof({ care: 0.7, play: 1, hygiene: 0.9 })).c)).toEqual(expect.arrayContaining(["water"]));
   });

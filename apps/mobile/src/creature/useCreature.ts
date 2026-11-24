@@ -4,6 +4,7 @@ import { compileClip, compileRig, derivePalette, evaluateFrame, switchClip, type
 import { useImage } from "@shopify/react-native-skia";
 import { useCallback, useMemo } from "react";
 import { buildPainted } from "./painted";
+import { buildSprite, FAMILY_SPRITES, spriteKey } from "./familySprites";
 import { useFrameCallback, useSharedValue, type SharedValue } from "react-native-reanimated";
 import { drawCreature, drawParticles, type ActiveEmitters, type Placement } from "./draw";
 import { buildResources, DEFAULT_LOOK, type CreatureResources, type Look } from "./resources";
@@ -58,13 +59,19 @@ export interface CreatureHandle {
 }
 
 /** Shared animation clock + playback state for one Tamtam on screen. */
-export function useCreature(alleleId: string, look: Look = DEFAULT_LOOK, genome?: GenomeLike | null): CreatureHandle {
+export function useCreature(alleleId: string, look: Look = DEFAULT_LOOK, genome?: GenomeLike | null, stage?: string): CreatureHandle {
   const gkey = genome ? JSON.stringify(genome) : "";
   const paintedImg = useImage(PAINTED_SRC);
   const eyesImg = useImage(EYES_SRC);
+  // Evolved forms: painted family art (falls back to the vector parts while it loads).
+  const spriteImg = useImage(genome ? (FAMILY_SPRITES[spriteKey(genome, stage)] ?? PAINTED_SRC) : PAINTED_SRC);
   const usePainted = !genome && !!paintedImg && !!eyesImg;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const model = useMemo(() => (usePainted ? PAINTED_MODEL : modelFor(genome)), [gkey, usePainted]);
+  const useSprite = !!genome && !!spriteImg && !!FAMILY_SPRITES[spriteKey(genome, stage)];
+  const model = useMemo(
+    () => (usePainted ? PAINTED_MODEL : useSprite ? { ...PAINTED_MODEL, emitters: genomeEmitters(genome!) } : modelFor(genome)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [gkey, usePainted, useSprite],
+  );
   const palette = useMemo(
     () => derivePalette(genome ? genomePalette(genome) : (fireColorAlleles.find((a) => a.id === alleleId) ?? fireColorAlleles[0]!).genes),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -76,9 +83,10 @@ export function useCreature(alleleId: string, look: Look = DEFAULT_LOOK, genome?
       rig: model.rig,
       clips: model.clips,
       painted: usePainted ? buildPainted(paintedImg!, eyesImg!, alleleId, look.emissive) : null,
+      sprite: useSprite ? buildSprite(spriteImg!, genome!, model.rig.boneIds.indexOf("body")) : null,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [model, palette, look, usePainted, alleleId],
+    [model, palette, look, usePainted, useSprite, spriteImg, alleleId],
   );
   const particleMul = look.particles;
   const clock = useSharedValue(0);

@@ -1,3 +1,9 @@
+> **Actualización 2026-11-24:** las familias del juego son ahora las **10 de las hojas de arte**
+> (`docs/media/concept/sheets/`): Brasildo, Aqualin, Foliaris, Voltix, Rocanix, Umbrin, Lúmina, Diamor, Plasmax y Mistor.
+> Correspondencia con este documento: Magmáridos→Brasildo, Mareálidos→Aqualin, Silváridos→Foliaris, Ferrálidos→Voltix,
+> Escamáridos→Rocanix, Umbrálidos→Umbrin, Etéridos→Lúmina, Cristálidos→Diamor y Gelíferos→Plasmax; Mistor es nueva.
+> Las propuestas de abajo quedan como referencia de anatomía.
+
 # Familias anatómicas y locomoción — propuestas visuales (v1)
 
 > Estado: **PROPUESTA PARA VALIDAR** (v2: 10 familias × 5 propuestas). Texto + reglas. Las piezas modulares de las 9 familias ya están en el juego (prototipo vectorial, `packages/art/src/modular/`). Las hojas de concepto de imagen de estas 15 propuestas
