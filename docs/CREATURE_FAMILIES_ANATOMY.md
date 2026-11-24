@@ -1,7 +1,7 @@
 # Familias anatómicas y locomoción — propuestas visuales (v1)
 
 > Estado: **PROPUESTA PARA VALIDAR** (v2: 10 familias × 5 propuestas). Texto + reglas. Las piezas modulares de las 9 familias ya están en el juego (prototipo vectorial, `packages/art/src/modular/`). Las hojas de concepto de imagen de estas 15 propuestas
-> están **BLOQUEADAS**: el generador de imágenes (plan gratuito de ElevenLabs) alcanzó su límite diario de
+> están **en curso**: 2 de 9 hechas (Brasardo y Ramollo, `docs/media/concept/families/`); el resto **BLOQUEADAS** por el límite diario de
 > imágenes; se generarán en cuanto haya crédito. Solo Chispín v3 (reptiliano) tiene concepto aprobado e
 > implementado en el rig (`docs/media/concept/chispin-v3-reptil.jpg`).
 
