@@ -9,6 +9,7 @@ import { genomeStats } from "../genetics/genome";
 import { canEvolve, evolveTamtam, type EvolutionRoll } from "../genetics/evolve";
 import { rankOf } from "./arena";
 import { payCare } from "./life";
+import { addAlbumPiece, medalFor, praiseFor, recordPlayDay, starsFor, type Medal, type Metrics } from "./play";
 import { recordFight, simulateBattle, type Difficulty, type Fighter } from "./arena";
 
 /** Study (Academy · Cocina): memory session at the desk → Intelligence. */
@@ -40,10 +41,26 @@ export const MINIGAMES: Record<MinigameId, { baseCoins: number; scoreForMax: num
 };
 
 /** Ends a minigame run: coins (with daily diminishing returns), record, fun for the Tamtam. */
-export function completeMinigame(s: GameState, input: { game: MinigameId; runId: string; score: number; now: number; tzOffsetMin: number }) {
+export interface MinigameResult {
+  coins: number;
+  best: number;
+  newRecord: boolean;
+  duplicate: boolean;
+  stars: number;
+  medal: Medal;
+  praise: string[];
+  streak: number;
+  streakReward: string | null;
+  usedProtection: boolean;
+  album: { painting: string; piece: number; completed: boolean } | null;
+}
+
+export function completeMinigame(s: GameState, input: { game: MinigameId; runId: string; score: number; now: number; tzOffsetMin: number; metrics?: Metrics }): MinigameResult {
   if (s.phase !== "home" || !s.tamtam) throw new GameRuleError("no_tamtam");
   const key = `reward:minigame:${input.game}:${input.runId}`;
-  if (s.economy.wallet.keys[key] !== undefined) return { coins: 0, best: s.records[input.game]?.best ?? 0, newRecord: false, duplicate: true };
+  if (s.economy.wallet.keys[key] !== undefined) {
+    return { coins: 0, best: s.records[input.game]?.best ?? 0, newRecord: false, duplicate: true, stars: 0, medal: "none", praise: [], streak: 0, streakReward: null, usedProtection: false, album: null };
+  }
   const def = MINIGAMES[input.game];
   const quality = 0.5 + Math.min(1, Math.max(0, input.score / def.scoreForMax));
   const r = grantActivityReward(s.economy.wallet, s.rewardLog, {
@@ -51,8 +68,10 @@ export function completeMinigame(s: GameState, input: { game: MinigameId; runId:
     levelMultiplier: 1, baseXp: 40, ts: input.now, tzOffsetMin: input.tzOffsetMin, tiers: MINIGAME_ENTHUSIASM,
   });
   advanceCare(s.care, input.now);
-  s.care.needs.happiness = Math.min(100, s.care.needs.happiness + 15);
-  s.care.needs.activity = Math.min(100, s.care.needs.activity + 20);
+  const stars = starsFor(input.score, def.scoreForMax);
+  // Playing makes the Tamtam happy and active; better runs, more fun.
+  s.care.needs.happiness = Math.min(100, s.care.needs.happiness + 8 + 4 * stars);
+  s.care.needs.activity = Math.min(100, s.care.needs.activity + 12 + 4 * stars);
   s.care.needs.energy = Math.max(0, s.care.needs.energy - 6);
   s.care.lastInteractionAt = input.now;
   for (let i = 0; i < 4; i++) s.care.playLog.push(input.now);
@@ -63,7 +82,13 @@ export function completeMinigame(s: GameState, input: { game: MinigameId; runId:
   s.records[input.game] = { best: Math.max(rec.best, input.score), plays: rec.plays + 1 };
   // A little Agility/Intelligence from play goes to Creativity in this slice (no AGI attribute).
   s.tamtam = addAttributeXp(s.tamtam, input.game === "grid" ? "int" : "cre", Math.round(r.xp / 2)).tamtam;
-  return { coins: r.coins, best: s.records[input.game]!.best, newRecord, duplicate: false };
+  const day = recordPlayDay(s, input.game, input.now);
+  const album = stars >= 3 ? addAlbumPiece(s, input.now) : null;
+  const best = s.records[input.game]!.best;
+  return {
+    coins: r.coins, best, newRecord, duplicate: false, stars, medal: medalFor(best, def.scoreForMax),
+    praise: praiseFor(stars, { ...input.metrics, newRecord: newRecord && rec.plays > 0 }), streak: day.streak, streakReward: day.reward, usedProtection: day.usedProtection, album,
+  };
 }
 
 /** The player's fighter, from the current form, level, Gym and form quality (Lustre). */

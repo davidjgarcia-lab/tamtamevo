@@ -20,3 +20,5 @@ export * from "./genetics/families";
 export * from "./genetics/genome";
 export * from "./genetics/evolve";
 export * from "./game/life";
+export * from "./game/play";
+export * from "./minigames/regions";

@@ -72,3 +72,25 @@ describe("problems", () => {
     expect(speechFor(s, T0).mood).toBe("dirty");
   });
 });
+
+import { addAlbumPiece, completeMinigame, peekPlay, recordPlayDay, starsFor } from "../index";
+describe("minigame layer", () => {
+  it("stars, streak with protection and album pieces", () => {
+    const s = home();
+    expect(starsFor(900, 1000)).toBe(3);
+    expect(starsFor(100, 1000)).toBe(0);
+    const D = 86_400_000;
+    recordPlayDay(s, "maze", T0);
+    recordPlayDay(s, "maze", T0 + D);
+    expect(peekPlay(s).streak.count).toBe(2);
+    const r = recordPlayDay(s, "maze", T0 + 3 * D); // missed one day: protected
+    expect(r.usedProtection).toBe(true);
+    expect(r.streak).toBe(3);
+    expect(r.reward).toBe("Brocheta asada");
+    for (let i = 0; i < 3; i++) addAlbumPiece(s, T0);
+    expect(addAlbumPiece(s, T0)!.completed).toBe(true);
+    const res = completeMinigame(s, { game: "grid", runId: "x", score: 1000, now: T0 + 4 * D, tzOffsetMin: 0, metrics: { mistakes: 0, seconds: 30 } });
+    expect(res.stars).toBe(3);
+    expect(res.praise[0]).toMatch(/0 errores/);
+  });
+});

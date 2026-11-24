@@ -1,4 +1,5 @@
-import { completeMinigame, MINIGAMES, type MinigameId } from "@tamtam/core";
+import { completeMinigame, MEDAL_NAMES, MINIGAMES, peekPlay, type MinigameId, type MinigameResult, type Metrics } from "@tamtam/core";
+import { Portrait } from "../creature/Portrait";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View, type GestureResponderEvent } from "react-native";
 import { newId, useGame } from "../game/GameProvider";
@@ -8,15 +9,16 @@ import { Btn, Coin } from "../ui/kit";
 import { Icon, type ICONS } from "../ui/icons";
 
 /** Shared frame for every minigame: icon header (no names, D9), score, exit and the result card. */
-export function GameFrame({ id, score, children, onExit, over, onReplay, extra }: {
+export function GameFrame({ id, score, children, onExit, over, onReplay, extra, metrics, cheer }: {
   id: MinigameId; score: number; children: ReactNode; onExit: () => void; over: boolean; onReplay: () => void; extra?: ReactNode;
+  metrics?: Metrics; cheer?: "happy" | "worried" | null;
 }) {
   const { state, act, now, tzOffsetMin } = useGame();
-  const [res, setRes] = useState<{ coins: number; best: number; newRecord: boolean } | null>(null);
+  const [res, setRes] = useState<MinigameResult | null>(null);
   const runId = useRef(newId());
   useEffect(() => {
     // Record once per run (the rule is idempotent by runId as well).
-    if (over && !res) setRes(act((s) => completeMinigame(s, { game: id, runId: runId.current, score, now: now(), tzOffsetMin })));
+    if (over && !res) setRes(act((s) => completeMinigame(s, { game: id, runId: runId.current, score, now: now(), tzOffsetMin, metrics })));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [over]);
   const best = state.records[id]?.best ?? 0;
@@ -29,7 +31,13 @@ export function GameFrame({ id, score, children, onExit, over, onReplay, extra }
         <View style={g.badge}>
           <Icon name={id as keyof typeof ICONS} size={30} accent={brand.cyan} />
         </View>
-        <View style={{ flex: 1 }} />
+        <View style={{ flex: 1, alignItems: "center" }}>
+          {state.tamtam && (
+            <View style={g.mini} accessibilityLabel="Tu Tamtam te anima">
+              <Portrait alleleId={state.alleleId} genome={state.tamtam.genome} size={56} clip={over ? (res && res.stars >= 2 ? "celebrate" : "sad") : cheer === "happy" ? "celebrate" : cheer === "worried" ? "hungry" : "idle"} />
+            </View>
+          )}
+        </View>
         <View style={g.scoreBox} accessibilityLabel={`Puntos ${score}`}>
           <Icon name="trophy" size={18} color={brand.gold} accent={brand.gold} />
           <Text style={g.score}>{score}</Text>
@@ -43,14 +51,30 @@ export function GameFrame({ id, score, children, onExit, over, onReplay, extra }
           <View style={g.card}>
             <Icon name={id as keyof typeof ICONS} size={56} accent={brand.cyan} />
             <Text style={g.big}>{score}</Text>
-            {res?.newRecord && <Text style={g.record}>¡Nuevo récord!</Text>}
+            {res && (
+              <Text style={g.stars} accessibilityLabel={`${res.stars} estrellas`}>
+                {"★".repeat(res.stars)}
+                <Text style={g.starsOff}>{"★".repeat(3 - res.stars)}</Text>
+              </Text>
+            )}
+            {res?.praise.map((p) => (
+              <Text key={p} style={g.record}>{p}</Text>
+            ))}
             {res && (
               <View style={g.row}>
                 <Coin />
                 <Text style={g.reward}>+{res.coins}</Text>
               </View>
             )}
-            <Text style={g.small}>Diversión +15 · Actividad +20 · Energía −6</Text>
+            {res && <Text style={g.small}>Felicidad +{8 + 4 * res.stars} · Actividad +{12 + 4 * res.stars} · Medalla: {MEDAL_NAMES[res.medal]}</Text>}
+            {res && (
+              <Text style={g.streak}>
+                Racha de juego: {res.streak} día{res.streak === 1 ? "" : "s"} · protecciones {peekPlay(state).streak.protections}
+                {res.usedProtection ? " (¡protección usada!)" : ""}
+              </Text>
+            )}
+            {res?.streakReward && <Text style={g.record}>Premio de racha: {res.streakReward}</Text>}
+            {res?.album && <Text style={g.album}>Pieza {res.album.piece}/4 del álbum de paisajes{res.album.completed ? " · ¡cuadro completo para tu casa!" : ""}</Text>}
             <View style={g.row}>
               <Pressable onPress={() => { runId.current = newId(); setRes(null); onReplay(); }} style={g.round} accessibilityRole="button" accessibilityLabel="Jugar otra vez" testID="game-replay">
                 <Icon name="replay" size={24} />
@@ -113,11 +137,16 @@ const g = StyleSheet.create({
   best: { fontFamily: fonts.bodyBold, fontSize: 12, color: brand.textDim },
   board: { flex: 1, margin: 10, borderRadius: 22, overflow: "hidden", backgroundColor: brand.panel },
   over: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(10,7,24,0.7)", alignItems: "center", justifyContent: "center" },
-  card: { backgroundColor: brand.panel, borderRadius: 24, padding: 22, alignItems: "center", gap: 10, minWidth: 260, borderWidth: 1.5, borderColor: brand.line },
+  card: { backgroundColor: brand.panel, borderRadius: 24, padding: 22, alignItems: "center", gap: 8, minWidth: 260, maxWidth: 350, borderWidth: 1.5, borderColor: brand.line },
   big: { fontFamily: fonts.displayBold, fontSize: 52, color: brand.gold, lineHeight: 60 },
   record: { fontFamily: fonts.displayBold, fontSize: 18, color: brand.cyan },
   row: { flexDirection: "row", alignItems: "center", gap: 10 },
   reward: { fontFamily: fonts.displayBold, fontSize: 22, color: colors.ink },
+  mini: { width: 56, height: 56, borderRadius: 28, backgroundColor: brand.panel, overflow: "hidden" },
+  stars: { fontSize: 34, color: brand.gold, letterSpacing: 4 },
+  starsOff: { color: brand.line },
+  streak: { fontFamily: fonts.bodyBold, fontSize: 12, color: brand.orange, textAlign: "center" },
+  album: { fontFamily: fonts.bodyBold, fontSize: 12, color: brand.mint, textAlign: "center" },
   small: { fontFamily: fonts.body, fontSize: 12, color: colors.inkSoft },
   dpad: { flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 8, paddingBottom: 12 },
   pad: { width: 64, height: 56, borderRadius: 16, backgroundColor: brand.panelHi, borderWidth: 1.5, borderBottomWidth: 4, borderColor: brand.line, alignItems: "center", justifyContent: "center" },

@@ -38,6 +38,9 @@ export function MazeGame({ onExit }: { onExit: () => void }) {
   const [score, setScore] = useState(0);
   const [over, setOver] = useState(false);
   const [trail, setTrail] = useState<number[]>([0]);
+  const newKeys = () => { const k = new Set<number>(); while (k.size < 2) k.add(5 + Math.floor(Math.random() * (COLS * ROWS - 10))); return k; };
+  const [keys, setKeys] = useState<Set<number>>(newKeys);
+  const runStart = useRef(Date.now());
   const started = useRef(Date.now());
   const [, force] = useState(0);
   useEffect(() => {
@@ -47,7 +50,7 @@ export function MazeGame({ onExit }: { onExit: () => void }) {
   const goal = COLS * ROWS - 1;
 
   const reset = () => {
-    setMaze(makeMaze()); setPos(0); setLevel(0); setScore(0); setOver(false); setTrail([0]); started.current = Date.now();
+    setMaze(makeMaze()); setPos(0); setLevel(0); setScore(0); setOver(false); setTrail([0]); setKeys(newKeys()); started.current = Date.now(); runStart.current = Date.now();
   };
   const step = (dx: number, dy: number) => {
     if (over) return;
@@ -56,13 +59,17 @@ export function MazeGame({ onExit }: { onExit: () => void }) {
     const next = pos + dx + dy * COLS;
     setPos(next);
     setTrail((t) => [...t, next]);
+    if (keys.has(next)) {
+      const k = new Set(keys); k.delete(next); setKeys(k);
+      setScore((s0) => s0 + 50);
+    }
     if (next === goal) {
       const secs = (Date.now() - started.current) / 1000;
-      const gained = Math.max(60, Math.round(300 - secs * 5));
+      const gained = Math.max(60, Math.round(260 - secs * 5)) + (keys.size === 0 ? 40 : 0);
       setScore((s) => s + gained);
       if (level + 1 >= LEVELS) setOver(true);
       else {
-        setLevel(level + 1); setMaze(makeMaze()); setPos(0); setTrail([0]); started.current = Date.now();
+        setLevel(level + 1); setMaze(makeMaze()); setPos(0); setTrail([0]); setKeys(newKeys()); started.current = Date.now();
       }
     }
   };
@@ -93,6 +100,12 @@ export function MazeGame({ onExit }: { onExit: () => void }) {
       if (m & 4) c.drawLine(x, y + cell, x + cell, y + cell, wall);
       if (m & 8) c.drawLine(x, y, x, y + cell, wall);
     }
+    const kp = Skia.Paint(); kp.setAntiAlias(true); kp.setColor(Skia.Color("#FFD166"));
+    for (const k of keys) {
+      const kx = ox + (k % COLS + 0.5) * cell, ky = oy + (Math.floor(k / COLS) + 0.5) * cell;
+      c.drawCircle(kx - cell * 0.1, ky, cell * 0.14, kp);
+      c.drawRect(Skia.XYWHRect(kx, ky - cell * 0.04, cell * 0.24, cell * 0.08), kp);
+    }
     const pp = Skia.Paint();
     pp.setAntiAlias(true);
     pp.setColor(Skia.Color("#FF8A00"));
@@ -100,11 +113,17 @@ export function MazeGame({ onExit }: { onExit: () => void }) {
     c.drawCircle(px, py, cell * 0.32, pp);
     pp.setColor(Skia.Color("#FFF8EC"));
     c.drawCircle(px + cell * 0.1, py - cell * 0.06, cell * 0.08, pp);
-  }, Skia.XYWHRect(0, 0, Math.max(1, size.w), Math.max(1, size.h))), [maze, pos, trail, cell, ox, oy, size]);
+    if (level === 2) {
+      // Fog in the last maze: you only see around your Tamtam.
+      const fog = Skia.Paint();
+      fog.setShader(Skia.Shader.MakeRadialGradient({ x: px, y: py }, cell * 3.2, [Skia.Color("#17132B00"), Skia.Color("#17132BF2")], [0.45, 1], 0));
+      c.drawRect(Skia.XYWHRect(0, 0, size.w, size.h), fog);
+    }
+  }, Skia.XYWHRect(0, 0, Math.max(1, size.w), Math.max(1, size.h))), [maze, pos, trail, cell, ox, oy, size, keys, level]);
 
   const elapsed = Math.floor((Date.now() - started.current) / 1000);
   return (
-    <GameFrame id="maze" score={score} over={over} onExit={onExit} onReplay={reset} extra={<DPad onDir={step} />}>
+    <GameFrame id="maze" score={score} over={over} metrics={{ seconds: (Date.now() - runStart.current) / 1000 }} cheer={keys.size === 0 ? "happy" : null} onExit={onExit} onReplay={reset} extra={<DPad onDir={step} />}>
       <View style={{ flex: 1 }} onLayout={(e) => setSize({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })} {...swipe}>
         <Canvas style={{ flex: 1 }} pointerEvents="none">
           <Picture picture={pic} />

@@ -157,6 +157,8 @@ try {
   await page.getByTestId("game-trail").click();
   await page.waitForTimeout(800);
   await shot("13-game-trail");
+  await page.getByTestId("trail-giveup").waitFor({ timeout: 20000 });
+  await page.getByTestId("trail-giveup").click();
   await page.getByTestId("game-done").waitFor({ timeout: 15000 });
   await page.waitForTimeout(400);
   await shot("14-game-result");

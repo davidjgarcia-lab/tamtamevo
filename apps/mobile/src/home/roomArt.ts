@@ -105,7 +105,7 @@ const hr = (n: number) => {
 };
 
 // ── Landscapes for the paintings ──────────────────────────────────────────────
-function drawLandscape(c: SkCanvas, kind: string, x: number, y: number, w: number, h: number) {
+export function drawLandscape(c: SkCanvas, kind: string, x: number, y: number, w: number, h: number) {
   const sky = (a: string, b: string) => c.drawRect(Skia.XYWHRect(x, y, w, h), grad(0, y, 0, y + h, [a, b]));
   const hill = (pts: string, col: string, a = 1) => c.drawPath(P(pts), paint(col, a));
   const X = (u: number) => x + w * u, Y = (v: number) => y + h * v;
