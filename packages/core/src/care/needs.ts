@@ -249,10 +249,10 @@ export function feed(s: CareState, food: FoodDef, family: string, now: number, c
   return disliked ? "dislike" : fav ? "eat_favorite" : "eat";
 }
 
-export function bathe(s: CareState, now: number, cfg: CareConfig = DEFAULT_CARE_CONFIG): CareReaction {
+export function bathe(s: CareState, now: number, cfg: CareConfig = DEFAULT_CARE_CONFIG, gain = 60): CareReaction {
   advanceCare(s, now, cfg);
   if (s.asleep) return "already_asleep";
-  s.needs.hygiene = clamp(s.needs.hygiene + 60, 0, 100);
+  s.needs.hygiene = clamp(s.needs.hygiene + gain, 0, 100);
   bumpStage(s, "baths");
   s.needs.happiness = clamp(s.needs.happiness + 4, 0, 100);
   touch(s, now, 3);

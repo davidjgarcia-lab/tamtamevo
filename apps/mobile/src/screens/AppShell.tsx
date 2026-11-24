@@ -1,4 +1,5 @@
-import { buy, PurchaseError, setFinish, type CatalogItem } from "@tamtam/core";
+import { buy, LEVEL_FEATURES, peekLife, PurchaseError, setFinish, SLICE_CATALOG, xpForLevel, type CatalogItem } from "@tamtam/core";
+import { useEffect } from "react";
 import { useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -48,6 +49,27 @@ export function AppShell() {
     toastTimer.current = setTimeout(() => setToastText(null), 2200);
   };
   const t = state.tamtam;
+  // Coins gained float up; caretaker level-ups show what got unlocked.
+  const coinsNow = state.economy.wallet.balances.tamcoin;
+  const lvl = state.economy.caretakerLevel;
+  const prev = useRef({ coins: coinsNow, lvl, profile: game.profile });
+  const [gain, setGain] = useState<{ n: number; k: number } | null>(null);
+  const [levelUp, setLevelUp] = useState<number | null>(null);
+  useEffect(() => {
+    const p = prev.current;
+    if (p.profile === game.profile) {
+      if (coinsNow > p.coins) setGain({ n: coinsNow - p.coins, k: Date.now() });
+      if (lvl > p.lvl) setLevelUp(lvl);
+    }
+    prev.current = { coins: coinsNow, lvl, profile: game.profile };
+  }, [coinsNow, lvl, game.profile]);
+  useEffect(() => {
+    if (!gain) return;
+    const tm = setTimeout(() => setGain(null), 1400);
+    return () => clearTimeout(tm);
+  }, [gain]);
+  const L = peekLife(state);
+  const xpPct = Math.min(100, (L.xp / xpForLevel(lvl)) * 100);
 
   const onBuy = (item: CatalogItem) => {
     try {
@@ -67,12 +89,20 @@ export function AppShell() {
       <View style={s.top}>
         <Pressable style={s.ribbon} onPress={() => t && setSheet("profile")} accessibilityRole="button" accessibilityLabel={t ? `Ficha de ${t.name}` : "Huevo"} testID="profile">
           <Text style={s.name} numberOfLines={1}>{t ? t.name : state.phase === "naming" ? "¡Ha nacido!" : "Tu primer huevo"}</Text>
-          <Text style={s.sub}>{t ? `${t.formName ?? "Chispín"} · ${STAGE[t.stage]} · Nv ${t.level}` : "Brasálido · en casa"}</Text>
+          <Text style={s.sub}>{t ? `${t.formName ?? "Chispín"} · ${STAGE[t.stage]} · Cuidador nv ${lvl}` : "Brasálido · en casa"}</Text>
+          <View style={s.xpTrack} accessibilityLabel={`Nivel de cuidador ${lvl}`}>
+            <View style={[s.xpFill, { width: `${xpPct}%` }]} />
+          </View>
         </Pressable>
         <Pressable style={s.wallet} onPress={() => setSheet("history")} accessibilityRole="button" accessibilityLabel={`${state.economy.wallet.balances.tamcoin} Tamcoins, ver historial`}>
           <Coin />
           <Text style={s.coins}>{state.economy.wallet.balances.tamcoin}</Text>
         </Pressable>
+        {gain && (
+          <Text key={gain.k} style={s.gain} pointerEvents="none">
+            +{gain.n}
+          </Text>
+        )}
         <Btn label="DEV" small tone="dark" onPress={() => setSheet("debug")} testID="dev" />
       </View>
 
@@ -132,6 +162,18 @@ export function AppShell() {
       {ritual && <EvolutionRitual force={ritual.force} onClose={() => setRitual(null)} />}
       {lab && <LustreLab alleleId={state.alleleId} onClose={() => setLab(false)} />}
       {games && <MinigameHub onClose={() => setGames(false)} />}
+      {levelUp && (
+        <View style={s.lvBack}>
+          <View style={s.lvCard}>
+            <Text style={s.lvKicker}>¡Subes de nivel como cuidador!</Text>
+            <Text style={s.lvBig}>Nivel {levelUp}</Text>
+            {[...LEVEL_FEATURES.filter((f) => f.level === levelUp).map((f) => f.label), ...[...SLICE_CATALOG.values()].filter((i) => i.level === levelUp && i.price.amount > 0).map((i) => i.name.es)].map((x) => (
+              <Text key={x} style={s.lvItem}>Nuevo: {x}</Text>
+            ))}
+            <Btn label="¡Genial!" tone="coral" onPress={() => setLevelUp(null)} testID="levelup-ok" />
+          </View>
+        </View>
+      )}
       <Toast text={toastText} />
     </SafeAreaView>
   );
@@ -146,6 +188,14 @@ const s = StyleSheet.create({
   sub: { fontFamily: fonts.body, fontSize: 11, color: "#E6DCFF", marginTop: -3 },
   wallet: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: brand.panel, borderRadius: 18, borderWidth: 1.5, borderBottomWidth: 4, borderColor: brand.line, paddingHorizontal: 12, height: 48 },
   coins: { fontFamily: fonts.displayBold, fontSize: 18, color: brand.cloud, fontVariant: ["tabular-nums"] },
+  xpTrack: { height: 4, borderRadius: 2, backgroundColor: "rgba(23,19,43,0.45)", marginTop: 2, marginBottom: 3, overflow: "hidden" },
+  xpFill: { height: 4, borderRadius: 2, backgroundColor: brand.gold },
+  gain: { position: "absolute", right: 70, top: 48, fontFamily: fonts.displayBold, fontSize: 20, color: brand.gold, textShadowColor: "#000", textShadowRadius: 4 },
+  lvBack: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(10,7,24,0.7)", alignItems: "center", justifyContent: "center" },
+  lvCard: { backgroundColor: brand.panel, borderRadius: 24, padding: 22, gap: 8, minWidth: 270, alignItems: "center", borderWidth: 2, borderColor: brand.gold },
+  lvKicker: { fontFamily: fonts.bodyBold, fontSize: 14, color: brand.gold },
+  lvBig: { fontFamily: fonts.displayBold, fontSize: 40, color: brand.cloud, lineHeight: 48 },
+  lvItem: { fontFamily: fonts.bodyBold, fontSize: 14, color: brand.mint },
   tabs: { flexDirection: "row", backgroundColor: brand.panel, borderTopWidth: 1, borderColor: brand.line, paddingTop: 6, paddingBottom: 4 },
   tab: { flex: 1, alignItems: "center", gap: 2, minHeight: 52 },
   tabIcon: { width: 44, height: 32, borderRadius: 12, alignItems: "center", justifyContent: "center" },

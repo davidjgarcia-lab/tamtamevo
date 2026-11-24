@@ -19,3 +19,4 @@ export * from "./game/activities";
 export * from "./genetics/families";
 export * from "./genetics/genome";
 export * from "./genetics/evolve";
+export * from "./game/life";

@@ -93,6 +93,10 @@ export const FLOOR_FINISHES: CatalogItem[] = [
   finish("floor_rings", "Anillos de árbol", "Tree rings", 210, "rare", "Rodajas de tronco con sus anillos."),
 ];
 
+/** Caretaker level needed to buy each item (unlock progression, PLAN_MEJORAS A2). */
+export const ITEM_LEVELS: Record<string, number> = {"furn_poster_stars": 3, "furn_poster_sea": 2, "furn_poster_mountains": 4, "furn_poster_aurora": 8, "furn_poster_waterfall": 5, "furn_poster_desert": 6, "furn_plant_fern": 2, "furn_brazier": 7, "wall_logs": 2, "wall_moss": 5, "wall_leaves": 3, "wall_treeheart": 9, "floor_moss": 3, "floor_stone": 5, "floor_rings": 8, "food_roast_skewer": 3};
+for (const it of [...FURNITURE, ...WALL_FINISHES, ...FLOOR_FINISHES, ...Object.values(FOODS).map((f) => f.item)]) it.level = ITEM_LEVELS[it.id] ?? 1;
+
 export const SLICE_CATALOG = validateCatalog([...FURNITURE, ...WALL_FINISHES, ...FLOOR_FINISHES, ...Object.values(FOODS).map((f) => f.item)]);
 
 /** Items granted at the start of the game (welcome pack). */

@@ -1,5 +1,5 @@
 import {
-  debugAttributeLevels, debugCoins, debugGrantAll, emptyStageLog, debugLevelUp, debugNewEgg, debugSetLifetimeCare, debugSetNeed, LUSTRE_NAMES, lustre, type NeedId,
+  debugAttributeLevels, debugCoins, debugGrantAll, emptyStageLog, debugProblem, addCaretakerXp, PROBLEMS, debugLevelUp, debugNewEgg, debugSetLifetimeCare, debugSetNeed, LUSTRE_NAMES, lustre, type NeedId,
 } from "@tamtam/core";
 import { fireColorAlleles } from "@tamtam/art";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -108,6 +108,14 @@ export function DebugPanel({ onClose, toast, onLustreLab, onEvolutionLab, onForc
         <Text style={d.h}>Objetos</Text>
         <View style={d.row}>
           <Btn small label="Desbloquear todo" onPress={() => { act((s) => debugGrantAll(s, now())); toast("Todos los objetos añadidos al inventario"); }} />
+        </View>
+
+        <Text style={d.h}>Vida del Tamtam</Text>
+        <View style={d.row}>
+          {(["thorn", "ash", "cold", "tangle"] as const).map((pid) => (
+            <Btn key={pid} small label={`Problema: ${PROBLEMS[pid].name}`} testID={`dbg-problem-${pid}`} onPress={() => { act((s) => debugProblem(s, pid, now())); toast(`Problema: ${PROBLEMS[pid].name}`); }} />
+          ))}
+          <Btn small label="+200 XP cuidador" testID="dbg-xp" onPress={() => act((s) => { addCaretakerXp(s, 200); })} />
         </View>
 
         <Text style={d.h}>Evolución genética</Text>

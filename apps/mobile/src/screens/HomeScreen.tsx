@@ -1,7 +1,7 @@
 import { BlurStyle, Canvas, createPicture, PaintStyle, Picture, Skia } from "@shopify/react-native-skia";
 import type { ChispinClipId } from "@tamtam/art";
 import {
-  buy, careAction, checkPlacement, readyToEvolve, setFinish, cleanPoop, cloneData, eggProgress, feedFood, FOODS, hatch, lustre, mirror, mood, move, napCooldownLeft, place, PlacementRejected, poopSpot,
+  buy, careAction, checkPlacement, readyToEvolve, setFinish, mopPoop, finishBath, peekLife, solveProblem, speechFor, quantity, cloneData, eggProgress, feedFood, FOODS, hatch, lustre, mirror, mood, move, napCooldownLeft, place, PlacementRejected, poopSpot, PROBLEMS,
   SLICE_CATALOG, unplace, type CareKind, type CareReaction, type CatalogItem, type Placement,
 } from "@tamtam/core";
 import { transformPoint } from "@tamtam/rig";
@@ -10,7 +10,9 @@ import { Pressable, StyleSheet, Text, View, type GestureResponderEvent, type Lay
 import { Easing, useDerivedValue, useSharedValue, withTiming } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import { composeLook } from "../creature/look";
-import { drawDirt, drawEgg, drawFoam, drawMeal, drawMop, drawShower, drawTowel, foodPicture } from "../creature/props";
+import { drawCarried, drawDirt, drawEgg, drawFoam, drawMeal, drawMop, drawShower, drawSoap, drawTowel, drawTowelAt, foodPicture } from "../creature/props";
+import { FoodIcon } from "../ui/FoodIcon";
+import { ProblemPanel } from "./ProblemPanel";
 import { BONE, drawTamtam, STAGE_SCALE, useCreature } from "../creature/useCreature";
 import { newId, useGame } from "../game/GameProvider";
 import { buildRoomPicture, cellAt, drawFurniture, placementRect, roomGeom } from "../home/roomArt";
@@ -58,6 +60,9 @@ type Mode =
   | { kind: "mop" }
   | { kind: "gym" }
   | { kind: "study" }
+  | { kind: "bath"; step: 0 | 1 | 2 }
+  | { kind: "feed"; food: string | null }
+  | { kind: "problem" }
   | { kind: "decor"; selectedUid: string | null; pendingItem: string | null }
   | { kind: "preview"; item: CatalogItem; x: number; y: number; mirrored: boolean };
 
@@ -72,6 +77,14 @@ interface Fx {
   mop: boolean;
   mx: number;
   my: number;
+  /** Bath: -1 none, 0 soap, 1 shower, 2 towel. */
+  bathStep: number;
+  foam: number;
+  tx: number;
+  ty: number;
+  toolOn: boolean;
+  /** Food carried by the finger (index) or -1. */
+  carry: number;
 }
 
 export function HomeScreen({
@@ -95,7 +108,10 @@ export function HomeScreen({
   const posX = useSharedValue(0);
   const dir = useSharedValue(1);
   const vx = useSharedValue(0);
-  const fx = useSharedValue<Fx>({ egg: false, eggP: 0, crack: -1, hygiene: 100, food: -1, foodStart: 0, bath: -1, mop: false, mx: 0, my: 0 });
+  const fx = useSharedValue<Fx>({ egg: false, eggP: 0, crack: -1, hygiene: 100, food: -1, foodStart: 0, bath: -1, mop: false, mx: 0, my: 0, bathStep: -1, foam: 0, tx: 0, ty: 0, toolOn: false, carry: -1 });
+  const bathProg = useRef([0, 0, 0]);
+  const [bathView, setBathView] = useState([0, 0, 0]);
+  const [bubble, setBubble] = useState<{ text: string; x: number } | null>(null);
   const arrive = useRef<(() => void) | null>(null);
   const hatching = useRef(false);
 
@@ -146,6 +162,23 @@ export function HomeScreen({
       scheduleOnRN(onArrive);
     });
   };
+
+  // The Tamtam says what it needs now and then.
+  useEffect(() => {
+    if (!t || !g) return;
+    const id = setInterval(() => {
+      if (mode.kind !== "play" || state.care.asleep) return;
+      const sp = speechFor(state, now());
+      if (sp.mood === "happy" && Math.random() < 0.6) return;
+      setBubble({ text: sp.text, x: posX.value });
+    }, 18_000);
+    return () => clearInterval(id);
+  });
+  useEffect(() => {
+    if (!bubble) return;
+    const tm = setTimeout(() => setBubble(null), 4500);
+    return () => clearTimeout(tm);
+  }, [bubble]);
 
   // Wandering: when idle and happy enough, walk somewhere now and then.
   useEffect(() => {
@@ -290,6 +323,13 @@ export function HomeScreen({
         drawShower(c, at.x + 6 * scale * at.dir, Math.max(30, laneY - 170 * scale), laneY, scale, tt);
       } else if (f.bath >= 0 && tt - f.bath < 2.9) drawTowel(c, frame, BONE.head, at, tt);
       if (f.mop) drawMop(c, f.mx, f.my, scale * 1.3, tt);
+      if (f.bathStep >= 0) {
+        drawFoam(c, frame, BONE.body, BONE.head, at, tt, f.foam);
+        if (f.bathStep === 1) drawShower(c, at.x + 6 * scale * at.dir, Math.max(30, laneY - 170 * scale), laneY, scale, tt);
+        if (f.toolOn && f.bathStep === 0) drawSoap(c, f.tx, f.ty, scale * 1.1, tt);
+        if (f.toolOn && f.bathStep === 2) drawTowelAt(c, f.tx, f.ty, scale * 1.1, tt);
+      }
+      if (f.carry >= 0) drawCarried(c, FOOD_PICS[f.carry]!, f.tx, f.ty, scale, tt);
     }, Skia.XYWHRect(0, 0, W, H));
   }, [W, H, laneY, scale, eggX, res]);
 
@@ -306,6 +346,8 @@ export function HomeScreen({
     const p = local(e);
     Object.assign(gesture.current, { sx: p.x, sy: p.y, lx: p.x, ly: p.y, moved: 0, stroke: 0 });
     if (mode.kind === "mop") fx.value = { ...fx.value, mop: true, mx: p.x, my: p.y };
+    if (mode.kind === "bath") fx.value = { ...fx.value, toolOn: true, tx: p.x, ty: p.y };
+    if (mode.kind === "feed" && mode.food) fx.value = { ...fx.value, carry: FOOD_IDS.indexOf(mode.food), tx: p.x, ty: p.y };
   };
   const onMove = (e: GestureResponderEvent) => {
     const p = local(e);
@@ -314,6 +356,29 @@ export function HomeScreen({
     gs.moved += d;
     gs.lx = p.x;
     gs.ly = p.y;
+    if (mode.kind === "feed") {
+      fx.value = { ...fx.value, tx: p.x, ty: p.y };
+      return;
+    }
+    if (mode.kind === "bath") {
+      fx.value = { ...fx.value, toolOn: true, tx: p.x, ty: p.y };
+      if (!overCreature(p.x, p.y)) return;
+      const st = mode.step;
+      const pr = bathProg.current;
+      pr[st] = Math.min(1, pr[st]! + d / 700);
+      const foam = st === 0 ? pr[0]! : st === 1 ? pr[0]! * (1 - pr[1]!) : 0;
+      fx.value = { ...fx.value, foam };
+      if (Math.random() < 0.15) setBathView([...pr]);
+      if (pr[st]! >= 1) {
+        setBathView([...pr]);
+        if (st < 2) {
+          setMode({ kind: "bath", step: (st + 1) as 1 | 2 });
+          fx.value = { ...fx.value, bathStep: st + 1, toolOn: false };
+          toast(st === 0 ? "¡Qué espuma! Ahora aclara bajo la ducha" : "¡Aclarado! Sécalo con la toalla");
+        } else endBath();
+      }
+      return;
+    }
     if (mode.kind === "mop" && g) {
       fx.value = { ...fx.value, mop: true, mx: p.x, my: p.y };
       for (const ts of state.care.poops) {
@@ -323,7 +388,7 @@ export function HomeScreen({
         gs.scrub.set(ts, v);
         if (v > 120) {
           gs.scrub.delete(ts);
-          act((s) => cleanPoop(s.care, ts, now()));
+          act((s) => mopPoop(s, ts, now()));
           toast(state.care.poops.length <= 1 ? "¡Suelo reluciente!" : "¡Una menos!");
         }
       }
@@ -343,6 +408,29 @@ export function HomeScreen({
   const onRelease = () => {
     const gs = gesture.current;
     if (mode.kind === "mop") return;
+    if (mode.kind === "bath") {
+      fx.value = { ...fx.value, toolOn: false };
+      return;
+    }
+    if (mode.kind === "feed") {
+      const f = fx.value;
+      fx.value = { ...fx.value, carry: -1 };
+      if (!mode.food || f.carry < 0) return;
+      // Mouth: in front of the head, about 70 % of the body height.
+      const mouthX = posX.value + dir.value * 62 * scale, mouthY = laneY - 62 * scale;
+      const nearMouth = Math.hypot(f.tx - mouthX, f.ty - mouthY) < 95 * scale + 24;
+      const onHead = overCreature(f.tx, f.ty) && f.ty < laneY - 45 * scale && (f.tx - posX.value) * dir.value > 0;
+      if (!nearMouth && !onHead) return toast("Acércalo a su boca");
+      const id = mode.food;
+      const r = act((s) => feedFood(s, id, now()));
+      react(r, { food: id });
+      if (r === "refuse_full") {
+        dir.value = -dir.value;
+        setTimeout(() => (dir.value = -dir.value), 900);
+      }
+      if (quantity(state.economy.inventory, id) <= 1) setMode({ kind: "feed", food: null });
+      return;
+    }
     if (gs.moved < 12) handleTap(gs.sx, gs.sy);
   };
 
@@ -363,7 +451,10 @@ export function HomeScreen({
     }
     if (!t) return;
     if (mode.kind === "play") {
-      if (overCreature(x, y)) return toast(state.care.asleep ? "Shhh… está durmiendo." : "Desliza el dedo sobre él para darle mimos.");
+      if (overCreature(x, y)) {
+        if (state.care.asleep) return toast("Shhh… está durmiendo.");
+        return setBubble({ text: speechFor(state, now()).text, x: posX.value });
+      }
       const hit = (id: string) => {
         const p = state.room.placements.find((q) => q.itemId === id);
         if (!p) return false;
@@ -431,6 +522,26 @@ export function HomeScreen({
     setMode({ kind: "play" });
   };
 
+  const startBath = () => {
+    if (state.care.asleep) return toast("Está dormido. Despiértalo primero.");
+    bathProg.current = [0, 0, 0];
+    setBathView([0, 0, 0]);
+    fx.value = { ...fx.value, bathStep: 0, foam: 0, toolOn: false };
+    setMode({ kind: "bath", step: 0 });
+    setActivityClip(null);
+  };
+  function endBath() {
+    const pr = bathProg.current;
+    const q = (pr[0]! + pr[1]! + pr[2]!) / 3;
+    fx.value = { ...fx.value, bathStep: -1, foam: 0, toolOn: false };
+    setMode({ kind: "play" });
+    const r = act((s) => finishBath(s, q, now()));
+    if (r.reaction !== "bathe") return react(r.reaction);
+    setReaction("celebrate");
+    setTimeout(() => setReaction(null), 1500);
+    toast(q > 0.95 ? `¡Reluciente! +${r.pay?.coins ?? 0} Tamcoins` : q > 0.5 ? "Limpio, pero podía quedar mejor" : "Un baño rapidito…");
+  }
+
   const startMop = () => {
     if (state.care.poops.length === 0) return toast("No hay nada que limpiar. ¡Todo reluce!");
     gesture.current.scrub.clear();
@@ -474,6 +585,8 @@ export function HomeScreen({
     ["Cariño", needs.affection, brand.pink], ["Energía", needs.energy, brand.violet], ["Actividad", needs.activity, brand.mint],
   ];
   const napLeft = napCooldownLeft(state.care, now());
+  const problem = t ? peekLife(state).problem : null;
+  const problemMin = problem ? Math.max(0, Math.ceil((problem.until - now()) / 60_000)) : 0;
 
   return (
     <View style={h.root}>
@@ -509,6 +622,12 @@ export function HomeScreen({
           </Canvas>
         )}
         {mode.kind === "mop" && <Text style={h.stageHint} pointerEvents="none">Frota con la fregona sobre la suciedad</Text>}
+        {mode.kind === "feed" && <Text style={h.stageHint} pointerEvents="none">{mode.food ? "Arrastra la comida hasta su boca" : "Elige una comida abajo"}</Text>}
+        {bubble && g && mode.kind === "play" && (
+          <View style={[h.bubble, { left: Math.max(8, Math.min(g.w - 208, bubble.x - 100)), top: Math.max(8, laneY - 150 * scale - 40) }]} pointerEvents="none" testID="speech">
+            <Text style={h.bubbleText}>{bubble.text}</Text>
+          </View>
+        )}
         {state.phase === "egg" && (
           <View style={h.eggHint} pointerEvents="none">
             <View style={h.track}>
@@ -521,6 +640,54 @@ export function HomeScreen({
 
       {state.phase === "naming" && <NamingPanel />}
 
+      {t && mode.kind === "play" && problem && (
+        <Pressable onPress={() => setMode({ kind: "problem" })} style={({ pressed }) => [h.problem, pressed && { opacity: 0.8 }]} accessibilityRole="button" testID="problem">
+          <Text style={h.problemText}>¡Ayuda! {PROBLEMS[problem.id].name} · {problemMin} min</Text>
+        </Pressable>
+      )}
+      {mode.kind === "problem" && problem && (
+        <ProblemPanel
+          id={problem.id}
+          minutesLeft={problemMin}
+          onClose={() => setMode({ kind: "play" })}
+          onSolved={(q) => {
+            const r = act((s) => solveProblem(s, now(), q));
+            setMode({ kind: "play" });
+            setReaction("celebrate");
+            setTimeout(() => setReaction(null), 1500);
+            toast(`¡Solucionado! +${r.coins} Tamcoins · +${r.xp} XP`);
+          }}
+        />
+      )}
+      {mode.kind === "bath" && (
+        <View style={h.panel}>
+          <Text style={h.panelTitle}>
+            {mode.step === 0 ? "1 · Enjabona: frota con la pastilla sobre el Tamtam" : mode.step === 1 ? "2 · Aclara: frota bajo la ducha" : "3 · Sécalo con la toalla"}
+          </Text>
+          <View style={h.row}>
+            {[0, 1, 2].map((i) => (
+              <View key={i} style={h.bathTrack}>
+                <View style={[h.bathFill, { width: `${Math.round((bathView[i] ?? 0) * 100)}%` }]} />
+              </View>
+            ))}
+          </View>
+          <Btn small label="Terminar baño" tone="coral" onPress={endBath} testID="bath-done" />
+        </View>
+      )}
+      {mode.kind === "feed" && (
+        <View style={h.panel}>
+          <View style={h.row}>
+            {FOOD_IDS.filter((id) => quantity(state.economy.inventory, id) > 0).map((id) => (
+              <Pressable key={id} onPress={() => setMode({ kind: "feed", food: id })} style={[h.foodBtn, mode.food === id && h.foodOn]} accessibilityRole="button" accessibilityLabel={FOODS[id]!.item.name.es} testID={`feed-${id}`}>
+                <FoodIcon id={id} size={40} />
+                <Text style={h.foodQty}>×{quantity(state.economy.inventory, id)}</Text>
+              </Pressable>
+            ))}
+            {FOOD_IDS.every((id) => quantity(state.economy.inventory, id) === 0) && <Text style={h.panelTitle}>No queda comida: cómprala en la Tienda.</Text>}
+          </View>
+          <Btn small label="Cerrar" onPress={() => setMode({ kind: "play" })} testID="feed-close" />
+        </View>
+      )}
       {t && mode.kind === "play" && readyToEvolve(state) && (
         <Pressable onPress={onEvolve} style={({ pressed }) => [h.evolve, pressed && { opacity: 0.8 }]} accessibilityRole="button" accessibilityLabel="Evolucionar" testID="evolve">
           <Text style={h.evolveText}>✦ ¡{t.name} está listo para evolucionar! ✦</Text>
@@ -529,8 +696,8 @@ export function HomeScreen({
       {t && mode.kind === "play" && (
         <View style={h.panel}>
           <View style={h.row}>
-            <IconAction icon="food" label="Comer" color={brand.orange} onPress={() => setFood(true)} testID="care-feed" />
-            <IconAction icon="shower" label="Bañar" color={brand.cyan} onPress={() => doCare("bathe")} testID="care-bathe" />
+            <IconAction icon="food" label="Comer" color={brand.orange} onPress={() => (state.care.asleep ? toast("Está dormido.") : setMode({ kind: "feed", food: null }))} testID="care-feed" />
+            <IconAction icon="shower" label="Bañar" color={brand.cyan} onPress={startBath} testID="care-bathe" />
             <IconAction icon="mop" label="Limpiar" color={brand.mint} onPress={startMop} badge={state.care.poops.length || undefined} testID="care-clean" />
             <IconAction icon="play" label="Jugar" color={brand.gold} onPress={() => (state.care.asleep ? toast("Está dormido. Despiértalo primero.") : onOpenGames())} testID="care-play" />
             <IconAction icon="nap" label={napLeft > 0 ? `${napLeft}m` : "Siesta"} color={brand.violet} disabled={state.care.asleep || napLeft > 0} onPress={() => doCare("nap")} testID="care-nap" />
@@ -622,6 +789,15 @@ const h = StyleSheet.create({
   stageHint2: { color: brand.cloud, fontFamily: fonts.bodyBold, fontSize: 14, textAlign: "center", textShadowColor: "#000", textShadowRadius: 4 },
   track: { height: 10, alignSelf: "stretch", borderRadius: 5, backgroundColor: "rgba(23,19,43,0.7)", overflow: "hidden" },
   fill: { height: 10, backgroundColor: brand.cyan, borderRadius: 5 },
+  problem: { marginHorizontal: 12, marginBottom: 6, borderRadius: 16, paddingVertical: 10, backgroundColor: "#5A1E3A", borderWidth: 2, borderColor: brand.pink, alignItems: "center" },
+  problemText: { fontFamily: fonts.displayBold, fontSize: 15, color: brand.cloud },
+  bubble: { position: "absolute", width: 200, backgroundColor: brand.cloud, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 2, borderColor: brand.violet },
+  bubbleText: { fontFamily: fonts.bodyBold, fontSize: 13, color: brand.core, textAlign: "center" },
+  bathTrack: { flex: 1, height: 10, borderRadius: 5, backgroundColor: brand.panel, overflow: "hidden" },
+  bathFill: { height: 10, borderRadius: 5, backgroundColor: brand.cyan },
+  foodBtn: { width: 62, height: 66, borderRadius: 14, backgroundColor: brand.panelHi, borderWidth: 2, borderColor: brand.line, alignItems: "center", justifyContent: "center" },
+  foodOn: { borderColor: brand.cyan },
+  foodQty: { fontFamily: fonts.bodyBold, fontSize: 11, color: brand.cloud },
   evolve: { marginHorizontal: 12, marginBottom: 6, borderRadius: 16, paddingVertical: 10, backgroundColor: brand.violet, borderWidth: 2, borderColor: brand.cyan, alignItems: "center" },
   evolveText: { fontFamily: fonts.displayBold, fontSize: 16, color: brand.cloud },
   panel: { paddingHorizontal: 12, paddingBottom: 6, gap: 6 },

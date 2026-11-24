@@ -276,8 +276,9 @@ export function drawTowel(c: SkCanvas, frame: Frame, headBone: number, at: { x: 
 }
 
 /** Soap foam on the body while showering. */
-export function drawFoam(c: SkCanvas, frame: Frame, bodyBone: number, headBone: number, at: { x: number; y: number; scale: number; dir: number }, t: number) {
+export function drawFoam(c: SkCanvas, frame: Frame, bodyBone: number, headBone: number, at: { x: number; y: number; scale: number; dir: number }, t: number, amount = 1) {
   "worklet";
+  if (amount <= 0.02) return;
   const foam = Skia.Paint();
   foam.setAntiAlias(true);
   foam.setColor(Skia.Color("#FFFFFF"));
@@ -286,8 +287,9 @@ export function drawFoam(c: SkCanvas, frame: Frame, bodyBone: number, headBone: 
   rim.setStyle(1);
   rim.setStrokeWidth(1.2 * at.scale);
   rim.setColor(Skia.Color("#9FDDF0"));
-  const spots: [number, number, number, number][] = [[-18, -14, 6, 0], [-6, -18, 7, 1], [8, -16, 6, 0], [20, -12, 5, 0], [-28, -8, 5, 0], [2, -20, 5, 1]];
-  for (let i = 0; i < spots.length; i++) {
+  const spots: [number, number, number, number][] = [[-18, -14, 6, 0], [-6, -18, 7, 1], [8, -16, 6, 0], [20, -12, 5, 0], [-28, -8, 5, 0], [2, -20, 5, 1], [-10, -4, 6, 0], [14, -4, 5, 0], [-34, -14, 4, 0], [10, -24, 5, 1], [26, -20, 4, 0], [-2, -10, 7, 0]];
+  const n = Math.max(1, Math.round(spots.length * Math.min(1, amount)));
+  for (let i = 0; i < n; i++) {
     const [bx, by, r, onHead] = spots[i]!;
     const [wx, wy] = transformPoint(frame.world, onHead ? headBone : bodyBone, onHead ? bx * 0.5 : bx, onHead ? by + 6 : by);
     const rr = r * at.scale * (0.9 + 0.12 * Math.sin(t * 5 + i));
@@ -369,3 +371,71 @@ export function drawMop(c: SkCanvas, x: number, y: number, s: number, t: number)
 }
 
 export const PROPS_CLIP = ClipOp.Intersect;
+
+/** Soap bar following the finger during the bath. */
+export function drawSoap(c: SkCanvas, x: number, y: number, s: number, t: number) {
+  "worklet";
+  c.save();
+  c.translate(x, y);
+  c.rotate(-15 + Math.sin(t * 9) * 8, 0, 0);
+  const body = Skia.Paint();
+  body.setAntiAlias(true);
+  body.setColor(Skia.Color("#FF9CC8"));
+  c.drawRRect(Skia.RRectXY(Skia.XYWHRect(-18 * s, -11 * s, 36 * s, 22 * s), 9 * s, 9 * s), body);
+  const hl = Skia.Paint();
+  hl.setAntiAlias(true);
+  hl.setColor(Skia.Color("#FFFFFF"));
+  hl.setAlphaf(0.6);
+  c.drawRRect(Skia.RRectXY(Skia.XYWHRect(-12 * s, -8 * s, 18 * s, 6 * s), 3 * s, 3 * s), hl);
+  const ink = Skia.Paint();
+  ink.setAntiAlias(true);
+  ink.setStyle(1);
+  ink.setStrokeWidth(2 * s);
+  ink.setColor(Skia.Color("#2A1A3E"));
+  c.drawRRect(Skia.RRectXY(Skia.XYWHRect(-18 * s, -11 * s, 36 * s, 22 * s), 9 * s, 9 * s), ink);
+  const b = Skia.Paint();
+  b.setAntiAlias(true);
+  b.setColor(Skia.Color("#E8F8FF"));
+  for (let i = 0; i < 4; i++) {
+    const ph = (t * 1.5 + i * 0.25) % 1;
+    b.setAlphaf(0.8 * (1 - ph));
+    c.drawCircle((i - 1.5) * 9 * s, -14 * s - ph * 26 * s, (3 + i % 2) * s, b);
+  }
+  c.restore();
+}
+
+/** Towel held at the finger (drying step). */
+export function drawTowelAt(c: SkCanvas, x: number, y: number, s: number, t: number) {
+  "worklet";
+  const cx = x + Math.sin(t * 12) * 3 * s;
+  const path = Skia.Path.MakeFromSVGString(
+    `M ${cx - 30 * s} ${y - 16 * s} C ${cx - 10 * s} ${y - 24 * s} ${cx + 12 * s} ${y - 8 * s} ${cx + 30 * s} ${y - 16 * s} L ${cx + 26 * s} ${y + 20 * s} C ${cx + 8 * s} ${y + 12 * s} ${cx - 12 * s} ${y + 28 * s} ${cx - 28 * s} ${y + 20 * s} Z`,
+  )!;
+  const fill = Skia.Paint();
+  fill.setAntiAlias(true);
+  fill.setColor(Skia.Color("#7FD6FF"));
+  c.drawPath(path, fill);
+  const st = Skia.Paint();
+  st.setAntiAlias(true);
+  st.setStyle(1);
+  st.setStrokeWidth(3 * s);
+  st.setColor(Skia.Color("#FFFFFF"));
+  st.setAlphaf(0.85);
+  c.drawLine(cx - 22 * s, y + 8 * s, cx + 22 * s, y - 2 * s, st);
+  const ink = Skia.Paint();
+  ink.setAntiAlias(true);
+  ink.setStyle(1);
+  ink.setStrokeWidth(2 * s);
+  ink.setColor(Skia.Color("#2A1A3E"));
+  c.drawPath(path, ink);
+}
+
+/** Food carried by the finger while feeding. */
+export function drawCarried(c: SkCanvas, pic: SkPicture, x: number, y: number, s: number, t: number) {
+  "worklet";
+  c.save();
+  c.translate(x, y - 10 * s + Math.sin(t * 6) * 2 * s);
+  c.scale(s * 1.4, s * 1.4);
+  c.drawPicture(pic);
+  c.restore();
+}

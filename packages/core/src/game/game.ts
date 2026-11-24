@@ -1,5 +1,5 @@
 import {
-  bumpStage,
+  bumpStage, cleanPoop as cleanPoopCare,
   advanceCare, bathe, clean, feed, goToSleep, nap, newCareState, pet, play, spendForActivity, wakeUp,
   DEFAULT_CARE_CONFIG, type CareConfig, type CareReaction, type CareState, type NeedId,
 } from "../care/needs";
@@ -13,6 +13,7 @@ import { purchase, type PlayerEconomyState } from "../shop/shop";
 import { FOODS, GYM, SLICE_CATALOG, STARTER_COINS, STARTER_ITEMS } from "./content";
 import { newArenaState, type ArenaState } from "./arena";
 import { FORM_QUALITY, formQuality, lustre } from "../appearance/appearance";
+import { payCare, tickLife } from "./life";
 
 /**
  * Game state and actions of the first-Tamtam vertical slice.
@@ -128,7 +129,10 @@ export function rename(s: GameState, requested: string, now: number): void {
 }
 
 export function tick(s: GameState, now: number, cfg: CareConfig = DEFAULT_CARE_CONFIG): void {
-  if (s.phase === "home") advanceCare(s.care, now, cfg);
+  if (s.phase === "home") {
+    advanceCare(s.care, now, cfg);
+    tickLife(s, now);
+  }
 }
 
 export type CareKind = "bathe" | "clean" | "pet" | "play" | "sleep" | "wake" | "nap";
@@ -138,7 +142,11 @@ export function careAction(s: GameState, kind: CareKind, now: number): CareReact
   switch (kind) {
     case "bathe": return bathe(s.care, now);
     case "clean": return clean(s.care, now);
-    case "pet": return pet(s.care, now);
+    case "pet": {
+      const r = pet(s.care, now);
+      if (r === "pet") payCare(s, "pet", now);
+      return r;
+    }
     case "play": return play(s.care, now);
     case "sleep": s.lightsOn = false; return goToSleep(s.care, now);
     case "wake": s.lightsOn = true; return wakeUp(s.care, now);
@@ -155,6 +163,7 @@ export function feedFood(s: GameState, foodId: string, now: number): CareReactio
   const r = feed(s.care, food, s.tamtam.speciesId, now);
   if (r === "refuse_full" || r === "already_asleep") return r;
   removeItem(s.economy.inventory, foodId, 1);
+  payCare(s, "feed", now);
   if (food.buff && !s.buffs.includes(food.buff)) s.buffs.push(food.buff);
   return r;
 }
@@ -195,6 +204,7 @@ export function completeGymSession(s: GameState, input: { runId: string; quality
   const up = addAttributeXp(s.tamtam, "str", r.xp);
   s.tamtam = up.tamtam;
   s.gym.sessions += 1;
+  payCare(s, "gym", input.now);
   bumpStage(s.care, "gym");
   const point = s.gym.sessions % GYM.sessionsPerStrPoint === 0;
   if (point) s.gym.strTrainingPoints += 1;
@@ -319,4 +329,12 @@ export function setFinish(s: GameState, slot: "wall" | "floor", itemId: string):
   if (!item || item.category !== "surfaces" || !itemId.startsWith(slot === "wall" ? "wall_" : "floor_")) throw new GameRuleError("not_a_finish");
   if (quantity(s.economy.inventory, itemId) < 1) throw new GameRuleError("not_owned");
   s.room.finishes = slot === "wall" ? { ...s.room.finishes, wallpaper: itemId } : { ...s.room.finishes, flooring: itemId };
+}
+
+/** Mops one poop up (pays a little). */
+export function mopPoop(s: GameState, ts: number, now: number): CareReaction {
+  const had = s.care.poops.includes(ts);
+  const r = cleanPoopCare(s.care, ts, now);
+  if (had) payCare(s, "poop", now);
+  return r;
 }

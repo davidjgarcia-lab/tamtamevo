@@ -8,6 +8,7 @@ import { FAMILIES } from "../genetics/families";
 import { genomeStats } from "../genetics/genome";
 import { canEvolve, evolveTamtam, type EvolutionRoll } from "../genetics/evolve";
 import { rankOf } from "./arena";
+import { payCare } from "./life";
 import { recordFight, simulateBattle, type Difficulty, type Fighter } from "./arena";
 
 /** Study (Academy · Cocina): memory session at the desk → Intelligence. */
@@ -26,6 +27,7 @@ export function completeStudySession(s: GameState, input: { runId: string; quali
   s.tamtam = up.tamtam;
   s.study.sessions += 1;
   bumpStage(s.care, "study");
+  payCare(s, "study", input.now);
   return { ok: true, coins: r.coins, xp: r.xp, levels: up.gained, duplicate: false };
 }
 
@@ -55,6 +57,7 @@ export function completeMinigame(s: GameState, input: { game: MinigameId; runId:
   s.care.lastInteractionAt = input.now;
   for (let i = 0; i < 4; i++) s.care.playLog.push(input.now);
   bumpStage(s.care, "games");
+  payCare(s, "play", input.now, quality);
   const rec = s.records[input.game] ?? { best: 0, plays: 0 };
   const newRecord = input.score > rec.best;
   s.records[input.game] = { best: Math.max(rec.best, input.score), plays: rec.plays + 1 };
@@ -96,6 +99,7 @@ export function fight(s: GameState, rival: Fighter, d: Difficulty, input: { figh
     s.buffs = s.buffs.filter((b) => b !== "str_5_next_fight");
     s.tamtam = addAttributeXp(s.tamtam, "str", 20).tamtam;
     bumpStage(s.care, "fights");
+    payCare(s, "fight", input.now);
     if (result.winner === 0) bumpStage(s.care, "wins");
   }
   return { me, result, ...rec };

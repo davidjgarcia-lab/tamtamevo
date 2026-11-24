@@ -230,6 +230,8 @@ describe("nest-house finishes", () => {
     expect(s.room.finishes.wallpaper).toBe("wall_woven");
     expect(() => setFinish(s, "wall", "wall_logs")).toThrow(/not_owned/);
     debugCoins(s, 1000, T0);
+    expect(() => buy(s, "wall_logs", "w0", T0)).toThrow();
+    s.economy.caretakerLevel = 2;
     buy(s, "wall_logs", "w1", T0);
     setFinish(s, "wall", "wall_logs");
     expect(s.room.finishes.wallpaper).toBe("wall_logs");
