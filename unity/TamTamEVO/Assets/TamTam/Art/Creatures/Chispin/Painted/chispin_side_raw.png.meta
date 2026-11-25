@@ -139,7 +139,7 @@ TextureImporter:
     physicsShape: []
     bones:
     - name: root
-      guid: e8727db1b2c44b94cae12428432670d0
+      guid: a16bd5dbad3b97f4b9b60536502c047f
       position: {x: 1372.6708, y: 210.84479, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
       length: 42.235962
@@ -148,7 +148,7 @@ TextureImporter:
         serializedVersion: 2
         rgba: 0
     - name: body
-      guid: 46297dfc40563f94aa717920ed154f5a
+      guid: a784a71916ee5844da278755b16d14c1
       position: {x: -253.41614, y: 374.84467, z: 0}
       rotation: {x: 0, y: 0, z: 0.04531449, w: 0.9989728}
       length: 466.51205
@@ -157,7 +157,7 @@ TextureImporter:
         serializedVersion: 2
         rgba: 0
     - name: tail1
-      guid: 8a189f0e92b4e414a82c4bc8a2d6184c
+      guid: 8ebe12449c79e3942a3f4228f647f6e7
       position: {x: -168.72826, y: 10.037705, z: 0}
       rotation: {x: 0, y: 0, z: 0.9989728, w: 0.0453146}
       length: 211.18018
@@ -166,7 +166,7 @@ TextureImporter:
         serializedVersion: 2
         rgba: 0
     - name: tail2
-      guid: 24dcb4c55fa084347830f68c115a84ef
+      guid: e2f13278283b41b4d95b8783cfb7a444
       position: {x: 211.18018, y: -0.000018461957, z: 0}
       rotation: {x: 0, y: 0, z: -0.20625502, w: 0.9784983}
       length: 196.19585
@@ -175,7 +175,7 @@ TextureImporter:
         serializedVersion: 2
         rgba: 0
     - name: tail3
-      guid: 352624a9b6ebfa2428f4a564f5f1012e
+      guid: 18310bc034e226b4d9edac4a9d5d138c
       position: {x: 196.19585, y: -0.000024627898, z: 0}
       rotation: {x: 0, y: 0, z: -0.3001257, w: 0.9538997}
       length: 172.93895
@@ -184,7 +184,7 @@ TextureImporter:
         serializedVersion: 2
         rgba: 0
     - name: tail4
-      guid: 718419cb05ebb27469c3a7f8dc125012
+      guid: 474355796bbeaff498684fa9596c5712
       position: {x: 172.93896, y: 0.0000028491304, z: 0}
       rotation: {x: 0, y: 0, z: -0.35958362, w: 0.93311286}
       length: 139.78226
@@ -193,7 +193,7 @@ TextureImporter:
         serializedVersion: 2
         rgba: 0
     - name: neck
-      guid: c7eaaa4e865738244b91b48a5279aa35
+      guid: a200745a2e56f50488286bb897315348
       position: {x: 511.4426, y: 27.72303, z: 0}
       rotation: {x: 0, y: 0, z: 0.53348476, w: 0.84580964}
       length: 304.01868
@@ -202,7 +202,7 @@ TextureImporter:
         serializedVersion: 2
         rgba: 0
     - name: head
-      guid: 8c53d2f88bc427046a65b3a5fbde58ca
+      guid: e1a6b05137e22fa4ca108744a4296b97
       position: {x: 323.8221, y: 7.334581, z: 0}
       rotation: {x: 0, y: 0, z: -0.5568682, w: 0.83060086}
       length: 454.3133
@@ -211,7 +211,7 @@ TextureImporter:
         serializedVersion: 2
         rgba: 0
     - name: jaw
-      guid: 429199585ca23e94bbc9a54faf2dc5f7
+      guid: 9b107dde132ebf240a657af1479d0c7f
       position: {x: 60.738697, y: -76.076836, z: 0}
       rotation: {x: 0, y: 0, z: -0.017433904, w: 0.999848}
       length: 337.88818
@@ -220,7 +220,7 @@ TextureImporter:
         serializedVersion: 2
         rgba: 0
     - name: crest1
-      guid: 2ceece3b37d31a640bb6a4869c0d951d
+      guid: a8b657cd55fed7f44a2f191f7a7dae0b
       position: {x: 67.36474, y: 113.86977, z: 0}
       rotation: {x: 0, y: 0, z: 0.7621718, w: 0.6473748}
       length: 215.36226
@@ -229,7 +229,7 @@ TextureImporter:
         serializedVersion: 2
         rgba: 0
     - name: crest2
-      guid: ea724da39b4e69846bdc62beab8cec10
+      guid: 240db4effc0847842bbbaa877056da25
       position: {x: 166.12843, y: 129.08875, z: 0}
       rotation: {x: 0, y: 0, z: 0.36777425, w: 0.92991513}
       length: 217.67952
@@ -238,7 +238,7 @@ TextureImporter:
         serializedVersion: 2
         rgba: 0
     - name: crest3
-      guid: 38912b045f109fb42ad33c32b370eab8
+      guid: d2fae55fe44a95544ba849c1680fb08a
       position: {x: 108.0243, y: 138.6153, z: 0}
       rotation: {x: 0, y: 0, z: 0.8153781, w: 0.57892877}
       length: 127.584946
@@ -247,7 +247,7 @@ TextureImporter:
         serializedVersion: 2
         rgba: 0
     - name: legFN
-      guid: fbea19081ef58fe47a96b60629cc5c03
+      guid: 4c8501e8f7dea054ab8334ab92b24c82
       position: {x: 381.43103, y: -119.49596, z: 0}
       rotation: {x: 0, y: 0, z: -0.6711315, w: 0.7413384}
       length: 279.5645
@@ -256,7 +256,7 @@ TextureImporter:
         serializedVersion: 2
         rgba: 0
     - name: legFF
-      guid: f0228f66a7644c143a966e6927374c1d
+      guid: 95e6dd22719f0514fa9a633e571dcdb9
       position: {x: 623.2907, y: -141.48323, z: 0}
       rotation: {x: 0, y: 0, z: -0.5368431, w: 0.84368205}
       length: 293.38083
@@ -265,7 +265,7 @@ TextureImporter:
         serializedVersion: 2
         rgba: 0
     - name: legBN
-      guid: 01a3a164d49e55247913a07feef8b208
+      guid: db3f05151c45b594c993d9773028f01d
       position: {x: -83.16923, y: -98.4646, z: 0}
       rotation: {x: 0, y: 0, z: -0.8125424, w: 0.5829021}
       length: 271.4712
@@ -274,7 +274,7 @@ TextureImporter:
         serializedVersion: 2
         rgba: 0
     - name: legBF
-      guid: 385c3688e47178948bb717431ca571b7
+      guid: 3be693a0bbb2f99479301a6a2dd346e1
       position: {x: 89.86095, y: -177.80994, z: 0}
       rotation: {x: 0, y: 0, z: -0.54344326, w: 0.8394459}
       length: 193.83755

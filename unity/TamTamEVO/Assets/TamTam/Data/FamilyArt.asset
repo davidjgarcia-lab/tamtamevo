@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: TamTam.Runtime::TamTam.Evolution.FamilyArt
   entries:
   - family: 3
+    stage: baby
+    sprite: {fileID: 21300000, guid: b1d5e8cfe6a41a5459a22dd2ead4e142, type: 3}
+  - family: 3
     stage: final
     sprite: {fileID: 21300000, guid: 9d5833f3752c8c541a1da4788f8359c3, type: 3}
   - family: 3
@@ -22,6 +25,9 @@ MonoBehaviour:
   - family: 3
     stage: intermediate
     sprite: {fileID: 21300000, guid: 1c9c9e9e8cdabcb4ab6458c9c4c3be91, type: 3}
+  - family: 2
+    stage: baby
+    sprite: {fileID: 21300000, guid: a153f22ef9ea5f94a8bd4383f19a5621, type: 3}
   - family: 2
     stage: final
     sprite: {fileID: 21300000, guid: 38061e94a45ccf84da25d5774c759479, type: 3}
@@ -32,6 +38,9 @@ MonoBehaviour:
     stage: intermediate
     sprite: {fileID: 21300000, guid: 044cff33cce2be74ab5804b55c41b55a, type: 3}
   - family: 0
+    stage: baby
+    sprite: {fileID: 21300000, guid: d88e349fd958e9944877bed8c471c7ce, type: 3}
+  - family: 0
     stage: final
     sprite: {fileID: 21300000, guid: f14a8d84b5e5de647adad996443228e9, type: 3}
   - family: 0
@@ -40,6 +49,9 @@ MonoBehaviour:
   - family: 0
     stage: intermediate
     sprite: {fileID: 21300000, guid: d27645fe7a89b7b4e93aed25f96852f4, type: 3}
+  - family: 7
+    stage: baby
+    sprite: {fileID: 21300000, guid: d4836adc9b8ede24985f71ba16d9b196, type: 3}
   - family: 7
     stage: final
     sprite: {fileID: 21300000, guid: 94e6f31750c77224e9c45ef470c6913e, type: 3}
@@ -50,6 +62,9 @@ MonoBehaviour:
     stage: intermediate
     sprite: {fileID: 21300000, guid: d8e4c3637c1fd84449daa4f695b30283, type: 3}
   - family: 9
+    stage: baby
+    sprite: {fileID: 21300000, guid: 7ef527caad637134bb5dff6c1fc47d4a, type: 3}
+  - family: 9
     stage: final
     sprite: {fileID: 21300000, guid: ed3c2c9e79c865440a8412b1c5f11d35, type: 3}
   - family: 9
@@ -58,6 +73,9 @@ MonoBehaviour:
   - family: 9
     stage: intermediate
     sprite: {fileID: 21300000, guid: 57569092c5b9d5f43aa155f5f9486257, type: 3}
+  - family: 1
+    stage: baby
+    sprite: {fileID: 21300000, guid: c4c0ff1bb8994d14b80ffeedf1d065a0, type: 3}
   - family: 1
     stage: final
     sprite: {fileID: 21300000, guid: 5d0e665b9b81b8b448ad8991e220d6f4, type: 3}
@@ -68,6 +86,12 @@ MonoBehaviour:
     stage: intermediate
     sprite: {fileID: 21300000, guid: 141a30c866c5d6848980a20c855dcbfa, type: 3}
   - family: 6
+    stage: baby
+    sprite: {fileID: 21300000, guid: e8717708051daa0478a97a915b9efb58, type: 3}
+  - family: 6
+    stage: baby2
+    sprite: {fileID: 21300000, guid: 516e73ec23f84294bb51890b03e3bb17, type: 3}
+  - family: 6
     stage: final
     sprite: {fileID: 21300000, guid: 7bb0f2ccad010934cbb71d5c92b10cad, type: 3}
   - family: 6
@@ -76,6 +100,9 @@ MonoBehaviour:
   - family: 6
     stage: intermediate
     sprite: {fileID: 21300000, guid: b5ad269910c648348a780886596cac55, type: 3}
+  - family: 8
+    stage: baby
+    sprite: {fileID: 21300000, guid: ddc8b985952a1cf47965577c7e9a7899, type: 3}
   - family: 8
     stage: final
     sprite: {fileID: 21300000, guid: f8051c542f9c2ca42b593b44142a4a7f, type: 3}
@@ -86,6 +113,9 @@ MonoBehaviour:
     stage: intermediate
     sprite: {fileID: 21300000, guid: a00f11e6502e62846a4c2788a8f50783, type: 3}
   - family: 4
+    stage: baby
+    sprite: {fileID: 21300000, guid: 23af7c58a314e3a4ea3aeacc06d8082f, type: 3}
+  - family: 4
     stage: final
     sprite: {fileID: 21300000, guid: 8586666e9a61e0b4a953d30866814648, type: 3}
   - family: 4
@@ -94,6 +124,9 @@ MonoBehaviour:
   - family: 4
     stage: intermediate
     sprite: {fileID: 21300000, guid: 3d33b401b9fe47b4bb454a711ed00dfd, type: 3}
+  - family: 5
+    stage: baby
+    sprite: {fileID: 21300000, guid: 913d2a4beef0f064db297f396d3b987e, type: 3}
   - family: 5
     stage: final
     sprite: {fileID: 21300000, guid: 830d15f2404ddc14ebd32511e0a26df4, type: 3}

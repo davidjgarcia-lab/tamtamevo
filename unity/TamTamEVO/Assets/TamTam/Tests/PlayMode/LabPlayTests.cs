@@ -38,6 +38,20 @@ namespace TamTam.Tests
             return t;
         }
 
+        /// Distance between the feet and the floor with the body in its neutral pose (idle hops are intended).
+        static float RestFeetGap(PaintedCreature pc)
+        {
+            var t = pc.body.transform; var (p, r, s) = (t.localPosition, t.localRotation, t.localScale);
+            t.localPosition = Vector3.zero; t.localRotation = Quaternion.identity; t.localScale = Vector3.one;
+            // The sprite pivot is the lowest opaque row (EditMode QaTests.Art_FeetSitOnThePivot); here we check that the
+            // pivot and the contact shadow land on the floor (bounds.min would include faint painted haze under the feet).
+            var gs = pc.GetComponent<GroundShadow>(); gs.Refresh();
+            var contact = pc.transform.Find("ContactShadow");
+            float gap = Mathf.Max(Mathf.Abs(t.position.y - pc.transform.position.y), Mathf.Abs(contact.position.y - pc.transform.position.y));
+            t.localPosition = p; t.localRotation = r; t.localScale = s;
+            return gap;
+        }
+
         [UnityTest]
         public IEnumerator EvolutionLab_EvolvesToAdultWithEveryCareStyle()
         {
@@ -77,7 +91,7 @@ namespace TamTam.Tests
                     Assert.NotNull(presenter.Current.GetComponent<GroundShadow>(), $"{name} step {c}: no contact shadow");
                     var pc = presenter.Current.GetComponent<PaintedCreature>();
                     if (pc && !pc.floating)
-                        Assert.That(Mathf.Abs(pc.body.bounds.min.y - presenter.transform.position.y), Is.LessThan(0.05f), $"{name} step {c}: feet not on the floor");
+                        Assert.That(RestFeetGap(pc), Is.LessThan(0.05f), $"{name} step {c}: feet not on the floor");
                     var shot = Grab(cam, W, H);
                     sheet.SetPixels(c * W, (rows - 1 - r) * H, W, H, shot.GetPixels());
                     Object.Destroy(shot);
@@ -107,7 +121,7 @@ namespace TamTam.Tests
                 {
                     var pc = sr.GetComponentInParent<PaintedCreature>();
                     Assert.NotNull(pc.GetComponent<GroundShadow>(), "contact shadow");
-                    if (!pc.floating) Assert.That(Mathf.Abs(sr.bounds.min.y - pc.transform.position.y), Is.LessThan(0.05f), $"{demo.biomes[i].name}: {sr.sprite.name} floats");
+                    if (!pc.floating) Assert.That(RestFeetGap(pc), Is.LessThan(0.05f), $"{demo.biomes[i].name}: {sr.sprite.name} floats");
                 }
                 var cam = demo.cam; var b = demo.backdrop.bounds;
                 float h = cam.orthographicSize * 2, w = h * cam.aspect;

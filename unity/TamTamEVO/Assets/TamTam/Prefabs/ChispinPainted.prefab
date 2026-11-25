@@ -5441,8 +5441,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: TamTam.Runtime::TamTam.GroundShadow
   target: {fileID: 3208299071001301995}
   lift: {fileID: 0}
-  contactOpacity: 0.55
-  ambientOpacity: 0.32
+  contactOpacity: 0.62
+  ambientOpacity: 0.38
   widthFactor: 0.55
   sortingOrder: -5
 --- !u!1 &6849489086797538328

@@ -32,11 +32,8 @@ namespace TamTam.Evolution
 
         void FitBackdrop()
         {
-            if (!cam || !backdrop.sprite) return;
-            float h = cam.orthographicSize * 2, w = h * cam.aspect;
-            var size = backdrop.sprite.bounds.size;
-            float s = Mathf.Max(w / size.x, h / size.y);
-            backdrop.transform.localScale = new Vector3(s, s, 1);
+            // QA fix: each biome has its floor at a different height; align it with the fighters' feet.
+            BiomeFloor.Fit(backdrop, cam, left ? left.transform.parent.position.y : -2.2f);
         }
 
         void SetFighter(SpriteRenderer sr, Family f)

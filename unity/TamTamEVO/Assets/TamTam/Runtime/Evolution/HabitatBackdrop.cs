@@ -30,20 +30,12 @@ namespace TamTam.Evolution
         {
             if (!backdrop || !cam) return;
             backdrop.sprite = SpriteFor(presenter ? presenter.CurrentGenome : null);
-            Fit(backdrop, cam);
+            Fit(backdrop, cam, presenter ? presenter.transform.position.y : 0);
         }
 
-        public static void Fit(SpriteRenderer sr, Camera cam)
-        {
-            if (!sr.sprite) return;
-            float h = cam.orthographicSize * 2, w = h * cam.aspect;
-            var size = sr.sprite.bounds.size;
-            float s = Mathf.Max(w / size.x, h / size.y) * 1.02f;
-            sr.transform.localScale = new Vector3(s, s, 1);
-            var c = cam.transform.position;
-            sr.transform.position = new Vector3(c.x, c.y, sr.transform.position.z);
-        }
+        /// Covers the camera with the habitat and puts its floor under the creature's feet (see BiomeFloor).
+        public static void Fit(SpriteRenderer sr, Camera cam, float feetY = 0) => BiomeFloor.Fit(sr, cam, feetY);
 
-        void LateUpdate() { if (backdrop && cam) Fit(backdrop, cam); } // keeps covering when the window aspect changes
+        void LateUpdate() { if (backdrop && cam) Fit(backdrop, cam, presenter ? presenter.transform.position.y : 0); } // keeps covering when the window aspect changes
     }
 }

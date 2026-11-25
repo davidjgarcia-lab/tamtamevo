@@ -13,8 +13,8 @@ namespace TamTam
         public Renderer target;
         [Tooltip("Transform that moves up when the creature jumps (its local y is the height above ground).")]
         public Transform lift;
-        [Range(0, 1)] public float contactOpacity = 0.55f;
-        [Range(0, 1)] public float ambientOpacity = 0.32f;
+        [Range(0, 1)] public float contactOpacity = 0.62f;
+        [Range(0, 1)] public float ambientOpacity = 0.38f;
         [Tooltip("Width of the shadow relative to the creature's visible width.")]
         public float widthFactor = 0.62f;
         public int sortingOrder = -5;
@@ -79,8 +79,8 @@ namespace TamTam
             float k = Mathf.Clamp01(1 - height / 1.2f); // fades/shrinks as the body lifts off the floor
             var sortLayer = target.sortingLayerID;
             int order = target.sortingOrder + sortingOrder;
-            Place(ambient, new Vector3(b.center.x, transform.position.y, 0), width * 1.35f * Mathf.Lerp(0.8f, 1, k), width * 0.22f, ambientOpacity * Mathf.Lerp(0.45f, 1, k), sortLayer, order - 1);
-            Place(contact, new Vector3(b.center.x, transform.position.y, 0), width * 0.75f * Mathf.Lerp(0.55f, 1, k), width * 0.11f, contactOpacity * k * k, sortLayer, order);
+            Place(ambient, new Vector3(b.center.x, transform.position.y, 0), width * 1.35f * Mathf.Lerp(0.8f, 1, k), width * 0.34f, ambientOpacity * Mathf.Lerp(0.45f, 1, k), sortLayer, order - 1);
+            Place(contact, new Vector3(b.center.x, transform.position.y, 0), width * 0.8f * Mathf.Lerp(0.55f, 1, k), width * 0.17f, contactOpacity * k * k, sortLayer, order);
         }
 
         static void Place(SpriteRenderer sr, Vector3 worldPos, float w, float h, float alpha, int layer, int order)
