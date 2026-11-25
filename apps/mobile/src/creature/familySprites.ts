@@ -1,5 +1,5 @@
 import { BlendMode, FilterMode, MipmapMode, Skia, TileMode, VertexMode, type SkCanvas, type SkImage, type SkPaint, type SkPoint } from "@shopify/react-native-skia";
-import { CHISPIN_PAINTED, type GenomeLike } from "@tamtam/art";
+import { CHISPIN_PAINTED, STARTER_EYES as EYES, type GenomeLike } from "@tamtam/art";
 import { artStage, motionFor, STARTERS, type FamilyId, type Motion } from "@tamtam/core";
 import type { Frame } from "@tamtam/rig";
 
@@ -55,8 +55,6 @@ export const FAMILY_SPRITES: Record<string, number> = {
 };
 /* eslint-enable @typescript-eslint/no-require-imports */
 
-/** Eyes of the starters (normalised position in the image, radius as a fraction of the width, eyelid colour). */
-const EYES: Record<string, { x: number; y: number; r: number; lid: string }> = {"fire_baby": {"x": 0.787, "y": 0.345, "r": 0.035, "lid": "#F45131"}, "water_baby": {"x": 0.733, "y": 0.44, "r": 0.045, "lid": "#7CE5FB"}, "plant_baby": {"x": 0.75, "y": 0.49, "r": 0.04, "lid": "#F5F691"}, "electric_baby": {"x": 0.817, "y": 0.433, "r": 0.028, "lid": "#BB8B47"}, "rock_baby": {"x": 0.783, "y": 0.503, "r": 0.028, "lid": "#EABD99"}, "plasma_baby": {"x": 0.667, "y": 0.563, "r": 0.05, "lid": "#4E1DDB"}, "shadow_baby": {"x": 0.633, "y": 0.559, "r": 0.045, "lid": "#561880"}, "light_baby": {"x": 0.75, "y": 0.431, "r": 0.035, "lid": "#FCFBF6"}, "crystal_baby": {"x": 0.733, "y": 0.395, "r": 0.03, "lid": "#88B0E2"}, "mystic_baby": {"x": 0.683, "y": 0.443, "r": 0.035, "lid": "#6B80D0"}};
 
 /** Family that "shows": most parts; ties go to the back part. */
 export function dominantFamily(g: GenomeLike): string {
