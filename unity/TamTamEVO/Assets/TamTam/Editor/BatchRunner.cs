@@ -20,6 +20,8 @@ namespace TamTam.EditorTools
         [MenuItem("TamTam/Reconstruir escenas (sin formas vectoriales)")]
         public static void RebuildScenes()
         {
+            Rendering.StyleSetup.CreateProfiles();
+            VfxTools.VfxLibraryBuilder.Build();
             Evolution.EvolvedFormsBuilder.ImportFamilyArt();
             Chispin.PaintedChispinBuilder.Build();
             Chispin.PaintedChispinBuilder.RenderPreview();
@@ -30,5 +32,6 @@ namespace TamTam.EditorTools
         }
 
         public static void RebuildScenesBatch() => Run(RebuildScenes);
+        public static void AuditImports() => Run(Rendering.StyleSetup.AuditImports);
     }
 }
