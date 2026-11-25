@@ -85,6 +85,25 @@ namespace TamTam.EditorTools.Environments
             Debug.Log($"TamTam: nest-house assets imported ({list.assets.Length}).");
         }
 
+        static bool HasNormal(TextureImporter ti)
+        {
+            var factory = new UnityEditor.U2D.Sprites.SpriteDataProviderFactories(); factory.Init();
+            var dp = factory.GetSpriteEditorDataProviderFromObject(ti); dp.InitSpriteEditorDataProvider();
+            var tex = dp.GetDataProvider<UnityEditor.U2D.Sprites.ISecondaryTextureDataProvider>().textures;
+            return tex != null && tex.Any(t => t.name == "_NormalMap" && t.texture);
+        }
+
+        /// Shared material for furniture and props: TamTam/CreatureLit with light contact occlusion (per-object look via MPB).
+        static Material PropMaterial()
+        {
+            const string path = "Assets/TamTam/Materials/PropLit.mat";
+            var m = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (!m) { m = new Material(Shader.Find("TamTam/CreatureLit")); AssetDatabase.CreateAsset(m, path); }
+            m.SetFloat("_GroundAO", 0.22f); m.SetFloat("_GroundAOHeight", 0.4f); m.SetFloat("_Emission", 0); m.SetFloat("_EmissionStrength", 1.2f);
+            EditorUtility.SetDirty(m);
+            return m;
+        }
+
         [MenuItem("TamTam/Entornos/2 · Construir escena NestHouse")]
         public static void BuildScene()
         {
@@ -99,9 +118,23 @@ namespace TamTam.EditorTools.Environments
             cam.tag = "MainCamera"; cam.orthographic = true; cam.orthographicSize = g.h / PPU / 2;
             cam.transform.position = new Vector3(g.w / PPU / 2, -g.h / PPU / 2, -10);
             cam.clearFlags = CameraClearFlags.SolidColor; cam.backgroundColor = new Color32(0x17, 0x13, 0x2B, 255);
-            cam.gameObject.AddComponent<UniversalAdditionalCameraData>();
+            cam.allowHDR = true;
+            cam.gameObject.AddComponent<UniversalAdditionalCameraData>().renderPostProcessing = true;
+            cam.gameObject.AddComponent<TamTam.Vfx.CameraShake>();
             var light = new GameObject("Global Light 2D").AddComponent<Light2D>();
-            light.lightType = Light2D.LightType.Global; light.intensity = 1f;
+            light.lightType = Light2D.LightType.Global; light.intensity = 0.9f;
+            // Grading: global profile + day and night looks, blended by DayNight.
+            var dayVol = Rendering.StyleSetup.AddVolumes(Rendering.StyleSetup.SceneLook.NestHouse_Day);
+            var nightVol = new GameObject("Volume · NestHouse_Night").AddComponent<UnityEngine.Rendering.Volume>();
+            nightVol.isGlobal = true; nightVol.priority = 2; nightVol.weight = 0;
+            nightVol.sharedProfile = AssetDatabase.LoadAssetAtPath<UnityEngine.Rendering.VolumeProfile>($"{Rendering.StyleSetup.Dir}/NestHouse_Night.asset");
+            var propMat = PropMaterial();
+            var dayLights = new System.Collections.Generic.List<Light2D>();
+            var nightLights = new System.Collections.Generic.List<Light2D>();
+            float W = g.w / PPU, Hh = g.h / PPU;
+            // Window light (day): the key light from the upper left through the round window, casting the 2D shadows.
+            var win = Rendering.StyleSetup.Point("Window light (day key)", new Vector3(W * 0.42f, -Hh * 0.22f, 0), "#FFE6C8", 0.85f, Hh * 0.75f, shadows: true);
+            dayLights.Add(win);
 
             var room = new GameObject("NestRoom").transform;
             Sprite S(string rel) => AssetDatabase.LoadAssetAtPath<Sprite>($"{Dir}/{rel}");
@@ -127,8 +160,48 @@ namespace TamTam.EditorTools.Environments
                 {
                     var gs = sr.gameObject.AddComponent<GroundShadow>();
                     gs.target = sr; gs.contactOpacity = 0.35f; gs.ambientOpacity = 0.2f; gs.widthFactor = 0.7f; gs.sortingOrder = -2;
+                    sr.gameObject.AddComponent<ShadowCaster2D>().selfShadows = false;      // projected shadow from the window
+                }
+                // Technical art for furniture and props: normal map, sober rim, emission on light sources (via MPB).
+                if (p.layer != "wall")
+                {
+                    sr.sharedMaterial = propMat;
+                    var ti = (TextureImporter)AssetImporter.GetAtPath($"{Dir}/{meta.path}");
+                    if (ti && !HasNormal(ti)) Rendering.NormalMapBaker.Attach(ti, Rendering.NormalMapBaker.Bake($"{Dir}/{meta.path}", 0.6f, 0.25f));
+                    sr.sprite = S(meta.path);
+                    TamTam.Evolution.CreatureLook.ApplyProp(sr, p.itemId);
+                }
+                // Night: every light source of the room gets a warm (or its own) light.
+                string id = p.itemId;
+                string lightHex = id.Contains("lantern") || id.Contains("lamp") || id.Contains("brazier") || id.Contains("stove") ? "#FFB066"
+                    : id.Contains("mushroom_cyan") ? "#7FF3FF" : id.Contains("crystal_blue") ? "#7FD8FF" : id.Contains("crystal_purple") ? "#C77DFF"
+                    : id.Contains("crystal_amber") ? "#FFC266" : null;
+                if (lightHex != null)
+                {
+                    var b = sr.bounds;
+                    var l = Rendering.StyleSetup.Point($"Night light · {id}", new Vector3(b.center.x, b.center.y + b.extents.y * 0.3f, 0), lightHex, 0, 2.4f);
+                    nightLights.Add(l);
+                    var flicker = id.Contains("lantern") || id.Contains("lamp") || id.Contains("brazier") || id.Contains("stove");
+                    if (flicker) l.gameObject.AddComponent<FlickerLight2D>().amount = 0.08f;
                 }
             }
+
+            // A resident Tamtam (Brasildo starter) so the room shows a creature under its lights and shadows.
+            var art = AssetDatabase.LoadAssetAtPath<TamTam.Evolution.FamilyArt>("Assets/TamTam/Data/FamilyArt.asset");
+            var catalogText = AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/TamTam/Data/Evolution/catalog.json");
+            if (art && catalogText)
+            {
+                var anchor = new GameObject("Tamtam (resident)");
+                anchor.transform.position = new Vector3(W * 0.5f, -(g.floorTop + 2.6f * g.floorCellH) / PPU, 0);
+                var presenter = anchor.AddComponent<TamTam.Evolution.TamtamPresenter>();
+                presenter.familyArt = art; presenter.catalogJson = catalogText;
+                presenter.catalog = AssetDatabase.LoadAssetAtPath<TamTam.Evolution.EvolutionCatalog>("Assets/TamTam/Data/EvolutionCatalog.asset");
+                anchor.AddComponent<TamTam.World.ResidentTamtam>();
+            }
+
+            var dn = new GameObject("Day/Night").AddComponent<TamTam.World.DayNight>();
+            dn.dayBackdrop = back; dn.nightBackdrop = night; dn.dayVolume = dayVol; dn.nightVolume = nightVol; dn.globalLight = light;
+            dn.dayLights = dayLights.ToArray(); dn.nightLights = nightLights.ToArray();
             Directory.CreateDirectory(Path.GetDirectoryName(ScenePath));
             EditorSceneManager.SaveScene(scene, ScenePath);
             Debug.Log($"TamTam: {ScenePath} built with {layout.placements.Length} placements.");

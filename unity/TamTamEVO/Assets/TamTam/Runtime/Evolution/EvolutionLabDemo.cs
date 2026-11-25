@@ -32,6 +32,7 @@ namespace TamTam.Evolution
             var st = cat.starters[UnityEngine.Random.Range(0, cat.starters.Length)];
             genome = st.genome.ToGenome(); stage = 0; line = genome[PartSlot.body];
             presenter.Show(genome, "baby");
+            TamTam.Vfx.GameVfx.Hatch(presenter.transform.position, TamTam.Evolution.CreatureLook.GlowOf(FamilyArt.Dominant(genome)));
             info = $"¡Ha nacido un {st.species}! · {st.title} · {string.Join(", ", st.traits)}";
         }
 
@@ -43,6 +44,7 @@ namespace TamTam.Evolution
             genome = roll.genome; stage++;
             line = FamilyArt.NextLine(prev, genome);
             presenter.Show(genome, Stages[stage], line);
+            StartCoroutine(TamTam.Vfx.GameVfx.EvolveRitual(presenter.transform.position, CreatureLook.GlowOf(line ?? FamilyArt.Dominant(genome)), 0.45f));
             info = $"{presenter.CurrentName} · {Stages[stage]}{(presenter.CurrentIsExact ? "" : " · (forma más parecida: constrúyela en TamTam ▸ Evoluciones ▸ 2)")}";
         }
 

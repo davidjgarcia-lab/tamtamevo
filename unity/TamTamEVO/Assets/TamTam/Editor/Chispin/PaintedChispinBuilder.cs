@@ -499,8 +499,7 @@ namespace TamTam.EditorTools.Chispin
             cam.orthographic = true; cam.orthographicSize = 1.55f; cam.clearFlags = CameraClearFlags.SolidColor;
             cam.backgroundColor = PaletteMath.Hex("#120B1C"); cam.transform.position = new Vector3(0, 1.15f, -10); cam.allowHDR = true;
             camGo.AddComponent<UniversalAdditionalCameraData>().renderPostProcessing = true;
-            var vol = new GameObject("Global Volume").AddComponent<Volume>();
-            vol.isGlobal = true; vol.sharedProfile = RenderSetup.EnsurePostProfile();
+            TamTam.EditorTools.Rendering.StyleSetup.AddVolumes(TamTam.EditorTools.Rendering.StyleSetup.SceneLook.ChispinLab);
 
             Sprite bg = null;
             if (File.Exists(BackdropPath))

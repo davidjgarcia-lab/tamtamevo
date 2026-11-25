@@ -8,9 +8,10 @@ namespace TamTam
     public class FlickerLight2D : MonoBehaviour
     {
         public float amount = 0.18f, speed = 2.6f;
-        Light2D light2D; float baseIntensity;
+        Light2D light2D;
+        [Tooltip("Intensity around which the flame flickers (other systems, e.g. DayNight, may change it).")] public float baseIntensity = -1;
 
-        void Awake() { light2D = GetComponent<Light2D>(); baseIntensity = light2D.intensity; }
+        void Awake() { light2D = GetComponent<Light2D>(); if (baseIntensity < 0) baseIntensity = light2D.intensity; }
 
         void Update()
         {

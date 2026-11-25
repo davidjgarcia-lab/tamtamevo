@@ -55,8 +55,8 @@ namespace TamTam.EditorTools.Environments
             cam.tag = "MainCamera"; cam.orthographic = true; cam.orthographicSize = 3.4f; cam.transform.position = new Vector3(0, 0, -10);
             cam.clearFlags = CameraClearFlags.SolidColor; cam.backgroundColor = new Color32(0x17, 0x13, 0x2B, 255);
             cam.gameObject.AddComponent<UniversalAdditionalCameraData>().renderPostProcessing = true;
-            var vol = new GameObject("Global Volume").AddComponent<Volume>();
-            vol.isGlobal = true; vol.sharedProfile = RenderSetup.EnsurePostProfile();
+            cam.gameObject.AddComponent<TamTam.Vfx.CameraShake>();
+            Rendering.StyleSetup.AddVolumes(Rendering.StyleSetup.SceneLook.Arena);
             var light = new GameObject("Global Light 2D").AddComponent<Light2D>();
             light.lightType = Light2D.LightType.Global; light.intensity = 0.9f;
 
@@ -67,8 +67,8 @@ namespace TamTam.EditorTools.Environments
             demo.familyArt = AssetDatabase.LoadAssetAtPath<FamilyArt>("Assets/TamTam/Data/FamilyArt.asset");
             demo.left = Fighter(demo.familyArt, "Fighter_L", -3.2f, false);
             demo.right = Fighter(demo.familyArt, "Fighter_R", 3.2f, true);
-            AddPoint("Key", new Vector3(-4f, 3.5f, 0), new Color(1f, 0.92f, 0.8f), 0.45f, 9f);
-            AddPoint("Rim", new Vector3(4.5f, 2.5f, 0), new Color(0.6f, 0.7f, 1f), 0.3f, 6f);
+            Rendering.StyleSetup.Point("Key", new Vector3(-4f, 3.5f, 0), "#FFE6C8", 0.45f, 9f, shadows: true);
+            demo.biomeLight = Rendering.StyleSetup.Point("BiomeLight (rim)", new Vector3(4.5f, 2.5f, 0), "#FFD9A0", 0.45f, 7f);
             demo.Apply();
             EditorSceneManager.SaveScene(scene, ScenePath);
             var list = EditorBuildSettings.scenes.Where(s => s.path != ScenePath).ToList();

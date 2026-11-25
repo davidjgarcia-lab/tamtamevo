@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46be6421ad5a69444aadde2e0c4f5724, type: 3}
+  m_Name: TamTamVfx
+  m_EditorClassIdentifier: TamTam.Runtime::TamTam.Vfx.VfxLibrary
+  entries:
+  - shape: 0
+    additive: {fileID: 2100000, guid: 1ab58f145b5709e47bcbc3d374c7e8dc, type: 2}
+    alpha: {fileID: 2100000, guid: 068fe150050cc8545b2eea90df71b909, type: 2}
+  - shape: 1
+    additive: {fileID: 2100000, guid: c9a6bf4529c347f4ea1205436ee517e1, type: 2}
+    alpha: {fileID: 2100000, guid: cae799d20dfd48e4a8bd363ef601489b, type: 2}
+  - shape: 2
+    additive: {fileID: 2100000, guid: 7760ec60123ff00448838aaa01964619, type: 2}
+    alpha: {fileID: 2100000, guid: 167c6156adbeb10479c50565693098d8, type: 2}
+  - shape: 3
+    additive: {fileID: 2100000, guid: ee5ff9cfcf7ed0b468516b48328dd203, type: 2}
+    alpha: {fileID: 2100000, guid: d27deb7db7244e343b5ad8b7fac19a4c, type: 2}
+  - shape: 4
+    additive: {fileID: 2100000, guid: 4cba304261d4d1c4b93f0af984007910, type: 2}
+    alpha: {fileID: 2100000, guid: 4fce78e78aacf2742abf97bddfa7f689, type: 2}
+  - shape: 5
+    additive: {fileID: 2100000, guid: f8050c9b2ce75d34a8cf58d0e23fdb06, type: 2}
+    alpha: {fileID: 2100000, guid: 54a64ee31f1813f4da8bf3852da922c0, type: 2}
+  - shape: 6
+    additive: {fileID: 2100000, guid: 1931d0cca743cc747b9b47e1fd7c4f3e, type: 2}
+    alpha: {fileID: 2100000, guid: 4d3b1b5680710e54991e00b6e71be4f7, type: 2}
