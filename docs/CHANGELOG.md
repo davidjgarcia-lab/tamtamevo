@@ -4,6 +4,30 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+### Unity: pasada de estudio — estilo, arte técnico, animación, luz, VFX y QA (2026-11-25)
+#### Añadido
+- **Dirección de arte**: `docs/STYLE_GUIDE_UNITY.md` (paleta maestra y por familia, luz arriba-izquierda, escala por etapa, bordes,
+  gradación por escena). Perfil global `Rendering/TamTamGlobal` y perfiles por escena (casa de día y de noche, EvolutionLab,
+  Arena, ChispinLab) superpuestos con mayor prioridad. Auditoría de nitidez de los 66 sprites en `docs/IMPORT_AUDIT_UNITY.md`.
+- **Arte técnico** (`TamTam/CreatureLit`): mapa de normales generado de cada sprite (volumen 2.5D con luces 2D), contraluz del
+  color de la familia, emisión automática de la pintura brillante y mutaciones como variación de material (melánica, albina,
+  aurora, iridiscente). Todo por MaterialPropertyBlock sobre un único material. Muebles y props con normales, contraluz sobrio
+  y emisión solo en fuentes de luz.
+- **Animación y física**: rig automático de 2D Animation (huesos, malla y pesos) en los 41 sprites pintados, sin tocar el arte.
+  Cabeza que mira y asiente, cola con muelle (follow-through), patas por forma de andar, alas que aletean, onda al nadar,
+  squash & stretch con anticipación, temblor al pisar de los pesados y fundido entre clips. Encuadre por etapa en EvolutionLab.
+- **Iluminación y VFX**: casa con luz de ventana de día y lámparas, farol, setas y cristales de noche (`DayNight`), sombras
+  proyectadas 2D de los muebles y un inicial viviendo en la habitación. Luz por bioma en la Arena. Firma de partículas por
+  familia (ascuas, burbujas, hojas y polen, chispas, polvo, niebla, destellos y plumas, brillos prismáticos, orbes con estela, runas).
+  Eclosión, ritual de evolución, aura de híbrido con partículas, golpe y crítico, baño y comer.
+- **QA**: `StudioPlayTests` (iniciales con rig animando todos los clips, líneas evolutivas e híbrido, casa de día y de noche,
+  Arena, rendimiento y grabación de GIF). Hojas de capturas y GIF en `docs/media/unity/`. EditMode 358/358 y PlayMode 9/9.
+#### PROVISIONAL
+- Las criaturas no proyectan sombra 2D: el proveedor de sombras de SpriteSkin de URP 17.3 se cuelga en nativo con la malla del rig.
+  Tienen sombra de contacto y oclusión ambiental.
+- El rig es genérico (cuerpo, cabeza, cola, patas y alas). Tentáculos, caparazón y alas separadas necesitan arte por capas.
+- Los biomas tienen poca resolución de origen (≈640×340). Los fps están medidos en escritorio, no en un Android medio.
+
 ### Iniciales, líneas de evolución y objetos pintados (2026-11-25)
 #### Añadido
 - **11 iniciales**: el huevo da uno al azar, siempre el mismo para el mismo huevo. Son Brasildo, Aqualin, Foliaris, Voltix,

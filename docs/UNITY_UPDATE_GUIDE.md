@@ -1,5 +1,21 @@
 # Actualizar Unity con las criaturas, evoluciones y entornos actuales
 
+> **Estado 2026-11-25 (pasada de estudio, Unity 6000.3.29f1):** "Actualizar todo" importa **41/41** sprites pintados
+> (11 iniciales + 30 etapas), cada uno con su **mapa de normales** y su **rig automático de 2D Animation**. Además construye
+> 80/80 formas, la biblioteca de VFX y los perfiles de estilo. **EditMode 358/358 · PlayMode 9/9.**
+>
+> - Escenas: `EvolutionLab` (hábitat por familia, encuadre por etapa, eclosión y ritual), `NestHouse` (día y noche, botón
+>   ☾/☀, luces de lámparas, farol, setas y cristales, inicial residente), `Arena` (8 biomas con luz propia, golpe y crítico)
+>   y `ChispinLab`.
+> - Guía de estilo: [`STYLE_GUIDE_UNITY.md`](STYLE_GUIDE_UNITY.md). Nitidez de sprites: [`IMPORT_AUDIT_UNITY.md`](IMPORT_AUDIT_UNITY.md).
+>   QA: [`QA_REPORT_UNITY.md`](QA_REPORT_UNITY.md).
+> - Capturas y GIF: `docs/media/unity/` (starters-clips, evolution-lines, hybrid-aura, nest-house-day-night,
+>   arena-3-biomes, lab.gif, room.gif, perf.txt).
+> - Atajo sin las 80 formas: **TamTam ▸ Reconstruir escenas (sin formas vectoriales)**, o desde la línea de comandos
+>   `-executeMethod TamTam.EditorTools.BatchRunner.RebuildScenesBatch`.
+> - PROVISIONAL: las criaturas no proyectan sombra 2D (cuelgue nativo de URP 17.3 con SpriteSkin); el rig es genérico; los biomas
+>   tienen poca resolución de origen; los fps están medidos en escritorio, no en Android.
+
 > Estado (2026-11-24, Unity 6000.3.29f1 en el PC): **COMPILA SIN ERRORES Y PROBADO.** "Actualizar todo" importa
 > 30/30 sprites pintados, construye 80/80 formas, EvolutionLab y NestHouse (7 muebles). EditMode 23/23
 > (GeneticsParityTests 18/18, EvolutionDataTests 2/2, ChispinAssetTests 3/3). PlayMode 2/2 (`LabPlayTests`:
