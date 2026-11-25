@@ -38,3 +38,15 @@ describe("starters", () => {
     expect([...lines].some((l) => [...st.lines.happy, ...st.lines.bored, ...st.lines.lonely].includes(l))).toBe(true);
   });
 });
+
+describe("evolution lines", () => {
+  it("keep the starter's line until another family takes 3+ parts", async () => {
+    const { nextLine, evolvedLook } = await import("./physics");
+    const g = (parts: string[]) => ({ parts: { body: parts[0], head: parts[1], legs: parts[2], tail: parts[3], back: parts[4] } }) as never;
+    expect(nextLine("fire", g(["fire", "water", "water", "plant", "fire"]))).toBe("fire");
+    expect(nextLine("fire", g(["water", "water", "water", "plant", "fire"]))).toBe("water");
+    expect(nextLine("fire", g(["light", "water", "plant", "rock", "shadow"]))).toBe("fire");
+    const look = evolvedLook({ ...(g(["fire", "shadow", "light", "shadow", "fire"]) as object), line: "fire" } as never, "adult");
+    expect(look).toMatchObject({ art: "fire", secondary: "shadow", gait: "fly" });
+  });
+});

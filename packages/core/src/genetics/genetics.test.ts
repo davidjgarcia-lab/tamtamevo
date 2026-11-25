@@ -85,7 +85,8 @@ describe("evolution in the game", () => {
     const roll = evolve(s, s.care.updatedAt + 1);
     expect(s.tamtam!.stage).toBe("child");
     expect(s.tamtam!.name).toBe("Tizón");
-    expect(s.tamtam!.genome).toEqual(roll.genome);
+    expect(s.tamtam!.genome).toEqual({ ...roll.genome, line: s.tamtam!.genome!.line });
+    expect(s.tamtam!.genome!.line).toBeTruthy();
     expect(s.tamtam!.formName!.length).toBeGreaterThan(2);
     expect(s.care.maturity).toBe(0);
     expect(s.care.log!.hours).toBe(0);

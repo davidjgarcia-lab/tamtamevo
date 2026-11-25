@@ -41,6 +41,11 @@ export function exportEnvironmentAssets(): ExportedAsset[] {
   const cellW = g.floorCellW, cellH = g.floorCellH, wallCell = g.wallCell;
   for (const it of FURNITURE) {
     const f = it.furniture!;
+    if (it.id.startsWith("prop_")) {
+      // Painted props already exist as PNG (Art/Environments/NestHouse/Props): only their metadata here.
+      out.push({ path: `Props/${it.id}.png`, png: "", meta: { name: it.name.es, layer: f.layer, footprint: { w: f.w, h: f.h }, prop: true, comfort: f.comfort ?? 0, price: it.price.amount, level: it.level } });
+      continue;
+    }
     const wall = f.layer === "wall";
     const rw = f.w * (wall ? wallCell : cellW), rh = f.h * (wall ? wallCell : cellH);
     // Generous margins: glows and contact shadows must fade out inside the image (no visible box in Unity).

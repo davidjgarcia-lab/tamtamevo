@@ -86,7 +86,7 @@ export function starterGenome(s: Starter): Genome {
     parts: { body: f, head: f, legs: f, tail: f, back: f },
     variant: { body: s.variant, head: s.variant, legs: s.variant, tail: s.variant, back: s.variant },
     eyes: FAMILY_EYES[f][0]!, pattern: FAMILY_PATTERNS[f][0]!,
-    palette: { base: f, shade: 0, accent: f }, mutation: "none",
+    palette: { base: f, shade: 0, accent: f }, mutation: "none", line: f,
   } as Genome;
 }
 

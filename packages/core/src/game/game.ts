@@ -64,6 +64,10 @@ export function newGame(now: number, ids: { tamtamId: string }, alleleId = "bras
     { uid: "p-poster2", itemId: "furn_poster_forest", layer: "wall", x: 8, y: 1, mirrored: false, rotated: false },
     { uid: "p-gym", itemId: "gym_dumbbells", layer: "floor", x: 10, y: 0, mirrored: false, rotated: false },
     { uid: "p-desk", itemId: "study_desk", layer: "floor", x: 7, y: 0, mirrored: false, rotated: false },
+    // Painted props (asset sheet): glowing mushroom, crystal and mossy rocks.
+    { uid: "p-mush", itemId: "prop_mushroom_cyan", layer: "floor", x: 5, y: 0, mirrored: false, rotated: false },
+    { uid: "p-crys", itemId: "prop_crystal_blue", layer: "floor", x: 9, y: 0, mirrored: false, rotated: false },
+    { uid: "p-rock", itemId: "prop_rock_moss", layer: "floor", x: 0, y: 3, mirrored: false, rotated: false },
   ];
   for (const p of starter) placeItem(room, SLICE_CATALOG, inventory, p);
   room.finishes = { ...room.finishes, wallpaper: "wall_woven", flooring: "floor_planks" };

@@ -56,3 +56,38 @@ export function motionFor(family: FamilyId, stage: ArtStage, starter?: StarterMo
 
 /** Tamtam stage → art stage. */
 export const artStage = (stage: string): ArtStage => (stage === "baby" ? "baby" : stage === "child" ? "initial" : stage === "juvenile" ? "intermediate" : "final");
+
+/** Parts per family of a genome, strongest first (ties: back part wins). */
+export function familyRanking(g: { parts: Record<"body" | "head" | "legs" | "tail" | "back", FamilyId> }): { family: FamilyId; parts: number }[] {
+  const n = new Map<FamilyId, number>();
+  for (const s of ["body", "head", "legs", "tail", "back"] as const) n.set(g.parts[s], (n.get(g.parts[s]) ?? 0) + (s === "back" ? 1.1 : 1));
+  return [...n.entries()].sort((a, b) => b[1] - a[1]).map(([family, v]) => ({ family, parts: Math.round(v) }));
+}
+
+/**
+ * How an evolved form looks and moves (evolution combinations):
+ *  - art: the dominant family's painted form for the stage;
+ *  - physics: the LEGS decide the gait (a fire body on light legs flies, on water legs it slithers…);
+ *  - hybrid: a second family with 2+ parts shows as an aura of its colour (and its particles on the back).
+ */
+export function evolvedLook(g: { parts: Record<"body" | "head" | "legs" | "tail" | "back", FamilyId>; line?: FamilyId }, stage: string) {
+  const st = artStage(stage);
+  const rank = familyRanking(g);
+  const art = g.line ?? rank[0]!.family;
+  const other = rank.find((r) => r.family !== art && r.parts >= 2);
+  return { art, stage: st, gait: GAITS[g.parts.legs][st], legs: g.parts.legs, secondary: other ? other.family : null, pure: rank.length === 1 };
+}
+
+/**
+ * Evolution LINE (art sheet: each family evolves along its own line): after an evolution the Tamtam keeps
+ * its previous line unless another family now has MORE parts than the line family and at least 3 of the 5 —
+ * then the line branches to that family. With the game's care styles about 6 in 10 adults stay in their
+ * starter's line (docs/EVOLUTION_COMBINATIONS.md).
+ */
+export function nextLine(prev: FamilyId, g: { parts: Record<"body" | "head" | "legs" | "tail" | "back", FamilyId> }): FamilyId {
+  const c = new Map<FamilyId, number>();
+  for (const v of Object.values(g.parts)) c.set(v, (c.get(v) ?? 0) + 1);
+  let best = prev, bn = c.get(prev) ?? 0;
+  for (const [f, n] of c) if (n > bn && n >= 3) { best = f; bn = n; }
+  return best;
+}

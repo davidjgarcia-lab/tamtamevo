@@ -59,6 +59,15 @@ Regenera `Data/Evolution/` y `Art/Environments/NestHouse/`. Después, en Unity, 
   con animación procedural (`PaintedCreature`). Si no hay sprite, usa las formas vectoriales.
 - `Art/Environments/Biomes/`: 8 biomas escalados ×4 (bosque, cascada, lava, cueva de cristal, setas, ruinas, islas del cielo y coliseo).
 
+## Iniciales, líneas y objetos (2026-11-25)
+
+- `Art/Creatures/Families/{familia}_baby.png` (+ `plasma_baby2.png`): 11 iniciales. FamilyArt debe tener **41 sprites**.
+- `Data/Evolution/catalog.json` incluye `starters` (personalidad, ojos para el parpadeo, movimiento y genoma) y `motions`
+  (física por familia y etapa). `TamtamPresenter.catalogJson` debe apuntar a ese archivo; la escena EvolutionLab lo asigna sola.
+- EvolutionLab: **Nuevo huevo (inicial al azar)**. Al evolucionar se aplica la línea evolutiva (`FamilyArt.NextLine`), la física
+  de las patas y el aura del híbrido.
+- NestHouse: `Art/Environments/NestHouse/Props/` (17 objetos pintados); la casa inicial coloca seta, cristal y rocas.
+
 ## Limitación honesta: el aspecto de las formas evolucionadas
 
 - Las formas evolucionadas usan las **piezas modulares vectoriales** de las 9 familias, pintadas por el rasterizador

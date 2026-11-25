@@ -34,11 +34,11 @@ namespace TamTam.Evolution
         // Same as STAGE_SCALE in apps/mobile/src/creature/useCreature.ts.
         public static float StageScale(string stage) => stage switch { "child" => 1.1f, "juvenile" => 1.22f, "adult" => 1.34f, _ => 1f };
 
-        public void Show(Genome genome, string stage = "baby")
+        public void Show(Genome genome, string stage = "baby", Family? line = null)
         {
             if (Current) Destroy(Current);
             var parent = anchor ? anchor : transform;
-            var art = genome != null && familyArt ? familyArt.Get(genome, stage) : null;
+            var art = genome != null && familyArt ? familyArt.Get(genome, stage, line) : null;
             if (art)
             {
                 Current = new GameObject("Tamtam_" + art.name);
@@ -49,13 +49,17 @@ namespace TamTam.Evolution
                 sr.sprite = art;
                 var pc = Current.AddComponent<PaintedCreature>();
                 pc.body = sr;
-                var fam = FamilyArt.Dominant(genome);
                 var artStage = FamilyArt.ArtStage(stage);
+                var fam = artStage == "baby" ? FamilyArt.Dominant(genome) : line ?? FamilyArt.Dominant(genome);
                 var starter = artStage == "baby" ? StarterFor(genome) : null;
-                var mj = starter?.motion ?? Data?.motions?.FirstOrDefault(x => x.family == fam.ToString() && x.stage == artStage)?.motion;
+                // Physics: evolved forms move with their LEGS' family (web: motionFor(parts.legs, stage)).
+                var legs = genome[PartSlot.legs].ToString();
+                var mj = starter?.motion ?? Data?.motions?.FirstOrDefault(x => x.family == legs && x.stage == artStage)?.motion;
                 if (mj != null) pc.motion = mj;
                 pc.SetMutation(genome.mutation);
                 if (starter?.eye != null && !string.IsNullOrEmpty(starter.eye.lid)) pc.SetEye(starter.eye);
+                var sec = artStage == "baby" ? null : FamilyArt.Secondary(genome, fam);
+                if (sec.HasValue) pc.SetAura(GenomePalette.Hex(Genetics.Defs[sec.Value].Glow));
                 CurrentName = starter != null ? starter.species : Genetics.FormName(genome, 1);
                 CurrentIsExact = true;
                 return;

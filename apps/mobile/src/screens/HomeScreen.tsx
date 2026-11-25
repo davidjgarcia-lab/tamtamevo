@@ -26,6 +26,7 @@ import { FinishTray, FoodSheet, InventoryTray } from "./sheets";
 import { StudyPanel } from "./StudyPanel";
 import { IconAction } from "./IconAction";
 import { CollectionPanel } from "./CollectionPanel";
+import { usePropImages } from "../home/props";
 import { Platform } from "react-native";
 import { useCanvasRef } from "@shopify/react-native-skia";
 
@@ -219,7 +220,9 @@ export function HomeScreen({
   // ── Rendering ─────────────────────────────────────────────────────────────
   const hour = new Date(now()).getHours();
   const night = hour >= 21 || hour < 7;
-  const roomPic = useMemo(() => (g ? buildRoomPicture(state.room, g, { night, lightsOn: state.lightsOn }) : null), [g, state.room, night, state.lightsOn]);
+  const propsReady = usePropImages();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const roomPic = useMemo(() => (g ? buildRoomPicture(state.room, g, { night, lightsOn: state.lightsOn }) : null), [g, state.room, night, state.lightsOn, propsReady]);
 
   const poopAt = (ts: number) => {
     const sp = poopSpot(ts);

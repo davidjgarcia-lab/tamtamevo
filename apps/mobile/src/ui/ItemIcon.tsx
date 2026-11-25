@@ -2,6 +2,8 @@ import { SLICE_CATALOG } from "@tamtam/core";
 import { Skia } from "@shopify/react-native-skia";
 import { drawFloor, drawFurniture, drawWall } from "../home/roomArt";
 import { FoodIcon } from "./FoodIcon";
+import { Image } from "react-native";
+import { PROP_SRC } from "../home/props";
 import { Snapshot } from "./snapshot";
 
 /** Thumbnail of any catalog item (same vector art used in the room). */
@@ -26,6 +28,9 @@ export function ItemIcon({ id, size = 56 }: { id: string; size?: number }) {
     );
   }
   const f = item?.furniture;
+  if (PROP_SRC[id]) {
+    return <Image source={PROP_SRC[id]} style={{ width: size, height: size }} resizeMode="contain" accessibilityIgnoresInvertColors />;
+  }
   return (
     <Snapshot
       id={`item:${id}`}

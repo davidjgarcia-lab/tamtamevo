@@ -19,7 +19,7 @@ namespace TamTam.Evolution
         static readonly string[] Stages = { "baby", "child", "juvenile", "adult" };
         static readonly string[] Clips = { "idle", "walk", "attack", "celebrate", "eat", "sleep", "pet", "sad" };
 
-        Genome genome; int stage; uint seed = 1; string info = "Chispín · Bebé";
+        Genome genome; Family? line; int stage; uint seed = 1; string info = "Chispín · Bebé";
 
         void Start() => NewEgg();
 
@@ -30,7 +30,7 @@ namespace TamTam.Evolution
             var cat = catalogText != null ? JsonUtility.FromJson<CatalogJson>(catalogText) : null;
             if (cat?.starters == null || cat.starters.Length == 0) { genome = null; stage = 0; presenter.Show(null); info = "Chispín · Bebé"; return; }
             var st = cat.starters[UnityEngine.Random.Range(0, cat.starters.Length)];
-            genome = st.genome.ToGenome(); stage = 0;
+            genome = st.genome.ToGenome(); stage = 0; line = genome[PartSlot.body];
             presenter.Show(genome, "baby");
             info = $"¡Ha nacido un {st.species}! · {st.title} · {string.Join(", ", st.traits)}";
         }
@@ -39,8 +39,10 @@ namespace TamTam.Evolution
         {
             if (stage >= Stages.Length - 1) return;
             var roll = Genetics.Roll(genome ?? Genetics.Chispin, p, seed++ * 7919u);
+            var prev = line ?? (genome != null ? FamilyArt.Dominant(genome) : Family.fire);
             genome = roll.genome; stage++;
-            presenter.Show(genome, Stages[stage]);
+            line = FamilyArt.NextLine(prev, genome);
+            presenter.Show(genome, Stages[stage], line);
             info = $"{presenter.CurrentName} · {Stages[stage]}{(presenter.CurrentIsExact ? "" : " · (forma más parecida: constrúyela en TamTam ▸ Evoluciones ▸ 2)")}";
         }
 

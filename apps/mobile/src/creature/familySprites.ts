@@ -1,6 +1,6 @@
 import { BlendMode, FilterMode, MipmapMode, Skia, TileMode, VertexMode, type SkCanvas, type SkImage, type SkPaint, type SkPoint } from "@shopify/react-native-skia";
 import { CHISPIN_PAINTED, STARTER_EYES as EYES, type GenomeLike } from "@tamtam/art";
-import { artStage, motionFor, STARTERS, type FamilyId, type Motion } from "@tamtam/core";
+import { artStage, evolvedLook, FAMILIES, motionFor, STARTERS, type FamilyId, type Motion } from "@tamtam/core";
 import type { Frame } from "@tamtam/rig";
 
 /**
@@ -63,8 +63,10 @@ export function dominantFamily(g: GenomeLike): string {
   return Object.entries(n).sort((a, b) => b[1] - a[1])[0]![0];
 }
 const isPure = (g: GenomeLike) => new Set(Object.values(g.parts)).size === 1;
+/** Family whose art is shown: the evolution line (kept in the genome) or, without one, the dominant family. */
+export const artFamily = (g: GenomeLike, stage = "juvenile") => (artStage(stage) === "baby" ? dominantFamily(g) : (g as { line?: string }).line ?? dominantFamily(g));
 export function spriteKey(g: GenomeLike, stage = "juvenile"): string {
-  const fam = dominantFamily(g);
+  const fam = artFamily(g, stage);
   const st = artStage(stage);
   if (st === "baby") return fam === "plasma" && g.variant.back === 1 ? "plasma_baby2" : `${fam}_baby`;
   return `${fam}_${st}`;
@@ -98,6 +100,10 @@ export interface SpriteRes {
   lid: SkPaint | null;
   lash: SkPaint | null;
   seed: number;
+  /** Hybrid aura (second family with 2+ parts). */
+  aura: SkPaint | null;
+  auraR: number;
+  center: [number, number];
 }
 
 function mutationFilter(m: string): number[] | null {
@@ -114,7 +120,7 @@ const smooth = (a: number, b: number, x: number) => {
 
 export function buildSprite(img: SkImage, genome: GenomeLike, bones: string[], stage = "juvenile"): SpriteRes {
   const key = spriteKey(genome, stage);
-  const fam = dominantFamily(genome) as FamilyId;
+  const fam = artFamily(genome, stage) as FamilyId;
   const st = artStage(stage);
   const H = st === "baby" ? 104 : st === "initial" ? 112 : st === "intermediate" ? 118 : 124;
   const w = (img.width() / img.height()) * H;
@@ -167,10 +173,25 @@ export function buildSprite(img: SkImage, genome: GenomeLike, bones: string[], s
     body: bones.indexOf("body"), head: bones.indexOf("head"), tail: bones.indexOf("tail1"),
     restInv: [1, 0, 0, 1, -bx, -by],
     headPivot: [x0 + w * 0.6, y0 + H * 0.55], tailPivot: [x0 + w * 0.34, y0 + H * 0.62], feetY: 12, w,
-    m: motionFor(fam, st, starter?.motion),
+    // Evolution physics: babies move like their starter; evolved forms move with their LEGS' family.
+    m: motionFor(st === "baby" ? fam : (genome.parts.legs as FamilyId), st, starter?.motion),
     eye: e ? { x: x0 + e.x * w, y: y0 + e.y * H, r: e.r * w, wh: smooth(0.52, 0.78, e.x) } : null,
     lid, lash, seed: (key.length * 7.3) % 5,
+    aura: auraPaint(genome, stage, w),
+    auraR: w * 0.5,
+    center: [12, y0 + H * 0.58],
   };
+}
+
+function auraPaint(genome: GenomeLike, stage: string, w: number): SkPaint | null {
+  if (artStage(stage) === "baby") return null;
+  const look = evolvedLook(genome as never, stage);
+  if (!look.secondary) return null;
+  const col = FAMILIES[look.secondary].glow;
+  const p = Skia.Paint();
+  p.setAntiAlias(true);
+  p.setShader(Skia.Shader.MakeRadialGradient(Skia.Point(0, 0), w * 0.5, [Skia.Color(col), Skia.Color("transparent")], [0, 1], TileMode.Clamp));
+  return p;
 }
 
 /** Draws the deformed mesh: personality + gait + clips (call inside drawCreature, creature units). */
@@ -223,6 +244,15 @@ export function drawSprite(canvas: SkCanvas, s: SpriteRes, frame: Frame, t: numb
   for (let i = 0; i < n; i++) {
     const p = def(s.rx[i]!, s.ry[i]!, s.wh[i]!, s.wt[i]!, s.u[i]!);
     pos[i] = Skia.Point(p[0], p[1]);
+  }
+  if (s.aura) {
+    const c0 = def(s.center[0], s.center[1], 0, 0, 0.5);
+    canvas.save();
+    canvas.translate(c0[0], c0[1]);
+    canvas.scale(1.15, 0.85);
+    s.aura.setAlphaf(0.28 + 0.12 * Math.sin(t * 2.1));
+    canvas.drawCircle(0, 0, s.auraR, s.aura);
+    canvas.restore();
   }
   const verts = Skia.MakeVertices(VertexMode.Triangles, pos, s.uvs, undefined, s.idx, true);
   canvas.drawVertices(verts, BlendMode.Dst, s.paint);

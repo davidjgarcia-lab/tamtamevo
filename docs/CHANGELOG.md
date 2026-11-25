@@ -4,6 +4,29 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+### Iniciales, líneas de evolución y objetos pintados (2026-11-25)
+#### Añadido
+- **11 iniciales**: el huevo da uno al azar, siempre el mismo para el mismo huevo. Son Brasildo, Aqualin, Foliaris, Voltix,
+  Rocanix, Plasmax (babosa y orbe), Umbrin, Lúmina, Diamor y Mistor. Cada uno tiene **personalidad**: rasgos, frases propias
+  mezcladas con las comunes, comida favorita y forma de moverse. El panel del nombre dice qué ha nacido.
+- **Sprites vivos**: cada criatura pintada es una malla deformable. La cabeza asiente y se ladea, la cola se mueve,
+  respira, da saltitos, flota o vuela, y los iniciales **parpadean** (con los ojos cerrados al dormir).
+- **Física de evolución** por familia y etapa: camina, pesado, veloz, vuela, flota, repta o rebota. En las formas evolucionadas,
+  **las patas deciden cómo se mueve**.
+- **Líneas evolutivas**: cada Tamtam sigue la línea de su inicial hasta que otra familia tiene más piezas que ella y al menos 3 de 5.
+  Entonces la línea se ramifica. Los híbridos (2 o más piezas de otra familia) muestran un aura de ese color.
+  Tabla simulada en `docs/EVOLUTION_COMBINATIONS.md`: 11 iniciales × 5 estilos × 500 crías.
+- **17 objetos pintados** de la hoja de assets, recortados y escalados ×4 (barril, caja, valla, tronco-banco, rocas con musgo,
+  tocón-mesa, farol, dos setas, tres cristales, estandarte, estanque, dos árboles y una fuente-cascada). Están en la tienda por nivel
+  y la habitación inicial ya trae la seta luminosa, el cristal azul y las rocas con musgo.
+- Unity: los 11 iniciales con personalidad, parpadeo y movimiento; línea evolutiva y aura en `TamtamPresenter`;
+  «Nuevo huevo» en EvolutionLab; los objetos pintados en NestHouse (`Art/Environments/NestHouse/Props`).
+#### Limitaciones
+- Cinco iniciales usan **arte provisional** (sombra, luz, cristal, plasma-orbe y místico): las imágenes llegaron
+  dentro de mensajes enviados mientras trabajaba y no se guardaron como archivo. Hay que reenviarlas.
+- Plasmax-babosa usa también la forma inicial de la hoja, por el mismo motivo.
+- Flores, helecho, arbustos, arco y antorcha de la hoja no se pudieron recortar limpios (demasiado pequeños sobre el fondo).
+
 ### Arte pintado de las 10 familias (2026-11-24)
 #### Cambiado
 - **10 familias** según las hojas de arte del usuario: Brasildo (fuego), Aqualin (agua), Foliaris (planta), Voltix (eléctrico),

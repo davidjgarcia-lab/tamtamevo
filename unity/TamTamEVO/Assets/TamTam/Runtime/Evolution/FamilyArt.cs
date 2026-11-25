@@ -25,9 +25,30 @@ namespace TamTam.Evolution
             return n.OrderByDescending(kv => kv.Value).First().Key;
         }
 
-        public Sprite Get(Genome g, string stage)
+        /// Evolution line (mirror of nextLine in packages/core/src/genetics/physics.ts): keep the previous line unless
+        /// another family has more parts than it and at least 3 of the 5.
+        public static Family NextLine(Family prev, Genome g)
         {
-            var f = Dominant(g); var st = ArtStage(stage);
+            var c = new Dictionary<Family, int>();
+            foreach (var s in Genetics.Slots) { c.TryGetValue(g[s], out var v); c[g[s]] = v + 1; }
+            c.TryGetValue(prev, out var bn); var best = prev;
+            foreach (var kv in c) if (kv.Value > bn && kv.Value >= 3) { best = kv.Key; bn = kv.Value; }
+            return best;
+        }
+
+        /// Second family with 2+ parts (shown as an aura), if any.
+        public static Family? Secondary(Genome g, Family art)
+        {
+            var c = new Dictionary<Family, int>();
+            foreach (var s in Genetics.Slots) { c.TryGetValue(g[s], out var v); c[g[s]] = v + 1; }
+            var o = c.Where(kv => kv.Key != art && kv.Value >= 2).OrderByDescending(kv => kv.Value).ToList();
+            return o.Count > 0 ? o[0].Key : (Family?)null;
+        }
+
+        public Sprite Get(Genome g, string stage, Family? line = null)
+        {
+            var st = ArtStage(stage);
+            var f = st == "baby" ? Dominant(g) : line ?? Dominant(g);
             if (st == "baby" && f == Family.plasma && g.variant[(int)PartSlot.back] == 1) st = "baby2";
             return entries.FirstOrDefault(e => e.family == f && e.stage == st)?.sprite
                 ?? entries.FirstOrDefault(e => e.family == f && e.stage == "initial")?.sprite;
@@ -62,6 +83,21 @@ namespace TamTam.Evolution
         }
 
         /// Eyelid at the starter's eye (normalised position in the sprite, radius as a fraction of the width).
+        /// Soft aura of a second family behind the body (hybrids).
+        public void SetAura(Color c)
+        {
+            if (!body || !body.sprite) return;
+            var b = body.sprite.bounds;
+            var go = new GameObject("aura");
+            go.transform.SetParent(transform, false);
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = Disc(); sr.color = new Color(c.r, c.g, c.b, 0.3f); sr.sortingOrder = body.sortingOrder - 1;
+            go.transform.localPosition = new Vector3(b.center.x, b.max.y * 0.95f, 0);
+            go.transform.localScale = new Vector3(b.size.x * 1.15f, b.size.y * 0.95f, 1);
+            aura = sr;
+        }
+        SpriteRenderer aura;
+
         public void SetEye(EyeJson e)
         {
             if (e == null || !body || !body.sprite) return;
@@ -143,6 +179,7 @@ namespace TamTam.Evolution
             body.transform.localPosition = new Vector3(x, y, 0);
             body.transform.localScale = new Vector3(sx, sy, 1);
             body.transform.localRotation = Quaternion.Euler(0, 0, rot);
+            if (aura) { var ac = aura.color; ac.a = 0.28f + 0.12f * Mathf.Sin(t * 2.1f); aura.color = ac; }
             // Blink every ~4.3 s; closed while sleeping.
             if (lid)
             {
