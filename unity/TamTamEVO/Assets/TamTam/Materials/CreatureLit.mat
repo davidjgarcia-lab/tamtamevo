@@ -41,12 +41,17 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AutoEmission: 0
     - _Emission: 1
     - _EmissionStrength: 1.6
+    - _EmitThreshold: 0.74
     - _EnableExternalAlpha: 0
     - _GroundAO: 0
     - _GroundAOHeight: 0.6
     - _Iridescence: 0
+    - _Mutation: 0
+    - _RimStrength: 0
+    - _RimWidth: 4
     m_Colors:
     - _AccentColor: {r: 1, g: 0.47843137, b: 0.14117648, a: 1}
     - _BaseColor: {r: 0.49019608, g: 0.14117648, b: 0.1882353, a: 1}
@@ -57,5 +62,6 @@ Material:
     - _RefBase: {r: 0.49019608, g: 0.14117648, b: 0.1882353, a: 1}
     - _RefGlow: {r: 1, g: 0.7019608, b: 0.2784314, a: 1}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
+    - _RimColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

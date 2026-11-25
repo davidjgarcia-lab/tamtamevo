@@ -22,6 +22,12 @@ Shader "TamTam/CreatureLit"
         _Iridescence("Iridescence", Range(0, 1)) = 0
         _GroundAO("Ground contact occlusion", Range(0, 1)) = 0
         _GroundAOHeight("Ground AO height (object units)", Float) = 0.6
+        _RimColor("Rim light (family glow)", Color) = (1, 1, 1, 1)
+        _RimStrength("Rim strength", Range(0, 2)) = 0
+        _RimWidth("Rim width (texels)", Range(1, 12)) = 4
+        _AutoEmission("Auto emission of bright saturated paint", Range(0, 2)) = 0
+        _EmitThreshold("Auto emission value threshold", Range(0.4, 1)) = 0.84
+        _Mutation("Mutation (0 none, 1 melanic, 2 albino, 3 aurora, 4 iridescent)", Float) = 0
         [HideInInspector] _Color("Tint", Color) = (1,1,1,1)
         [HideInInspector] _RendererColor("RendererColor", Color) = (1,1,1,1)
         [HideInInspector] _AlphaTex("External Alpha", 2D) = "white" {}
@@ -34,6 +40,8 @@ Shader "TamTam/CreatureLit"
                 half4 _Color; half4 _BaseColor; half4 _AccentColor; half4 _GlowColor; half4 _EyeColor; \
                 half4 _RefBase; half4 _RefAccent; half4 _RefGlow; \
                 half _Emission; half _EmissionStrength; half _Iridescence; half _GroundAO; half _GroundAOHeight; \
+                half4 _RimColor; half _RimStrength; half _RimWidth; half _AutoEmission; half _EmitThreshold; half _Mutation; \
+                float4 _MainTex_TexelSize; \
             CBUFFER_END
     ENDHLSL
 
@@ -113,6 +121,28 @@ Shader "TamTam/CreatureLit"
                 half ph = input.uv.x * 6.0h + input.uv.y * 3.0h + _Time.y * 0.6h;
                 half3 film = 0.5h + 0.5h * cos(ph + half3(0.0h, 2.1h, 4.2h));
                 col = lerp(col, col * (0.55h + film), _Iridescence * m.r * 0.6h);
+
+                // Emissive zones of painted art (flames, crystals, plasma, halos): bright AND saturated paint.
+                half vmax = max(col.r, max(col.g, col.b)), vmin = min(col.r, min(col.g, col.b));
+                half sat = (vmax - vmin) / max(vmax, 1e-3h);
+                half autoE = smoothstep(_EmitThreshold, 1.0h, vmax) * smoothstep(0.3h, 0.75h, sat) * _AutoEmission;
+
+                // Mutations as a material variation (not a flat tint): value/saturation/hue response of the paint.
+                half lum = dot(col, half3(0.2126h, 0.7152h, 0.0722h));
+                int mut = (int)round(_Mutation);
+                if (mut == 1)      // melanic: dark, low-saturation scales; bright accents survive as embers
+                    col = lerp(col, lum * half3(0.30h, 0.25h, 0.34h) * 0.85h, 0.78h * (1.0h - autoE));
+                else if (mut == 2) // albino: pale pigment-free body with warm translucency
+                    col = lerp(col, saturate(lum * 1.25h + half3(0.10h, 0.07h, 0.08h)), 0.8h);
+                else if (mut == 3) // aurora: hue drifts toward teal/green on the saturated paint, cool sheen on the rest
+                {
+                    half3 hsv = RgbToHsv(col);
+                    hsv.x = frac(hsv.x + 0.32h * sat + 0.04h * sin(_Time.y * 0.8h + input.uv.y * 6.0h));
+                    col = lerp(HsvToRgb(hsv), col, 0.15h);
+                    autoE = max(autoE, 0.35h * sat * smoothstep(0.5h, 1.0h, vmax));
+                }
+                else if (mut == 4) // iridescent: thin-film rainbow over the whole body
+                    col = lerp(col, col * (0.55h + film), 0.55h);
                 half4 main = input.color * half4(col, tex.a);
                 // Contact occlusion: the painting darkens softly where it meets the ground (object y = 0 at the feet).
                 half ao = saturate(input.aoY / max(_GroundAOHeight, 0.01h));
@@ -128,8 +158,19 @@ Shader "TamTam/CreatureLit"
                 surfaceData.normalWS = input.normalWS;
             #endif
                 half4 lit = CombinedShapeLightShared(surfaceData, inputData);
-                half e = m.b * _Emission;
+                half e = max(m.b * _Emission, autoE);
                 lit.rgb = lit.rgb * (1.0h - saturate(e)) + main.rgb * e * (1.0h + _EmissionStrength);
+
+                // Rim light (back light in the family glow): alpha drops toward the upper-right edge of the silhouette.
+                if (_RimStrength > 0.001h)
+                {
+                    float2 px = _MainTex_TexelSize.xy * _RimWidth;
+                    half a1 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv + float2(px.x, 0)).a;
+                    half a2 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv + float2(0, px.y)).a;
+                    half a3 = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv + px * 0.7071).a;
+                    half rim = saturate(tex.a - min(a1, min(a2, a3)));
+                    lit.rgb += _RimColor.rgb * rim * _RimStrength * main.a;
+                }
                 return lit;
             }
             ENDHLSL
