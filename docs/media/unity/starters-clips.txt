@@ -1,0 +1,12 @@
+Rows: starters; columns: idle, eat, celebrate, sleep
+Brasildo (brasildo): gait walk, bones root,body,head,tail1,tail2,tail3,legF,legB
+Aqualin (aqualin): gait walk, bones root,body,head,tail1,tail2,tail3,legF,legB
+Foliaris (foliaris): gait walk, bones root,body,head,tail1,tail2,tail3,legF,legB
+Voltix (voltix): gait dash, bones root,body,head,tail1,tail2,tail3,legF,legB
+Rocanix (rocanix): gait heavy, bones root,body,head,tail1,tail2,tail3,legF,legB
+Plasmax (plasmax_slime): gait bounce, bones root,body,head,tail1,tail2,tail3
+Plasmax (plasmax_orb): gait float, bones root,body,head,tail1,tail2,tail3
+Umbrin (umbrin): gait float, bones root,body,head,tail1,tail2,tail3
+Lúmina (lumina): gait fly, bones root,body,head,tail1,tail2,tail3,wing
+Diamor (diamor): gait walk, bones root,body,head,tail1,tail2,tail3,legF,legB
+Mistor (mistor): gait walk, bones root,body,head,tail1,tail2,tail3,legF,legB

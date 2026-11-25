@@ -4,6 +4,10 @@
   "references": [
     "TamTam.Core",
     "TamTam.Runtime",
+    "Unity.2D.Animation.Runtime",
+    "Unity.RenderPipelines.Universal.Runtime",
+    "Unity.RenderPipelines.Universal.2D.Runtime",
+    "Unity.RenderPipelines.Core.Runtime",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"
   ],

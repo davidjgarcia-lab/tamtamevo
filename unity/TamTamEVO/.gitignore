@@ -20,3 +20,6 @@
 /[Aa]ssets/TamTam/Animation/Forms.meta
 /[Aa]ssets/TamTam/Prefabs/Forms/
 /[Aa]ssets/TamTam/Prefabs/Forms.meta
+
+# Frame captures for GIFs (Tests/PlayMode/StudioPlayTests.Record_GifFrames)
+/[Rr]ecordings/

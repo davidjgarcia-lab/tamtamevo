@@ -1,0 +1,3 @@
+Measured in the Unity 6.3 editor, batch mode, Windows desktop (NOT an Android device).
+EvolutionLab: 1,77 ms/frame (565 fps) at 1920x1080 · batches 68 · draw calls 68 · triangles 3988 · live particles 17
+Arena: 1,81 ms/frame (552 fps) at 1920x1080 · batches 76 · draw calls 76 · triangles 16296 · live particles 9

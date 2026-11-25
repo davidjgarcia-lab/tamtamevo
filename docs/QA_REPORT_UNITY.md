@@ -46,3 +46,27 @@ Unity 6000.3.29f1 · URP 2D · Windows. Pruebas automáticas en `Assets/TamTam/T
 - **Aura de híbrido**: es un disco translúcido plano y se lee como un círculo. Mejorarla con VFX (fase de iluminación/VFX).
 
 Capturas: `docs/media/unity/evolution-lab.png`, `arena-biomes.png`, `nest-house.png`, `chispin-painted-clips.png`.
+
+## Pasada de estudio (2026-11-25, tarde)
+
+| Suite | Resultado |
+|---|---|
+| EditMode (QaTests 335 + paridad 18 + datos 2 + Chispín 3) | **358/358** |
+| PlayMode (`LabPlayTests` 3 + `StudioPlayTests` 6) | **9/9** |
+
+`StudioPlayTests` comprueba que:
+- los 11 iniciales tienen rig de 2D Animation (SpriteSkin con huesos de cuerpo y cabeza), sombra de contacto y VFX de familia, y que reproducen 10 clips sin errores;
+- 3 líneas evolutivas completas (Brasildo · Guerrero, Aqualin · Mimado, Umbrin · Descuidado) llegan a su forma final y aparece un híbrido con aura de partículas;
+- la casa tiene la seta luminosa, el cristal azul y las rocas con musgo, y de noche se encienden sus luces;
+- la Arena funciona en lava, cueva de cristal y setas, con golpe o crítico;
+- el rendimiento queda por debajo de 33 ms;
+- se graban los GIF.
+
+**Rendimiento** (editor de Unity, escritorio Windows, 1920×1080; **no es un Android**): EvolutionLab 1,8 ms/frame (≈565 fps),
+68 draw calls, 4 k triángulos; Arena 1,8 ms/frame (≈550 fps), 76 draw calls, 16 k triángulos.
+
+**Defectos encontrados en esta pasada**
+- Cuelgue nativo de Unity con `ShadowCaster2D` sobre `SpriteSkin` (ClipperOffset2D). Se retiran las sombras proyectadas de las criaturas (PROVISIONAL).
+- Los faroles parpadeantes se quedaban apagados de noche, porque `FlickerLight2D` guardaba la intensidad base del día. Corregido y cubierto por un test.
+- Los bebés salían pequeños en EvolutionLab. Ahora hay encuadre por etapa (`StageFraming`).
+- La emisión automática saturaba el fuego y la luz. Se ha bajado el umbral y la intensidad por familia.
