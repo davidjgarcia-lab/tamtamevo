@@ -23,6 +23,28 @@ namespace TamTam.EditorTools.Environments
         [Serializable] class Geom { public float w, h, wallTop, wallBottom, floorTop, floorBottom, wallCell, wallX0, floorCellW, floorCellH, floorX0; }
         [Serializable] class Layout { public Placement[] placements; public Geom geom; }
 
+        /// QA fix: soft glows (lamp, brazier) were cut by the canvas edge and showed a rectangle. Caps the alpha of
+        /// semi-transparent pixels (glow, not the solid drawing) so it reaches 0 at the border. Idempotent (min).
+        public static bool FeatherGlow(string png)
+        {
+            var t = new Texture2D(2, 2); t.LoadImage(File.ReadAllBytes(png));
+            var px = t.GetPixels32(); int w = t.width, h = t.height; bool changed = false;
+            float band = Mathf.Min(w, h) * 0.22f;
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < w; x++)
+                {
+                    int i = y * w + x; var c = px[i];
+                    if (c.a == 0 || c.a >= 160) continue;
+                    float d = Mathf.Min(Mathf.Min(x, w - 1 - x), Mathf.Min(y, h - 1 - y));
+                    float k = Mathf.Clamp01(d / band); k = k * k * (3 - 2 * k);
+                    byte cap = (byte)Mathf.FloorToInt(160 * k);
+                    if (c.a > cap) { c.a = cap; px[i] = c; changed = true; }
+                }
+            if (changed) { t.SetPixels32(px); t.Apply(); File.WriteAllBytes(png, t.EncodeToPNG()); }
+            UnityEngine.Object.DestroyImmediate(t);
+            return changed;
+        }
+
         [MenuItem("TamTam/Entornos/1 · Importar assets de la casa-nido")]
         public static void ImportAll()
         {
@@ -34,6 +56,7 @@ namespace TamTam.EditorTools.Environments
                 var meta = list.assets.FirstOrDefault(a => a.path == rel);
                 var ti = (TextureImporter)AssetImporter.GetAtPath(png);
                 if (ti == null) continue;
+                if (rel.StartsWith("Furniture/")) FeatherGlow(png);
                 ti.textureType = TextureImporterType.Sprite; ti.spriteImportMode = SpriteImportMode.Single;
                 ti.mipmapEnabled = false; ti.alphaIsTransparency = true; ti.textureCompression = TextureImporterCompression.CompressedHQ;
                 ti.wrapMode = rel.StartsWith("Walls/") || rel.StartsWith("Floors/") ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
@@ -90,6 +113,11 @@ namespace TamTam.EditorTools.Environments
                 sr.transform.localPosition = new Vector3(x / PPU, -y / PPU, 0);
                 sr.sprite = S(meta.path); sr.flipX = p.mirrored;
                 sr.sortingOrder = p.layer == "wall" ? -50 : p.layer == "rug" ? -40 : 10 * (p.y + 1);
+                if (p.layer != "wall" && p.layer != "rug")
+                {
+                    var gs = sr.gameObject.AddComponent<GroundShadow>();
+                    gs.target = sr; gs.contactOpacity = 0.35f; gs.ambientOpacity = 0.2f; gs.widthFactor = 0.7f; gs.sortingOrder = -2;
+                }
             }
             Directory.CreateDirectory(Path.GetDirectoryName(ScenePath));
             EditorSceneManager.SaveScene(scene, ScenePath);

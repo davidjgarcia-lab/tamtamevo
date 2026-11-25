@@ -141,6 +141,7 @@ namespace TamTam.EditorTools.Chispin
             pmat.SetColor("_RefAccent", refAccent); pmat.SetColor("_AccentColor", refAccent);
             pmat.SetColor("_RefGlow", refAccent); pmat.SetColor("_GlowColor", refAccent);
             pmat.SetFloat("_EmissionStrength", 1.1f);
+            pmat.SetFloat("_GroundAO", 0.35f); pmat.SetFloat("_GroundAOHeight", 0.5f);
             AssetDatabase.DeleteAsset("Assets/TamTam/Materials/CreatureLitPainted.mat");
             AssetDatabase.CreateAsset(pmat, "Assets/TamTam/Materials/CreatureLitPainted.mat");
 
@@ -242,6 +243,7 @@ namespace TamTam.EditorTools.Chispin
             cr.breathBone = bones["body"]; cr.eyeBones = new Transform[0];
             cr.embers = ps; cr.blinkOverlay = eyesClosed;
             cr.tinted = eyesClosed ? new Renderer[] { sr, eyesClosed.GetComponent<SpriteRenderer>() } : new Renderer[] { sr };
+            var gshadow = go.AddComponent<GroundShadow>(); gshadow.target = sr; gshadow.widthFactor = 0.55f;
 
             Directory.CreateDirectory(Path.GetDirectoryName(PrefabPath));
             PrefabUtility.SaveAsPrefabAsset(go, PrefabPath);
@@ -520,13 +522,6 @@ namespace TamTam.EditorTools.Chispin
             var bgGo = new GameObject("Backdrop"); bgGo.transform.position = new Vector3(0, 1.15f, 5);
             var bgsr = bgGo.AddComponent<SpriteRenderer>(); bgsr.sprite = bg; bgsr.sortingOrder = -100;
 
-            var shadow = ChispinBuilder.GeneratedSprite("ground_shadow", 256, 64, 256 / 4.2f, (u, v) =>
-            {
-                float d = Mathf.Pow((u - 0.5f) / 0.5f, 2) + Mathf.Pow((v - 0.5f) / 0.5f, 2);
-                return new Color(0.04f, 0.02f, 0.06f, Mathf.Clamp01(1 - d) * 0.6f);
-            });
-            var shGo = new GameObject("GroundShadow"); shGo.transform.position = new Vector3(-0.4f, 0.03f, 0);
-            var shsr = shGo.AddComponent<SpriteRenderer>(); shsr.sprite = shadow; shsr.sortingOrder = -10;
 
             var chispin = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath));
             chispin.transform.position = new Vector3(-0.45f, 0.0f, 0); chispin.transform.localScale = Vector3.one * 0.85f;
@@ -579,6 +574,7 @@ namespace TamTam.EditorTools.Chispin
                 var clip = AssetDatabase.LoadAssetAtPath<AnimationClip>($"{AnimDir}/{id}.anim");
                 clip.SampleAnimation(rig.gameObject, poseTime.TryGetValue(id, out var t) ? t : clip.length * 0.4f);
                 if (dm != null && dmUpdate != null) dmUpdate.Invoke(dm, null);
+                foreach (var gs in UnityEngine.Object.FindObjectsByType<GroundShadow>(FindObjectsSortMode.None)) gs.Refresh();
                 cam.Render();
                 RenderTexture.active = rt; read.ReadPixels(new Rect(0, 0, W, H), 0, 0); read.Apply();
                 sheet.SetPixels((i % COLS) * W, (rows - 1 - i / COLS) * H, W, H, read.GetPixels());

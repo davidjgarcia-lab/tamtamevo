@@ -17,6 +17,10 @@ namespace TamTam.Evolution
         public GameObject Current { get; private set; }
         public string CurrentName { get; private set; } = "Chispín";
         public bool CurrentIsExact { get; private set; } = true;
+        /// Genome shown now (null for the baby).
+        public Genome CurrentGenome { get; private set; }
+        /// Raised after every Show (habitat backdrops, UI).
+        public event System.Action Shown;
 
         // Same as STAGE_SCALE in apps/mobile/src/creature/useCreature.ts.
         public static float StageScale(string stage) => stage switch { "child" => 1.1f, "juvenile" => 1.22f, "adult" => 1.34f, _ => 1f };
@@ -26,21 +30,18 @@ namespace TamTam.Evolution
             if (Current) Destroy(Current);
             var parent = anchor ? anchor : transform;
             var art = genome != null && stage != "baby" && familyArt ? familyArt.Get(genome, stage) : null;
+            CurrentGenome = stage == "baby" ? null : genome;
             if (art)
             {
-                Current = new GameObject("Tamtam_" + art.name);
-                Current.transform.SetParent(parent, false);
+                var pc = familyArt.Spawn(art, parent, "Tamtam_" + art.name);
+                Current = pc.gameObject;
                 Current.transform.localScale = Vector3.one * StageScale(stage);
-                var sr = new GameObject("sprite").AddComponent<SpriteRenderer>();
-                sr.transform.SetParent(Current.transform, false);
-                sr.sprite = art;
-                var pc = Current.AddComponent<PaintedCreature>();
-                pc.body = sr;
                 var fam = FamilyArt.Dominant(genome);
                 pc.floating = fam == Family.shadow || fam == Family.light || fam == Family.plasma;
                 pc.SetMutation(genome.mutation);
                 CurrentName = Genetics.FormName(genome, 1);
                 CurrentIsExact = true;
+                Shown?.Invoke();
                 return;
             }
             GameObject prefab;
@@ -57,12 +58,14 @@ namespace TamTam.Evolution
             Current = Instantiate(prefab, parent);
             Current.transform.localPosition = Vector3.zero;
             Current.transform.localScale = Vector3.one * StageScale(stage);
+            if (!Current.GetComponent<GroundShadow>()) Current.AddComponent<GroundShadow>();
             var rig = Current.GetComponentInChildren<CreatureRig>();
             if (rig && genome != null && stage != "baby")
             {
                 var p = GenomePalette.Of(genome);
                 rig.SetPalette(p.baseC, p.accent, p.eye, p.glow, emission);
             }
+            Shown?.Invoke();
         }
 
         public void Play(string clip)

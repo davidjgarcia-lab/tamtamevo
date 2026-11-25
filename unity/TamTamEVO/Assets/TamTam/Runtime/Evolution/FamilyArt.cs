@@ -13,6 +13,24 @@ namespace TamTam.Evolution
     {
         [Serializable] public class Entry { public Family family; public string stage; public Sprite sprite; }
         public List<Entry> entries = new List<Entry>();
+        [Tooltip("TamTam/CreatureLit with ground contact occlusion: lit by 2D lights, darker where the feet meet the floor.")]
+        public Material material;
+
+        /// Builds a painted Tamtam: sprite (pivot at the feet), procedural animation and contact shadow + AO.
+        public PaintedCreature Spawn(Sprite sprite, Transform parent, string name)
+        {
+            var root = new GameObject(name);
+            root.transform.SetParent(parent, false);
+            var sr = new GameObject("sprite").AddComponent<SpriteRenderer>();
+            sr.transform.SetParent(root.transform, false);
+            sr.sprite = sprite;
+            if (material) sr.sharedMaterial = material;
+            var pc = root.AddComponent<PaintedCreature>();
+            pc.body = sr;
+            var gs = root.AddComponent<GroundShadow>();
+            gs.target = sr; gs.lift = sr.transform;
+            return pc;
+        }
 
         /// Tamtam stage → art stage (the baby is the painted Chispín).
         public static string ArtStage(string stage) => stage switch { "child" => "initial", "juvenile" => "intermediate", "adult" => "final", _ => "initial" };

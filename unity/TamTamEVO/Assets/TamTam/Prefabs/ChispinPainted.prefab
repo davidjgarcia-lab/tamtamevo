@@ -5193,6 +5193,7 @@ GameObject:
   - component: {fileID: 2845819427248018129}
   - component: {fileID: 949677441376629550}
   - component: {fileID: 2617505564808913328}
+  - component: {fileID: 1390162240120877113}
   m_Layer: 0
   m_Name: ChispinPainted
   m_TagString: Untagged
@@ -5426,6 +5427,24 @@ MonoBehaviour:
   seed: 1
   velocity: 0
   crossFade: 0.15
+--- !u!114 &1390162240120877113
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6446222775167461610}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea6b2186fddd4a84f8ccd1d4c981c275, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TamTam.Runtime::TamTam.GroundShadow
+  target: {fileID: 3208299071001301995}
+  lift: {fileID: 0}
+  contactOpacity: 0.55
+  ambientOpacity: 0.32
+  widthFactor: 0.55
+  sortingOrder: -5
 --- !u!1 &6849489086797538328
 GameObject:
   m_ObjectHideFlags: 0

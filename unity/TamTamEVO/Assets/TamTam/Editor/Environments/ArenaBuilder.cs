@@ -15,7 +15,7 @@ namespace TamTam.EditorTools.Environments
         const string BiomeDir = "Assets/TamTam/Art/Environments/Biomes";
         const string ScenePath = "Assets/TamTam/Scenes/Arena.unity";
 
-        static Sprite[] ImportBiomes()
+        public static Sprite[] ImportBiomes()
         {
             var sprites = Directory.GetFiles(BiomeDir, "*.png").Select(p => p.Replace('\\', '/')).OrderBy(p => p).Select(p =>
             {
@@ -29,16 +29,20 @@ namespace TamTam.EditorTools.Environments
             return sprites;
         }
 
-        static SpriteRenderer Fighter(string name, float x, bool facingLeft)
+        static SpriteRenderer Fighter(FamilyArt art, string name, float x, bool facingLeft)
         {
-            var root = new GameObject(name);
-            root.transform.position = new Vector3(x, -2.2f, 0);
-            root.transform.localScale = Vector3.one * 1.15f;
-            var sr = new GameObject("sprite").AddComponent<SpriteRenderer>();
-            sr.transform.SetParent(root.transform, false);
-            sr.flipX = facingLeft; sr.sortingOrder = 10;
-            var pc = root.AddComponent<PaintedCreature>(); pc.body = sr;
-            return sr;
+            var pc = art.Spawn(null, null, name);
+            pc.transform.position = new Vector3(x, -2.2f, 0);
+            pc.transform.localScale = Vector3.one * 1.05f;
+            pc.body.flipX = facingLeft; pc.body.sortingOrder = 10;
+            return pc.body;
+        }
+
+        static void AddPoint(string name, Vector3 pos, Color c, float intensity, float radius)
+        {
+            var l = new GameObject(name).AddComponent<Light2D>();
+            l.transform.position = pos; l.lightType = Light2D.LightType.Point; l.color = c; l.intensity = intensity;
+            l.pointLightOuterRadius = radius; l.pointLightInnerRadius = radius * 0.15f; l.falloffIntensity = 0.6f;
         }
 
         [MenuItem("TamTam/Entornos/3 · Construir escena Arena (biomas)")]
@@ -54,15 +58,17 @@ namespace TamTam.EditorTools.Environments
             var vol = new GameObject("Global Volume").AddComponent<Volume>();
             vol.isGlobal = true; vol.sharedProfile = RenderSetup.EnsurePostProfile();
             var light = new GameObject("Global Light 2D").AddComponent<Light2D>();
-            light.lightType = Light2D.LightType.Global; light.intensity = 1f;
+            light.lightType = Light2D.LightType.Global; light.intensity = 0.9f;
 
             var bg = new GameObject("Backdrop").AddComponent<SpriteRenderer>();
             bg.sortingOrder = -100;
             var demo = new GameObject("Arena").AddComponent<ArenaDemo>();
             demo.backdrop = bg; demo.biomes = biomes; demo.cam = cam;
             demo.familyArt = AssetDatabase.LoadAssetAtPath<FamilyArt>("Assets/TamTam/Data/FamilyArt.asset");
-            demo.left = Fighter("Fighter_L", -3.2f, false);
-            demo.right = Fighter("Fighter_R", 3.2f, true);
+            demo.left = Fighter(demo.familyArt, "Fighter_L", -3.2f, false);
+            demo.right = Fighter(demo.familyArt, "Fighter_R", 3.2f, true);
+            AddPoint("Key", new Vector3(-4f, 3.5f, 0), new Color(1f, 0.92f, 0.8f), 0.45f, 9f);
+            AddPoint("Rim", new Vector3(4.5f, 2.5f, 0), new Color(0.6f, 0.7f, 1f), 0.3f, 6f);
             demo.Apply();
             EditorSceneManager.SaveScene(scene, ScenePath);
             var list = EditorBuildSettings.scenes.Where(s => s.path != ScenePath).ToList();
@@ -89,6 +95,7 @@ namespace TamTam.EditorTools.Environments
                 typeof(ArenaDemo).GetField("famL", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(demo, i % fams.Length);
                 typeof(ArenaDemo).GetField("famR", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(demo, (i + 5) % fams.Length);
                 demo.SetBiome(i);
+                foreach (var gs in Object.FindObjectsByType<GroundShadow>(FindObjectsSortMode.None)) gs.Refresh();
                 cam.Render();
                 RenderTexture.active = rt; read.ReadPixels(new Rect(0, 0, W, H), 0, 0); read.Apply();
                 sheet.SetPixels((i % COLS) * W, (rows - 1 - i / COLS) * H, W, H, read.GetPixels());

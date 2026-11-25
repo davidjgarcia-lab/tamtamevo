@@ -20,6 +20,8 @@ Shader "TamTam/CreatureLit"
         _Emission("Emission (genome / lustre)", Range(0, 2)) = 1
         _EmissionStrength("Emission HDR boost", Range(0, 6)) = 1.6
         _Iridescence("Iridescence", Range(0, 1)) = 0
+        _GroundAO("Ground contact occlusion", Range(0, 1)) = 0
+        _GroundAOHeight("Ground AO height (object units)", Float) = 0.6
         [HideInInspector] _Color("Tint", Color) = (1,1,1,1)
         [HideInInspector] _RendererColor("RendererColor", Color) = (1,1,1,1)
         [HideInInspector] _AlphaTex("External Alpha", 2D) = "white" {}
@@ -31,7 +33,7 @@ Shader "TamTam/CreatureLit"
             CBUFFER_START(UnityPerMaterial) \
                 half4 _Color; half4 _BaseColor; half4 _AccentColor; half4 _GlowColor; half4 _EyeColor; \
                 half4 _RefBase; half4 _RefAccent; half4 _RefGlow; \
-                half _Emission; half _EmissionStrength; half _Iridescence; \
+                half _Emission; half _EmissionStrength; half _Iridescence; half _GroundAO; half _GroundAOHeight; \
             CBUFFER_END
     ENDHLSL
 
@@ -55,7 +57,7 @@ Shader "TamTam/CreatureLit"
             #pragma multi_compile _ SKINNED_SPRITE
 
             struct Attributes { COMMON_2D_INPUTS half4 color : COLOR; UNITY_SKINNED_VERTEX_INPUTS };
-            struct Varyings { COMMON_2D_LIT_OUTPUTS half4 color : COLOR; };
+            struct Varyings { COMMON_2D_LIT_OUTPUTS half4 color : COLOR; float aoY : TEXCOORD7; };
 
             #include "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/Lit2DCommon.hlsl"
             TEXTURE2D(_TintMask); SAMPLER(sampler_TintMask);
@@ -68,6 +70,7 @@ Shader "TamTam/CreatureLit"
                 input.positionOS = UnityFlipSprite(input.positionOS, unity_SpriteProps.xy);
                 Varyings o = CommonLitVertex(input);
                 o.color = input.color * _Color * unity_SpriteColor;
+                o.aoY = input.positionOS.y;
                 return o;
             }
 
@@ -111,6 +114,9 @@ Shader "TamTam/CreatureLit"
                 half3 film = 0.5h + 0.5h * cos(ph + half3(0.0h, 2.1h, 4.2h));
                 col = lerp(col, col * (0.55h + film), _Iridescence * m.r * 0.6h);
                 half4 main = input.color * half4(col, tex.a);
+                // Contact occlusion: the painting darkens softly where it meets the ground (object y = 0 at the feet).
+                half ao = saturate(input.aoY / max(_GroundAOHeight, 0.01h));
+                main.rgb *= lerp(1.0h - _GroundAO, 1.0h, ao * ao * (3.0h - 2.0h * ao));
 
                 SurfaceData2D surfaceData;
                 InputData2D inputData;

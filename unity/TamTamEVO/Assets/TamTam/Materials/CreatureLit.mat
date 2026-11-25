@@ -44,6 +44,8 @@ Material:
     - _Emission: 1
     - _EmissionStrength: 1.6
     - _EnableExternalAlpha: 0
+    - _GroundAO: 0
+    - _GroundAOHeight: 0.6
     - _Iridescence: 0
     m_Colors:
     - _AccentColor: {r: 1, g: 0.47843137, b: 0.14117648, a: 1}

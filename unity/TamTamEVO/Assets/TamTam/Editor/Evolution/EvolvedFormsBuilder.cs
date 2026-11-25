@@ -52,16 +52,50 @@ namespace TamTam.EditorTools.Evolution
                 ti.mipmapEnabled = true; ti.alphaIsTransparency = true; ti.textureCompression = TextureImporterCompression.CompressedHQ;
                 var st = new TextureImporterSettings(); ti.ReadTextureSettings(st);
                 float height = parts[1] == "final" ? 3.0f : parts[1] == "intermediate" ? 2.7f : 2.5f;
-                st.spritePixelsPerUnit = tex.height / height; st.spriteAlignment = (int)SpriteAlignment.BottomCenter;
+                // QA fix: the sheets have transparent margins, so "bottom centre" left the creatures floating.
+                // Size by the visible body and put the pivot on the lowest opaque row (the feet).
+                var body = OpaqueBounds(tex);
+                st.spritePixelsPerUnit = body.height / height;
+                st.spriteAlignment = (int)SpriteAlignment.Custom;
+                st.spritePivot = new Vector2(body.center.x / tex.width, body.yMin / (float)tex.height);
                 st.spriteMeshType = SpriteMeshType.Tight;
                 ti.SetTextureSettings(st); ti.SaveAndReimport();
                 UnityEngine.Object.DestroyImmediate(tex);
                 art.entries.Add(new FamilyArt.Entry { family = fam, stage = parts[1], sprite = AssetDatabase.LoadAssetAtPath<Sprite>(png) });
             }
+            art.material = PaintedMaterial();
             EditorUtility.SetDirty(art);
             AssetDatabase.SaveAssets();
             Debug.Log($"TamTam: painted family art imported ({art.entries.Count} sprites, expected 30).");
             return art;
+        }
+
+        /// Pixel rect of the visible creature (alpha > 0.5), ignoring isolated specks: rows/columns need ≥ 3 pixels.
+        public static RectInt OpaqueBounds(Texture2D tex)
+        {
+            var px = tex.GetPixels32(); int w = tex.width, h = tex.height;
+            var rows = new int[h]; var cols = new int[w];
+            for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) if (px[y * w + x].a > 128) { rows[y]++; cols[x]++; }
+            int y0 = 0, y1 = h - 1, x0 = 0, x1 = w - 1;
+            while (y0 < h - 1 && rows[y0] < 3) y0++;
+            while (y1 > y0 && rows[y1] < 3) y1--;
+            while (x0 < w - 1 && cols[x0] < 3) x0++;
+            while (x1 > x0 && cols[x1] < 3) x1--;
+            return new RectInt(x0, y0, x1 - x0 + 1, y1 - y0 + 1);
+        }
+
+        /// Material for painted Tamtams: 2D-lit CreatureLit with contact occlusion at the feet.
+        public static Material PaintedMaterial()
+        {
+            const string path = "Assets/TamTam/Materials/PaintedCreature.mat";
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (!mat) { mat = new Material(Shader.Find("TamTam/CreatureLit")); AssetDatabase.CreateAsset(mat, path); }
+            mat.shader = Shader.Find("TamTam/CreatureLit");
+            mat.SetFloat("_GroundAO", 0.38f);
+            mat.SetFloat("_GroundAOHeight", 0.55f);
+            mat.SetFloat("_Emission", 0);
+            EditorUtility.SetDirty(mat);
+            return mat;
         }
 
         static CatalogJson LoadCatalog() => JsonUtility.FromJson<CatalogJson>(File.ReadAllText($"{DataDir}/catalog.json"));
@@ -200,6 +234,13 @@ namespace TamTam.EditorTools.Evolution
             EditorUtility.DisplayDialog("TamTam", "Actualizado: arte pintado de las 10 familias, formas evolucionadas, escena EvolutionLab y casa-nido.\nAbre Assets/TamTam/Scenes/EvolutionLab.unity y pulsa Play.", "Vale");
         }
 
+        static void Lights(Vector3 pos, Color c, float intensity, float radius, string name)
+        {
+            var l = new GameObject(name).AddComponent<Light2D>();
+            l.transform.position = pos; l.lightType = Light2D.LightType.Point; l.color = c; l.intensity = intensity;
+            l.pointLightOuterRadius = radius; l.pointLightInnerRadius = radius * 0.15f; l.falloffIntensity = 0.6f;
+        }
+
         // ── Lab scene ──────────────────────────────────────────────────────
         [MenuItem("TamTam/Evoluciones/3 · Crear escena EvolutionLab")]
         public static void BuildScene()
@@ -207,17 +248,40 @@ namespace TamTam.EditorTools.Evolution
             RenderSetup.Setup();
             var catalog = LoadOrCreateCatalog();
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            // QA fix: the creature filled ~40% of the frame. Frame an adult (≈4 units with the stage scale) with the
+            // feet at 18% from the bottom, on the floor of the habitat.
             var cam = new GameObject("Main Camera").AddComponent<Camera>();
-            cam.tag = "MainCamera"; cam.orthographic = true; cam.orthographicSize = 3.2f;
-            cam.transform.position = new Vector3(0, 0.6f, -10);
+            cam.tag = "MainCamera"; cam.orthographic = true; cam.orthographicSize = 2.7f;
+            cam.transform.position = new Vector3(0, 1.73f, -10);
             cam.clearFlags = CameraClearFlags.SolidColor; cam.backgroundColor = new Color32(0x17, 0x13, 0x2B, 255);
-            cam.gameObject.AddComponent<UniversalAdditionalCameraData>();
+            cam.allowHDR = true;
+            cam.gameObject.AddComponent<UniversalAdditionalCameraData>().renderPostProcessing = true;
+            var vol = new GameObject("Global Volume").AddComponent<UnityEngine.Rendering.Volume>();
+            vol.isGlobal = true; vol.sharedProfile = RenderSetup.EnsurePostProfile();
             var light = new GameObject("Global Light 2D").AddComponent<Light2D>();
-            light.lightType = Light2D.LightType.Global; light.intensity = 1f;
+            light.lightType = Light2D.LightType.Global; light.intensity = 0.85f; light.color = new Color(0.93f, 0.9f, 1f);
+            Lights(new Vector3(-2.8f, 4.2f, 0), new Color(1f, 0.9f, 0.78f), 0.55f, 7f, "Key");
+            Lights(new Vector3(3.2f, 3.4f, 0), new Color(0.55f, 0.68f, 1f), 0.35f, 4.5f, "Rim");
+
+            var bg = new GameObject("Habitat").AddComponent<SpriteRenderer>();
+            bg.transform.position = new Vector3(0, 1.73f, 5); bg.sortingOrder = -100;
+            var biomes = TamTam.EditorTools.Environments.ArenaBuilder.ImportBiomes();
+            Sprite B(string n) => biomes.FirstOrDefault(s => s.name == n);
             var go = new GameObject("Tamtam");
             var presenter = go.AddComponent<TamtamPresenter>();
             presenter.catalog = catalog;
             presenter.familyArt = AssetDatabase.LoadAssetAtPath<FamilyArt>(FamilyArtPath) ?? ImportFamilyArt();
+            var habitat = new GameObject("HabitatBackdrop").AddComponent<HabitatBackdrop>();
+            habitat.presenter = presenter; habitat.backdrop = bg; habitat.cam = cam;
+            HabitatBackdrop.Fit(bg, cam);
+            habitat.babyHabitat = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/TamTam/Art/Environments/FireDen/fire_den_bg.png") ?? B("lava");
+            habitat.byFamily = new[]
+            {
+                (Family.fire, "lava"), (Family.water, "waterfall"), (Family.plant, "forest"), (Family.electric, "sky_islands"),
+                (Family.rock, "ruins_sunset"), (Family.shadow, "mushroom_shadow"), (Family.light, "sky_islands"),
+                (Family.crystal, "crystal_cave"), (Family.plasma, "crystal_cave"), (Family.mystic, "mushroom_shadow"),
+            }.Select(p => new HabitatBackdrop.Entry { family = p.Item1, sprite = B(p.Item2) }).ToArray();
+            bg.sprite = habitat.babyHabitat; HabitatBackdrop.Fit(bg, cam); // visible in the editor before Play too
             go.AddComponent<EvolutionLabDemo>().presenter = presenter;
             Directory.CreateDirectory(Path.GetDirectoryName(ScenePath));
             EditorSceneManager.SaveScene(scene, ScenePath);

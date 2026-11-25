@@ -103,3 +103,4 @@ MonoBehaviour:
   - family: 5
     stage: intermediate
     sprite: {fileID: 21300000, guid: 2b9cd7868e79d094da4b3358cdf6ce8a, type: 3}
+  material: {fileID: 2100000, guid: 1b560a925d1bda749b685c523856d031, type: 2}

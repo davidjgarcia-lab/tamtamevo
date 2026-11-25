@@ -73,6 +73,10 @@ namespace TamTam.Tests
                     if (c > 0) evolve.Invoke(demo, new[] { profile });
                     for (int f = 0; f < 20; f++) yield return null;
                     Assert.NotNull(presenter.Current, $"{name}: nothing shown at step {c}");
+                    Assert.NotNull(presenter.Current.GetComponent<GroundShadow>(), $"{name} step {c}: no contact shadow");
+                    var pc = presenter.Current.GetComponent<PaintedCreature>();
+                    if (pc && !pc.floating)
+                        Assert.That(Mathf.Abs(pc.body.bounds.min.y - presenter.transform.position.y), Is.LessThan(0.05f), $"{name} step {c}: feet not on the floor");
                     var shot = Grab(cam, W, H);
                     sheet.SetPixels(c * W, (rows - 1 - r) * H, W, H, shot.GetPixels());
                     Object.Destroy(shot);
@@ -86,6 +90,28 @@ namespace TamTam.Tests
             File.WriteAllBytes(Path.Combine(OutDir, "evolution-lab.png"), sheet.EncodeToPNG());
             File.WriteAllText(Path.Combine(OutDir, "evolution-lab.txt"), log.ToString());
             Debug.Log("TamTam: EvolutionLab played\n" + log);
+        }
+
+        [UnityTest]
+        public IEnumerator Arena_FightersStandOnTheFloorInEveryBiome()
+        {
+            yield return Load("Assets/TamTam/Scenes/Arena.unity");
+            var demo = Object.FindFirstObjectByType<ArenaDemo>();
+            Assert.NotNull(demo);
+            for (int i = 0; i < demo.biomes.Length; i++)
+            {
+                demo.SetBiome(i);
+                for (int f = 0; f < 3; f++) yield return null;
+                foreach (var sr in new[] { demo.left, demo.right })
+                {
+                    var pc = sr.GetComponentInParent<PaintedCreature>();
+                    Assert.NotNull(pc.GetComponent<GroundShadow>(), "contact shadow");
+                    if (!pc.floating) Assert.That(Mathf.Abs(sr.bounds.min.y - pc.transform.position.y), Is.LessThan(0.05f), $"{demo.biomes[i].name}: {sr.sprite.name} floats");
+                }
+                var cam = demo.cam; var b = demo.backdrop.bounds;
+                float h = cam.orthographicSize * 2, w = h * cam.aspect;
+                Assert.That(b.size.x >= w - 0.01f && b.size.y >= h - 0.01f, $"{demo.biomes[i].name} does not cover the screen");
+            }
         }
 
         [UnityTest]
