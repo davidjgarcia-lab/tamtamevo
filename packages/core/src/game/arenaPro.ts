@@ -204,3 +204,11 @@ export function narrate(e: { type: string; by?: number; on?: number; dmg?: numbe
     default: return null;
   }
 }
+
+/** Debug: next Arena level now (offers the 2 cards). */
+export function debugArenaLevel(s: GameState): void {
+  const p = arenaPro(s);
+  p.level++;
+  p.xp = 0;
+  if (!p.offer) p.offer = offerCards(s, p.level);
+}

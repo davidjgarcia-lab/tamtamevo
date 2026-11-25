@@ -328,6 +328,12 @@ try {
     await page.getByTestId("battle-exit").click();
     await page.waitForTimeout(400);
   }
+  if (!(await page.getByTestId("arena-cards").isVisible().catch(() => false))) {
+    // Lost every fight (random starter): not enough Arena XP yet — level up from the debug panel to test the cards.
+    await dev("dbg-arena-level");
+    await page.getByTestId("tab-arena").click();
+    await page.waitForTimeout(500);
+  }
   const cardsShown = await page.getByTestId("arena-cards").isVisible().catch(() => false);
   if (cardsShown) {
     await page.getByTestId("arena-cards").scrollIntoViewIfNeeded();
