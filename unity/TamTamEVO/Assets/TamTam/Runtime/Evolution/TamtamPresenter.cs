@@ -32,6 +32,8 @@ namespace TamTam.Evolution
         public bool CurrentIsExact { get; private set; } = true;
         /// Genome shown now (null for the baby).
         public Genome CurrentGenome { get; private set; }
+        /// Stage shown now (baby, child, juvenile, adult).
+        public string CurrentStage { get; private set; } = "baby";
         /// Raised after every Show (habitat backdrops, UI).
         public event System.Action Shown;
 
@@ -44,6 +46,7 @@ namespace TamTam.Evolution
             var parent = anchor ? anchor : transform;
             var art = genome != null && familyArt ? familyArt.Get(genome, stage, line) : null;
             CurrentGenome = genome;
+            CurrentStage = genome == null ? "baby" : stage;
             if (art)
             {
                 var pc = familyArt.Spawn(art, parent, "Tamtam_" + art.name);
@@ -56,7 +59,8 @@ namespace TamTam.Evolution
                 var legs = genome[PartSlot.legs].ToString();
                 var mj = starter?.motion ?? Data?.motions?.FirstOrDefault(x => x.family == legs && x.stage == artStage)?.motion;
                 if (mj != null) pc.motion = mj;
-                pc.SetMutation(genome.mutation);
+                pc.SetLook(fam, genome.mutation);                       // rim, auto-emission, mutation material
+                TamTam.Vfx.FamilyVfx.Attach(pc.transform, fam, pc.body.bounds, pc.body.sortingOrder);
                 if (starter?.eye != null && !string.IsNullOrEmpty(starter.eye.lid)) pc.SetEye(starter.eye);
                 var sec = artStage == "baby" ? null : FamilyArt.Secondary(genome, fam);
                 if (sec.HasValue) pc.SetAura(GenomePalette.Hex(Genetics.Defs[sec.Value].Glow));
@@ -93,7 +97,14 @@ namespace TamTam.Evolution
         {
             if (!Current) return;
             var painted = Current.GetComponent<PaintedCreature>();
-            if (painted) { painted.Play(clip); return; }
+            if (painted)
+            {
+                painted.Play(clip);
+                var b = painted.body.bounds;
+                if (clip == "eat") TamTam.Vfx.GameVfx.Eat(new Vector3(b.max.x - b.size.x * 0.15f, b.center.y + b.extents.y * 0.35f, 0));
+                if (clip == "bathe") TamTam.Vfx.GameVfx.Bath(new Vector3(b.center.x, painted.transform.position.y, 0), b.size.x);
+                return;
+            }
             var rig = Current.GetComponentInChildren<CreatureRig>();
             if (rig) rig.Play(clip);
         }

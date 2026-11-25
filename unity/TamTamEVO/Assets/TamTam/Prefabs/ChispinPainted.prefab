@@ -5774,6 +5774,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: TamTam.Runtime::TamTam.FlickerLight2D
   amount: 0.18
   speed: 2.6
+  baseIntensity: -1
 --- !u!1 &8088105857885511713
 GameObject:
   m_ObjectHideFlags: 0

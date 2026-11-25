@@ -29,6 +29,21 @@ namespace TamTam.Evolution
             pc.body = sr;
             var gs = root.AddComponent<GroundShadow>();
             gs.target = sr; gs.lift = sr.transform;
+            if (sprite) pc.BindRig(PuppetSkin.Bind(sr));   // 2D Animation auto-rig (bones + mesh baked on import)
+            // PROVISIONAL: no projected ShadowCaster2D on creatures. URP 17.3's SpriteSkin shadow-shape provider crashes
+            // natively (ClipperOffset2D in ShadowMesh2D.SetShape) with the rig mesh. Creatures keep contact shadow + AO.
+            return pc;
+        }
+
+        /// Re-spawns with another sprite (rig bones are per sprite), keeping position and parent.
+        public PaintedCreature Respawn(PaintedCreature old, Sprite sprite)
+        {
+            var parent = old ? old.transform.parent : null; var pos = old ? old.transform.position : Vector3.zero;
+            var scale = old ? old.transform.localScale : Vector3.one; var name = old ? old.name : "Tamtam";
+            bool flip = old && old.body && old.body.flipX; int order = old && old.body ? old.body.sortingOrder : 0;
+            if (old) { if (Application.isPlaying) Destroy(old.gameObject); else DestroyImmediate(old.gameObject); }
+            var pc = Spawn(sprite, parent, name);
+            pc.transform.position = pos; pc.transform.localScale = scale; pc.body.flipX = flip; pc.body.sortingOrder = order;
             return pc;
         }
 

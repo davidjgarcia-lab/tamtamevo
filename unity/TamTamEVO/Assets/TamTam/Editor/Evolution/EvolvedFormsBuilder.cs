@@ -41,6 +41,7 @@ namespace TamTam.EditorTools.Evolution
                 AssetDatabase.CreateAsset(art, FamilyArtPath);
             }
             art.entries.Clear();
+            var rigCatalog = JsonUtility.FromJson<TamTam.Evolution.CatalogJson>(File.ReadAllText($"{DataDir}/catalog.json"));
             foreach (var png in Directory.GetFiles(FamilyArtDir, "*.png").Select(p => p.Replace('\\', '/')))
             {
                 var name = Path.GetFileNameWithoutExtension(png);
@@ -60,6 +61,9 @@ namespace TamTam.EditorTools.Evolution
                 st.spritePivot = new Vector2(body.center.x / tex.width, body.yMin / (float)tex.height);
                 st.spriteMeshType = SpriteMeshType.Tight;
                 ti.SetTextureSettings(st); ti.SaveAndReimport();
+                // Technical art: baked normal map (2.5D volume under 2D lights) + 2D Animation auto-rig (bones, mesh, weights).
+                Rendering.NormalMapBaker.Attach(ti, Rendering.NormalMapBaker.Bake(png));
+                Animation.PuppetRigBuilder.Rig(png, ti, Animation.PuppetRigBuilder.ProfileFor(name, rigCatalog));
                 UnityEngine.Object.DestroyImmediate(tex);
                 art.entries.Add(new FamilyArt.Entry { family = fam, stage = parts[1], sprite = AssetDatabase.LoadAssetAtPath<Sprite>(png) });
             }
@@ -227,6 +231,8 @@ namespace TamTam.EditorTools.Evolution
         [MenuItem("TamTam/Actualizar todo (criaturas, evoluciones y entornos)", priority = 0)]
         public static void UpdateEverything()
         {
+            Rendering.StyleSetup.CreateProfiles();
+            VfxTools.VfxLibraryBuilder.Build();
             ImportFamilyArt();
             BuildAll();
             BuildScene();
@@ -256,12 +262,13 @@ namespace TamTam.EditorTools.Evolution
             cam.clearFlags = CameraClearFlags.SolidColor; cam.backgroundColor = new Color32(0x17, 0x13, 0x2B, 255);
             cam.allowHDR = true;
             cam.gameObject.AddComponent<UniversalAdditionalCameraData>().renderPostProcessing = true;
-            var vol = new GameObject("Global Volume").AddComponent<UnityEngine.Rendering.Volume>();
-            vol.isGlobal = true; vol.sharedProfile = RenderSetup.EnsurePostProfile();
+            cam.gameObject.AddComponent<TamTam.Vfx.CameraShake>();
+            Rendering.StyleSetup.AddVolumes(Rendering.StyleSetup.SceneLook.EvolutionLab);
             var light = new GameObject("Global Light 2D").AddComponent<Light2D>();
             light.lightType = Light2D.LightType.Global; light.intensity = 0.85f; light.color = new Color(0.93f, 0.9f, 1f);
-            Lights(new Vector3(-2.8f, 4.2f, 0), new Color(1f, 0.9f, 0.78f), 0.55f, 7f, "Key");
-            Lights(new Vector3(3.2f, 3.4f, 0), new Color(0.55f, 0.68f, 1f), 0.35f, 4.5f, "Rim");
+            // Style guide §3: one key light from the upper left (casts the 2D shadows), cool back light on the right.
+            Rendering.StyleSetup.Point("Key", new Vector3(-2.8f, 4.2f, 0), "#FFE6C8", 0.55f, 7f, shadows: true);
+            Rendering.StyleSetup.Point("Rim", new Vector3(3.2f, 3.4f, 0), "#86A8FF", 0.35f, 4.5f);
 
             var bg = new GameObject("Habitat").AddComponent<SpriteRenderer>();
             bg.transform.position = new Vector3(0, 1.73f, 5); bg.sortingOrder = -100;
@@ -284,6 +291,7 @@ namespace TamTam.EditorTools.Evolution
             }.Select(p => new HabitatBackdrop.Entry { family = p.Item1, sprite = B(p.Item2) }).ToArray();
             bg.sprite = habitat.babyHabitat; HabitatBackdrop.Fit(bg, cam); // visible in the editor before Play too
             go.AddComponent<EvolutionLabDemo>().presenter = presenter;
+            cam.gameObject.AddComponent<StageFraming>().presenter = presenter;   // UX: frame babies as large as adults
             Directory.CreateDirectory(Path.GetDirectoryName(ScenePath));
             EditorSceneManager.SaveScene(scene, ScenePath);
             Debug.Log($"TamTam: {ScenePath} created. Press Play and use the buttons to evolve with different care styles.");
