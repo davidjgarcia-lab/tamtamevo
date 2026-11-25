@@ -22,12 +22,25 @@ namespace TamTam.Evolution
         public string id, name, element, accent, eye, glow, particleShape, particleColor, suffix, skill, locomotion;
         public string[] bases, prefixes;
     }
+    [Serializable] public class MotionJson
+    {
+        public float bounce, sway, jitter, tail, tilt, breath, tempo = 1, lift, wave, flap, shake, speed = 1;
+        public bool @float; public string gait;
+    }
+    [Serializable] public class EyeJson { public float x, y, r; public string lid; }
+    [Serializable] public class StarterJson
+    {
+        public string id, family, species, title, favoriteFood, art; public int variant; public string[] traits, lines;
+        public EyeJson eye; public MotionJson motion; public GenomeJson genome;
+    }
+    [Serializable] public class StageMotionJson { public string family, stage, gait; public MotionJson motion; }
     [Serializable] public class AssemblyJson { public string[] order; public float floatBodyLift; public string floatBone; }
     [Serializable] public class CatalogJson
     {
         public int version; public string note; public double combinations;
         public FamilyJson[] families; public string[] eyeStyles, patterns, mutations;
         public RigJson skeleton; public LibraryEntry[] library; public AssemblyJson assembly;
+        public StarterJson[] starters; public StageMotionJson[] motions;
     }
     [Serializable] public class GenomeJson
     {

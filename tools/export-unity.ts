@@ -5,10 +5,10 @@ import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import {
   AFFINITY_WEIGHTS, CHISPIN_GENOME, EYE_STYLES, FAMILIES, FAMILY_IDS, formName, genomeSpace, genomeStats, MUTATIONS, PATTERNS, rollEvolution,
-  type CareProfile, type Genome,
+  GAITS, motionFor, STARTERS, starterGenome, type CareProfile, type Genome,
 } from "../packages/core/src/index.ts";
 import {
-  backParts, bodyParts, chispinRig, eyeParts, FAMILY_COLORS, genomePalette, genomeRig, headParts, legParts, patternParts, SHARED_PART_IDS, tailParts,
+  backParts, bodyParts, chispinRig, eyeParts, FAMILY_COLORS, genomePalette, genomeRig, headParts, legParts, patternParts, SHARED_PART_IDS, STARTER_EYES, tailParts,
 } from "../packages/art/src/index.ts";
 
 type AnyPart = { id?: string; bone: string; d: string; z: number; fill?: Paint; stroke?: Paint; strokeWidth?: number; blur?: number; emissive?: boolean; sheen?: boolean; face?: { slot: string; states: string[] }; tiers?: [number, number] };
@@ -57,6 +57,15 @@ const catalog = {
   }),
   eyeStyles: [...EYE_STYLES], patterns: [...PATTERNS], mutations: [...MUTATIONS],
   skeleton, library,
+  /** Starters (egg hatches one at random), with their personality and baby motion; gaits per family/stage. */
+  starters: STARTERS.map((st) => {
+    const art = st.family === "plasma" && st.variant === 1 ? "plasma_baby2" : `${st.family}_baby`;
+    const eye = STARTER_EYES[art];
+    return { id: st.id, family: st.family, variant: st.variant, species: st.species, title: st.title, traits: st.traitLabels, favoriteFood: st.favoriteFood,
+      art, eye: eye ?? null, motion: motionFor(st.family, "baby", st.motion), genome: starterGenome(st),
+      lines: [...st.lines.happy, ...st.lines.bored, ...st.lines.hungry, ...st.lines.lonely] };
+  }),
+  motions: FAMILY_IDS.flatMap((f) => (["initial", "intermediate", "final"] as const).map((stage) => ({ family: f, stage, gait: GAITS[f][stage], motion: motionFor(f, stage) }))),
   /** Assembly rules (mirror of genomeRig in packages/art/src/modular/build.ts). */
   assembly: { order: ["shared", "body", "head", "eyes", "legs", "tail", "back", "pattern"], floatBodyLift: 14, floatBone: "body" },
 };

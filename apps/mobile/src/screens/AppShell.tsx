@@ -89,7 +89,7 @@ export function AppShell() {
       <View style={s.top}>
         <Pressable style={s.ribbon} onPress={() => t && setSheet("profile")} accessibilityRole="button" accessibilityLabel={t ? `Ficha de ${t.name}` : "Huevo"} testID="profile">
           <Text style={s.name} numberOfLines={1}>{t ? t.name : state.phase === "naming" ? "¡Ha nacido!" : "Tu primer huevo"}</Text>
-          <Text style={s.sub}>{t ? `${t.formName ?? "Chispín"} · ${STAGE[t.stage]} · Cuidador nv ${lvl}` : "Brasálido · en casa"}</Text>
+          <Text style={s.sub}>{t ? `${t.formName ?? "Chispín"} · ${STAGE[t.stage]} · Cuidador nv ${lvl}` : "Huevo · en casa"}</Text>
           <View style={s.xpTrack} accessibilityLabel={`Nivel de cuidador ${lvl}`}>
             <View style={[s.xpFill, { width: `${xpPct}%` }]} />
           </View>

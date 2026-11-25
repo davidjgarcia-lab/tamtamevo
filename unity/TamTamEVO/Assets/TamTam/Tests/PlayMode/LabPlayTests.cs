@@ -47,7 +47,8 @@ namespace TamTam.Tests
             var presenter = demo.presenter;
             Assert.NotNull(presenter.catalog, "Tamtam has no Catalog assigned");
             Assert.NotNull(presenter.familyArt, "Tamtam has no Family Art assigned");
-            Assert.AreEqual(30, presenter.familyArt.entries.FindAll(e => e.sprite).Count, "FamilyArt sprites");
+            Assert.AreEqual(41, presenter.familyArt.entries.FindAll(e => e.sprite).Count, "FamilyArt sprites (11 starters + 30 stages)");
+            Assert.NotNull(presenter.catalogJson, "Tamtam has no catalog.json assigned");
 
             var t = typeof(EvolutionLabDemo);
             var styles = (System.Array)t.GetField("Styles", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);

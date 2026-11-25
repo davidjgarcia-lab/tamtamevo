@@ -1,5 +1,5 @@
 import {
-  debugAttributeLevels, debugCoins, debugGrantAll, emptyStageLog, debugProblem, addCaretakerXp, PROBLEMS, debugLevelUp, debugNewEgg, debugSetLifetimeCare, debugSetNeed, LUSTRE_NAMES, lustre, type NeedId,
+  debugArenaLevel, debugAttributeLevels, debugCoins, debugGrantAll, emptyStageLog, debugProblem, addCaretakerXp, PROBLEMS, debugLevelUp, debugNewEgg, debugSetLifetimeCare, debugSetNeed, LUSTRE_NAMES, lustre, type NeedId,
 } from "@tamtam/core";
 import { fireColorAlleles } from "@tamtam/art";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -117,6 +117,7 @@ export function DebugPanel({ onClose, toast, onLustreLab, onEvolutionLab, onForc
             <Btn key={pid} small label={`Problema: ${PROBLEMS[pid].name}`} testID={`dbg-problem-${pid}`} onPress={() => { act((s) => debugProblem(s, pid, now())); toast(`Problema: ${PROBLEMS[pid].name}`); }} />
           ))}
           <Btn small label="+200 XP cuidador" testID="dbg-xp" onPress={() => act((s) => { addCaretakerXp(s, 200); })} />
+          <Btn small label="+1 nivel de Arena" testID="dbg-arena-level" onPress={() => { act((s) => debugArenaLevel(s)); toast("Nivel de Arena +1: elige carta en la Arena"); }} />
         </View>
 
         <Text style={d.h}>Evolución genética</Text>

@@ -14,6 +14,8 @@ export interface Genome {
   /** Family whose palette colours the body, index of its base, and the family giving the accent. */
   palette: { base: FamilyId; shade: number; accent: FamilyId };
   mutation: Mutation;
+  /** Evolution line shown in the art (the starter's family, until another family takes over — see physics.ts nextLine). */
+  line?: FamilyId;
 }
 
 /** Chispín (baby) expressed as a genome: a pure fire hatchling (Brasildo line, art sheets 2026-11-24). */

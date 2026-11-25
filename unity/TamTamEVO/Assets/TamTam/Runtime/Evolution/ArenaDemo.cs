@@ -45,7 +45,6 @@ namespace TamTam.Evolution
             var e = familyArt.entries.Find(x => x.family == f && x.stage == "final");
             if (e != null) sr.sprite = e.sprite;
             var pc = sr.GetComponentInParent<PaintedCreature>();
-            if (pc) pc.floating = f == Family.shadow || f == Family.light || f == Family.plasma;
         }
 
         void Turn(SpriteRenderer attacker, SpriteRenderer target)

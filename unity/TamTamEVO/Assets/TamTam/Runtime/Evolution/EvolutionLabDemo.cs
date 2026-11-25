@@ -19,16 +19,30 @@ namespace TamTam.Evolution
         static readonly string[] Stages = { "baby", "child", "juvenile", "adult" };
         static readonly string[] Clips = { "idle", "walk", "attack", "celebrate", "eat", "sleep", "pet", "sad" };
 
-        Genome genome; int stage; uint seed = 1; string info = "Chispín · Bebé";
+        Genome genome; Family? line; int stage; uint seed = 1; string info = "Chispín · Bebé";
 
-        void Start() => presenter.Show(null, "baby");
+        void Start() => NewEgg();
+
+        /// A new egg: one of the starters at random (same list as the web game).
+        void NewEgg()
+        {
+            var catalogText = presenter.catalogJson ? presenter.catalogJson.text : null;
+            var cat = catalogText != null ? JsonUtility.FromJson<CatalogJson>(catalogText) : null;
+            if (cat?.starters == null || cat.starters.Length == 0) { genome = null; stage = 0; presenter.Show(null); info = "Chispín · Bebé"; return; }
+            var st = cat.starters[UnityEngine.Random.Range(0, cat.starters.Length)];
+            genome = st.genome.ToGenome(); stage = 0; line = genome[PartSlot.body];
+            presenter.Show(genome, "baby");
+            info = $"¡Ha nacido un {st.species}! · {st.title} · {string.Join(", ", st.traits)}";
+        }
 
         void Evolve(CareProfile p)
         {
             if (stage >= Stages.Length - 1) return;
             var roll = Genetics.Roll(genome ?? Genetics.Chispin, p, seed++ * 7919u);
+            var prev = line ?? (genome != null ? FamilyArt.Dominant(genome) : Family.fire);
             genome = roll.genome; stage++;
-            presenter.Show(genome, Stages[stage]);
+            line = FamilyArt.NextLine(prev, genome);
+            presenter.Show(genome, Stages[stage], line);
             info = $"{presenter.CurrentName} · {Stages[stage]}{(presenter.CurrentIsExact ? "" : " · (forma más parecida: constrúyela en TamTam ▸ Evoluciones ▸ 2)")}";
         }
 
@@ -40,7 +54,7 @@ namespace TamTam.Evolution
             GUILayout.Label($"<b>{info}</b>", new GUIStyle(GUI.skin.label) { richText = true, fontSize = 15, wordWrap = true });
             GUILayout.Label("Evolucionar con estilo de cuidado:");
             foreach (var (name, p) in Styles) if (GUILayout.Button(name, GUILayout.Height(26))) Evolve(p);
-            if (GUILayout.Button("Volver a Chispín", GUILayout.Height(26))) { genome = null; stage = 0; presenter.Show(null); info = "Chispín · Bebé"; }
+            if (GUILayout.Button("Nuevo huevo (inicial al azar)", GUILayout.Height(26))) NewEgg();
             GUILayout.EndArea();
             GUILayout.BeginArea(new Rect(Screen.width / s - 160, 12, 148, 400));
             foreach (var c in Clips) if (GUILayout.Button(c, GUILayout.Height(24))) presenter.Play(c);

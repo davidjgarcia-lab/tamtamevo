@@ -3,7 +3,7 @@ import {
   careProfile, CHISPIN_GENOME, FAMILIES, familyOdds, type FamilyId,
   arenaStrength, ageInDays, DEFAULT_CARE_CONFIG, FORM_QUALITY, formQuality, lifeMark, LUSTRE_NAMES, MARK_NAMES, lustre, SKILL_VARIANT_NAMES, FOODS, history, itemStatus, placedCount, quantity, rename, satisfaction, SLICE_CATALOG,
   validateName, xpToNext, type CatalogItem, type ShopCategory,
-  furnitureStars,
+  furnitureStars, starterById,
 } from "@tamtam/core";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
@@ -160,7 +160,7 @@ export function ProfileSheet({ onClose }: { onClose: () => void }) {
     <Sheet title={t.name} onClose={onClose} tall>
       <ScrollView contentContainerStyle={{ gap: 10, paddingBottom: 12 }}>
         <Text style={k.desc}>
-          {t.formName ?? "Brasálido · Chispín"} ({stageNames[t.stage]}) · Nivel {t.level} · {ageInDays(t, now())} días · Juguetón, Glotón
+          {t.formName ?? "Brasálido · Chispín"} ({stageNames[t.stage]}) · Nivel {t.level} · {ageInDays(t, now())} días · {starterById(t.starterId ?? "")?.traitLabels.join(", ") ?? "Juguetón, Glotón"}
         </Text>
         {editing ? (
           <View style={{ gap: 6 }}>

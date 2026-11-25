@@ -115,14 +115,14 @@
     "h": 1
    },
    "rectPx": {
-    "x": 86,
-    "y": 304,
+    "x": 276,
+    "y": 415,
     "w": 259.2,
     "h": 138.37499999999997
    },
    "size": {
-    "w": 432,
-    "h": 459
+    "w": 812,
+    "h": 803
    },
    "cell": {
     "w": 86.39999999999999,
@@ -141,14 +141,14 @@
     "h": 2
    },
    "rectPx": {
-    "x": 86,
-    "y": 304,
+    "x": 276,
+    "y": 415,
     "w": 345.59999999999997,
     "h": 276.74999999999994
    },
    "size": {
-    "w": 518,
-    "h": 597
+    "w": 898,
+    "h": 941
    },
    "cell": {
     "w": 86.39999999999999,
@@ -167,14 +167,14 @@
     "h": 1
    },
    "rectPx": {
-    "x": 86,
-    "y": 304,
+    "x": 276,
+    "y": 415,
     "w": 86.39999999999999,
     "h": 138.37499999999997
    },
    "size": {
-    "w": 259,
-    "h": 459
+    "w": 639,
+    "h": 803
    },
    "cell": {
     "w": 86.39999999999999,
@@ -193,14 +193,14 @@
     "h": 1
    },
    "rectPx": {
-    "x": 86,
-    "y": 304,
+    "x": 276,
+    "y": 415,
     "w": 86.39999999999999,
     "h": 138.37499999999997
    },
    "size": {
-    "w": 259,
-    "h": 459
+    "w": 639,
+    "h": 803
    },
    "cell": {
     "w": 86.39999999999999,
@@ -219,14 +219,14 @@
     "h": 2
    },
    "rectPx": {
-    "x": 86,
-    "y": 16,
+    "x": 276,
+    "y": 83,
     "w": 169.2,
     "h": 169.2
    },
    "size": {
-    "w": 342,
-    "h": 202
+    "w": 722,
+    "h": 502
    },
    "cell": {
     "w": 84.6,
@@ -245,14 +245,14 @@
     "h": 2
    },
    "rectPx": {
-    "x": 86,
-    "y": 16,
+    "x": 276,
+    "y": 83,
     "w": 169.2,
     "h": 169.2
    },
    "size": {
-    "w": 342,
-    "h": 202
+    "w": 722,
+    "h": 502
    },
    "cell": {
     "w": 84.6,
@@ -271,14 +271,14 @@
     "h": 2
    },
    "rectPx": {
-    "x": 86,
-    "y": 16,
+    "x": 276,
+    "y": 83,
     "w": 169.2,
     "h": 169.2
    },
    "size": {
-    "w": 342,
-    "h": 202
+    "w": 722,
+    "h": 502
    },
    "cell": {
     "w": 84.6,
@@ -297,14 +297,14 @@
     "h": 2
    },
    "rectPx": {
-    "x": 86,
-    "y": 16,
+    "x": 276,
+    "y": 83,
     "w": 169.2,
     "h": 169.2
    },
    "size": {
-    "w": 342,
-    "h": 202
+    "w": 722,
+    "h": 502
    },
    "cell": {
     "w": 84.6,
@@ -323,14 +323,14 @@
     "h": 2
    },
    "rectPx": {
-    "x": 86,
-    "y": 16,
+    "x": 276,
+    "y": 83,
     "w": 169.2,
     "h": 169.2
    },
    "size": {
-    "w": 342,
-    "h": 202
+    "w": 722,
+    "h": 502
    },
    "cell": {
     "w": 84.6,
@@ -349,14 +349,14 @@
     "h": 2
    },
    "rectPx": {
-    "x": 86,
-    "y": 16,
+    "x": 276,
+    "y": 83,
     "w": 169.2,
     "h": 169.2
    },
    "size": {
-    "w": 342,
-    "h": 202
+    "w": 722,
+    "h": 502
    },
    "cell": {
     "w": 84.6,
@@ -375,14 +375,14 @@
     "h": 2
    },
    "rectPx": {
-    "x": 86,
-    "y": 16,
+    "x": 276,
+    "y": 83,
     "w": 169.2,
     "h": 169.2
    },
    "size": {
-    "w": 342,
-    "h": 202
+    "w": 722,
+    "h": 502
    },
    "cell": {
     "w": 84.6,
@@ -401,14 +401,14 @@
     "h": 2
    },
    "rectPx": {
-    "x": 86,
-    "y": 16,
+    "x": 276,
+    "y": 83,
     "w": 169.2,
     "h": 169.2
    },
    "size": {
-    "w": 342,
-    "h": 202
+    "w": 722,
+    "h": 502
    },
    "cell": {
     "w": 84.6,
@@ -427,14 +427,14 @@
     "h": 1
    },
    "rectPx": {
-    "x": 86,
-    "y": 304,
+    "x": 276,
+    "y": 415,
     "w": 86.39999999999999,
     "h": 138.37499999999997
    },
    "size": {
-    "w": 259,
-    "h": 459
+    "w": 639,
+    "h": 803
    },
    "cell": {
     "w": 86.39999999999999,
@@ -453,14 +453,14 @@
     "h": 1
    },
    "rectPx": {
-    "x": 86,
-    "y": 304,
+    "x": 276,
+    "y": 415,
     "w": 259.2,
     "h": 138.37499999999997
    },
    "size": {
-    "w": 432,
-    "h": 459
+    "w": 812,
+    "h": 803
    },
    "cell": {
     "w": 86.39999999999999,
@@ -479,14 +479,14 @@
     "h": 1
    },
    "rectPx": {
-    "x": 86,
-    "y": 304,
+    "x": 276,
+    "y": 415,
     "w": 86.39999999999999,
     "h": 138.37499999999997
    },
    "size": {
-    "w": 259,
-    "h": 459
+    "w": 639,
+    "h": 803
    },
    "cell": {
     "w": 86.39999999999999,
@@ -505,14 +505,14 @@
     "h": 1
    },
    "rectPx": {
-    "x": 86,
-    "y": 304,
+    "x": 276,
+    "y": 415,
     "w": 86.39999999999999,
     "h": 138.37499999999997
    },
    "size": {
-    "w": 259,
-    "h": 459
+    "w": 639,
+    "h": 803
    },
    "cell": {
     "w": 86.39999999999999,
@@ -531,14 +531,14 @@
     "h": 1
    },
    "rectPx": {
-    "x": 86,
-    "y": 304,
+    "x": 276,
+    "y": 415,
     "w": 86.39999999999999,
     "h": 138.37499999999997
    },
    "size": {
-    "w": 259,
-    "h": 459
+    "w": 639,
+    "h": 803
    },
    "cell": {
     "w": 86.39999999999999,
@@ -557,14 +557,14 @@
     "h": 1
    },
    "rectPx": {
-    "x": 86,
-    "y": 304,
+    "x": 276,
+    "y": 415,
     "w": 86.39999999999999,
     "h": 138.37499999999997
    },
    "size": {
-    "w": 259,
-    "h": 459
+    "w": 639,
+    "h": 803
    },
    "cell": {
     "w": 86.39999999999999,
@@ -583,14 +583,14 @@
     "h": 1
    },
    "rectPx": {
-    "x": 86,
-    "y": 304,
+    "x": 276,
+    "y": 415,
     "w": 172.79999999999998,
     "h": 138.37499999999997
    },
    "size": {
-    "w": 345,
-    "h": 459
+    "w": 725,
+    "h": 803
    },
    "cell": {
     "w": 86.39999999999999,
@@ -609,14 +609,14 @@
     "h": 1
    },
    "rectPx": {
-    "x": 86,
-    "y": 304,
+    "x": 276,
+    "y": 415,
     "w": 172.79999999999998,
     "h": 138.37499999999997
    },
    "size": {
-    "w": 345,
-    "h": 459
+    "w": 725,
+    "h": 803
    },
    "cell": {
     "w": 86.39999999999999,
@@ -627,6 +627,227 @@
    "level": 4
   },
   {
+   "path": "Props/prop_barrel.png",
+   "name": "Barril de roble",
+   "layer": "floor",
+   "footprint": {
+    "w": 1,
+    "h": 1
+   },
+   "prop": true,
+   "comfort": 1,
+   "price": 120,
+   "level": 1
+  },
+  {
+   "path": "Props/prop_crate.png",
+   "name": "Caja de madera",
+   "layer": "floor",
+   "footprint": {
+    "w": 1,
+    "h": 1
+   },
+   "prop": true,
+   "comfort": 1,
+   "price": 80,
+   "level": 1
+  },
+  {
+   "path": "Props/prop_fence.png",
+   "name": "Valla de madera",
+   "layer": "floor",
+   "footprint": {
+    "w": 2,
+    "h": 1
+   },
+   "prop": true,
+   "comfort": 1,
+   "price": 90,
+   "level": 1
+  },
+  {
+   "path": "Props/prop_log.png",
+   "name": "Tronco-banco",
+   "layer": "floor",
+   "footprint": {
+    "w": 2,
+    "h": 1
+   },
+   "prop": true,
+   "comfort": 2,
+   "price": 140,
+   "level": 1
+  },
+  {
+   "path": "Props/prop_rock_moss.png",
+   "name": "Rocas con musgo",
+   "layer": "floor",
+   "footprint": {
+    "w": 2,
+    "h": 1
+   },
+   "prop": true,
+   "comfort": 1,
+   "price": 110,
+   "level": 1
+  },
+  {
+   "path": "Props/prop_stump.png",
+   "name": "Tocón-mesa",
+   "layer": "floor",
+   "footprint": {
+    "w": 2,
+    "h": 1
+   },
+   "prop": true,
+   "comfort": 1,
+   "price": 150,
+   "level": 2
+  },
+  {
+   "path": "Props/prop_lantern.png",
+   "name": "Farol del bosque",
+   "layer": "floor",
+   "footprint": {
+    "w": 1,
+    "h": 1
+   },
+   "prop": true,
+   "comfort": 2,
+   "price": 220,
+   "level": 2
+  },
+  {
+   "path": "Props/prop_mushroom_red.png",
+   "name": "Seta roja",
+   "layer": "floor",
+   "footprint": {
+    "w": 1,
+    "h": 1
+   },
+   "prop": true,
+   "comfort": 1,
+   "price": 160,
+   "level": 2
+  },
+  {
+   "path": "Props/prop_mushroom_cyan.png",
+   "name": "Seta luminosa",
+   "layer": "floor",
+   "footprint": {
+    "w": 1,
+    "h": 1
+   },
+   "prop": true,
+   "comfort": 2,
+   "price": 260,
+   "level": 3
+  },
+  {
+   "path": "Props/prop_crystal_amber.png",
+   "name": "Cristal ámbar",
+   "layer": "floor",
+   "footprint": {
+    "w": 1,
+    "h": 1
+   },
+   "prop": true,
+   "comfort": 2,
+   "price": 300,
+   "level": 3
+  },
+  {
+   "path": "Props/prop_crystal_blue.png",
+   "name": "Cristal azul",
+   "layer": "floor",
+   "footprint": {
+    "w": 1,
+    "h": 1
+   },
+   "prop": true,
+   "comfort": 2,
+   "price": 300,
+   "level": 4
+  },
+  {
+   "path": "Props/prop_crystal_purple.png",
+   "name": "Cristal violeta",
+   "layer": "floor",
+   "footprint": {
+    "w": 1,
+    "h": 1
+   },
+   "prop": true,
+   "comfort": 2,
+   "price": 350,
+   "level": 5
+  },
+  {
+   "path": "Props/prop_banner_royal.png",
+   "name": "Estandarte del clan",
+   "layer": "wall",
+   "footprint": {
+    "w": 1,
+    "h": 2
+   },
+   "prop": true,
+   "comfort": 1,
+   "price": 200,
+   "level": 4
+  },
+  {
+   "path": "Props/prop_pond.png",
+   "name": "Estanque de nenúfares",
+   "layer": "rug",
+   "footprint": {
+    "w": 3,
+    "h": 2
+   },
+   "prop": true,
+   "comfort": 3,
+   "price": 480,
+   "level": 6
+  },
+  {
+   "path": "Props/prop_tree_orange.png",
+   "name": "Árbol otoñal",
+   "layer": "floor",
+   "footprint": {
+    "w": 2,
+    "h": 1
+   },
+   "prop": true,
+   "comfort": 3,
+   "price": 600,
+   "level": 6
+  },
+  {
+   "path": "Props/prop_tree_pink.png",
+   "name": "Cerezo en flor",
+   "layer": "floor",
+   "footprint": {
+    "w": 2,
+    "h": 1
+   },
+   "prop": true,
+   "comfort": 3,
+   "price": 650,
+   "level": 7
+  },
+  {
+   "path": "Props/prop_waterfall.png",
+   "name": "Fuente cascada",
+   "layer": "floor",
+   "footprint": {
+    "w": 2,
+    "h": 1
+   },
+   "prop": true,
+   "comfort": 3,
+   "price": 900,
+   "level": 8
+  },
+  {
    "path": "Furniture/gym_dumbbells.png",
    "name": "Mancuernas",
    "layer": "floor",
@@ -635,14 +856,14 @@
     "h": 1
    },
    "rectPx": {
-    "x": 86,
-    "y": 304,
+    "x": 276,
+    "y": 415,
     "w": 172.79999999999998,
     "h": 138.37499999999997
    },
    "size": {
-    "w": 345,
-    "h": 459
+    "w": 725,
+    "h": 803
    },
    "cell": {
     "w": 86.39999999999999,
@@ -661,14 +882,14 @@
     "h": 1
    },
    "rectPx": {
-    "x": 86,
-    "y": 304,
+    "x": 276,
+    "y": 415,
     "w": 172.79999999999998,
     "h": 138.37499999999997
    },
    "size": {
-    "w": 345,
-    "h": 459
+    "w": 725,
+    "h": 803
    },
    "cell": {
     "w": 86.39999999999999,

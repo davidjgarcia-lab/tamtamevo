@@ -1,4 +1,5 @@
 import { emptyStageLog, stageEligible, type CareState, type StageLog } from "../care/needs";
+import { familyRanking, nextLine } from "./physics";
 import { applyEvolution, type Stage, type Tamtam } from "../identity/tamtam";
 import { lustre, type LustreTier } from "../appearance/appearance";
 import { EYE_STYLES, FAMILIES, FAMILY_EYES, FAMILY_IDS, FAMILY_PATTERNS, PATTERNS, type FamilyId, type Mutation } from "./families";
@@ -180,5 +181,6 @@ export function evolveTamtam(t: Tamtam, care: CareState, now: number, arena?: { 
   const next = applyEvolution(t, { formId, stage: NEXT[t.stage as Exclude<Stage, "adult">] }, now, 2, tier);
   care.maturity = 0;
   care.log = emptyStageLog();
-  return { tamtam: { ...next, genome: roll.genome, formName: roll.name }, roll };
+  const prevLine = t.genome?.line ?? familyRanking(t.genome ?? CHISPIN_GENOME)[0]!.family;
+  return { tamtam: { ...next, genome: { ...roll.genome, line: nextLine(prevLine, roll.genome) }, formName: roll.name }, roll };
 }

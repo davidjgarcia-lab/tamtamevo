@@ -20,7 +20,7 @@ namespace TamTam.Tests
         const string Biomes = "Assets/TamTam/Art/Environments/Biomes";
         const string Furniture = "Assets/TamTam/Art/Environments/NestHouse/Furniture";
         static readonly string[] Stages = { "initial", "intermediate", "final" };
-        static readonly Dictionary<string, float> StageHeight = new Dictionary<string, float> { { "initial", 2.5f }, { "intermediate", 2.7f }, { "final", 3.0f } };
+        static readonly Dictionary<string, float> StageHeight = new Dictionary<string, float> { { "baby", 2.2f }, { "initial", 2.5f }, { "intermediate", 2.7f }, { "final", 3.0f } };
 
         static IEnumerable<string> FamilyPngs() => Directory.GetFiles(Families, "*.png").Select(p => p.Replace('\\', '/')).OrderBy(p => p);
         static IEnumerable<string> BiomePngs() => Directory.GetFiles(Biomes, "*.png").Select(p => p.Replace('\\', '/')).OrderBy(p => p);
@@ -35,7 +35,7 @@ namespace TamTam.Tests
         }
         static RectInt Body(string png) => EvolutionBounds(Load(png));
         static RectInt EvolutionBounds(Texture2D t) => TamTam.EditorTools.Evolution.EvolvedFormsBuilder.OpaqueBounds(t);
-        static string Stage(string png) => Path.GetFileNameWithoutExtension(png).Split('_')[1];
+        static string Stage(string png) { var s = Path.GetFileNameWithoutExtension(png).Split('_')[1]; return s.StartsWith("baby") ? "baby" : s; }
 
         // ── 2D image artist: the 30 painted creatures (6 × 30 = 180) ─────────────────
         [TestCaseSource(nameof(FamilyPngs))]

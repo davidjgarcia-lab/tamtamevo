@@ -4,6 +4,7 @@ import {
   buy, careAction, checkPlacement, readyToEvolve, setFinish, mopPoop, finishBath, peekLife, solveProblem, speechFor, quantity, cloneData, eggProgress, feedFood, FOODS, hatch, lustre, mirror, mood, move, napCooldownLeft, place, PlacementRejected, poopSpot, PROBLEMS,
   SLICE_CATALOG, unplace, ROOMS, ROOM_ORDER, roomUnlocked, switchRoom, toggleLights, takePhoto, peekHouse, roomEffects, type CareKind, type CareReaction, type CatalogItem, type Placement,
 } from "@tamtam/core";
+import { starterGenome, starterOf } from "@tamtam/core";
 import { transformPoint } from "@tamtam/rig";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View, type GestureResponderEvent, type LayoutChangeEvent } from "react-native";
@@ -25,6 +26,7 @@ import { FinishTray, FoodSheet, InventoryTray } from "./sheets";
 import { StudyPanel } from "./StudyPanel";
 import { IconAction } from "./IconAction";
 import { CollectionPanel } from "./CollectionPanel";
+import { usePropImages } from "../home/props";
 import { Platform } from "react-native";
 import { useCanvasRef } from "@shopify/react-native-skia";
 
@@ -101,7 +103,10 @@ export function HomeScreen({
   const liveTier = t ? lustre(state.care, t).tier : "plain";
   const formTier = !t || t.stage === "baby" ? liveTier : t.formQuality ?? liveTier;
   const look = useMemo(() => composeLook(formTier, liveTier), [formTier, liveTier]);
-  const creature = useCreature(t ? state.alleleId : state.egg?.alleleId ?? state.alleleId, look, t?.genome, t?.stage);
+  // While naming, the newborn starter is already visible in the room.
+  const newborn = !t && state.phase === "naming" ? starterOf(state.egg?.formId) : undefined;
+  const shownGenome = t?.genome ?? (newborn ? starterGenome(newborn) : undefined);
+  const creature = useCreature(t ? state.alleleId : state.egg?.alleleId ?? state.alleleId, look, shownGenome, t?.stage ?? "baby");
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [food, setFood] = useState(false);
   const [mode, setMode] = useState<Mode>({ kind: "play" });
@@ -215,7 +220,9 @@ export function HomeScreen({
   // ── Rendering ─────────────────────────────────────────────────────────────
   const hour = new Date(now()).getHours();
   const night = hour >= 21 || hour < 7;
-  const roomPic = useMemo(() => (g ? buildRoomPicture(state.room, g, { night, lightsOn: state.lightsOn }) : null), [g, state.room, night, state.lightsOn]);
+  const propsReady = usePropImages();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const roomPic = useMemo(() => (g ? buildRoomPicture(state.room, g, { night, lightsOn: state.lightsOn }) : null), [g, state.room, night, state.lightsOn, propsReady]);
 
   const poopAt = (ts: number) => {
     const sp = poopSpot(ts);

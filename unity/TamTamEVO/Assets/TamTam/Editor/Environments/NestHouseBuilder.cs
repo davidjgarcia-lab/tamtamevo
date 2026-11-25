@@ -17,7 +17,7 @@ namespace TamTam.EditorTools.Environments
         const float PPU = 100f;
 
         [Serializable] class V2 { public float x, y, w, h; }
-        [Serializable] class Asset { public string path, name, layer; public V2 footprint, rectPx, size; public int level, comfort, price; }
+        [Serializable] class Asset { public string path, name, layer; public V2 footprint, rectPx, size; public int level, comfort, price; public bool prop; }
         [Serializable] class AssetList { public Asset[] assets; }
         [Serializable] class Placement { public string uid, itemId, layer; public int x, y; public bool mirrored, rotated; }
         [Serializable] class Geom { public float w, h, wallTop, wallBottom, floorTop, floorBottom, wallCell, wallX0, floorCellW, floorCellH, floorX0; }
@@ -49,6 +49,7 @@ namespace TamTam.EditorTools.Environments
         public static void ImportAll()
         {
             var list = JsonUtility.FromJson<AssetList>(File.ReadAllText($"{Dir}/assets.json"));
+            var geom = JsonUtility.FromJson<Layout>(File.ReadAllText($"{Dir}/nest_layout.json")).geom;
             AssetDatabase.Refresh();
             foreach (var png in Directory.GetFiles(Dir, "*.png", SearchOption.AllDirectories).Select(p => p.Replace('\\', '/')))
             {
@@ -62,7 +63,16 @@ namespace TamTam.EditorTools.Environments
                 ti.wrapMode = rel.StartsWith("Walls/") || rel.StartsWith("Floors/") ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
                 var st = new TextureImporterSettings(); ti.ReadTextureSettings(st);
                 st.spritePixelsPerUnit = PPU; st.spriteMeshType = SpriteMeshType.FullRect;
-                if (meta?.rectPx != null && meta.size != null && meta.size.w > 0)
+                if (meta != null && meta.prop)
+                {
+                    // Painted prop: as wide as its footprint (like the web), standing on its base (rugs/wall items centred).
+                    var tex = new Texture2D(2, 2); tex.LoadImage(File.ReadAllBytes(png));
+                    float cell = meta.layer == "wall" ? geom.wallCell : geom.floorCellW;
+                    st.spritePixelsPerUnit = tex.width / (meta.footprint.w * cell * (meta.layer == "floor" && meta.footprint.w < 1.5f ? 1.45f : 1.12f) / PPU);
+                    st.spriteAlignment = (int)(meta.layer == "floor" ? SpriteAlignment.BottomCenter : SpriteAlignment.Center);
+                    UnityEngine.Object.DestroyImmediate(tex);
+                }
+                else if (meta?.rectPx != null && meta.size != null && meta.size.w > 0)
                 {
                     // Pivot: middle of the footprint's front edge (floor items) / of the frame's bottom (wall items).
                     st.spriteAlignment = (int)SpriteAlignment.Custom;
@@ -106,8 +116,8 @@ namespace TamTam.EditorTools.Environments
                 var meta = list.assets.FirstOrDefault(a => a.path.EndsWith("/" + p.itemId + ".png"));
                 if (meta == null) { Debug.LogWarning($"TamTam: no asset for {p.itemId}"); continue; }
                 float x, y;
-                if (p.layer == "wall") { x = g.wallX0 + (p.x + meta.footprint.w / 2) * g.wallCell; y = g.wallTop + (p.y + meta.footprint.h) * g.wallCell; }
-                else { x = g.floorX0 + (p.x + meta.footprint.w / 2) * g.floorCellW; y = g.floorTop + (p.y + meta.footprint.h) * g.floorCellH; }
+                if (p.layer == "wall") { x = g.wallX0 + (p.x + meta.footprint.w / 2) * g.wallCell; y = g.wallTop + (p.y + meta.footprint.h * (meta.prop ? 0.5f : 1f)) * g.wallCell; }
+                else { x = g.floorX0 + (p.x + meta.footprint.w / 2) * g.floorCellW; y = g.floorTop + (p.y + meta.footprint.h * (meta.prop && p.layer == "rug" ? 0.5f : 1f)) * g.floorCellH; }
                 var sr = new GameObject(p.itemId).AddComponent<SpriteRenderer>();
                 sr.transform.SetParent(room, false);
                 sr.transform.localPosition = new Vector3(x / PPU, -y / PPU, 0);

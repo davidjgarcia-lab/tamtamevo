@@ -75,6 +75,24 @@ export const FURNITURE: CatalogItem[] = [
   furn("furn_toy_spinner", "Peonza de bellota", "Acorn spinner", "decoration", 180, "uncommon", { layer: "floor", w: 1, h: 1, mirrorable: false, rotatable: false, comfort: 2, interactions: [{ kind: "look", dx: 0, dy: 0, capacity: 1 }] }, 1),
   furn("furn_stove_clay", "Fogón de barro", "Clay stove", "furniture", 400, "uncommon", { layer: "floor", w: 2, h: 1, mirrorable: true, rotatable: false, comfort: 2 }, 1),
   furn("furn_tub_wood", "Tina de madera", "Wooden tub", "furniture", 450, "uncommon", { layer: "floor", w: 2, h: 1, mirrorable: true, rotatable: false, comfort: 2 }, 1),
+  // Painted props from the user's asset sheet (2026-11-25), drawn with their PNG art.
+  furn("prop_barrel", "Barril de roble", "Oak barrel", "furniture", 120, "common", { layer: "floor", w: 1, h: 1, mirrorable: true, rotatable: false, comfort: 1 }, 2),
+  furn("prop_crate", "Caja de madera", "Wooden crate", "furniture", 80, "common", { layer: "floor", w: 1, h: 1, mirrorable: true, rotatable: false, comfort: 1 }, 3),
+  furn("prop_fence", "Valla de madera", "Wooden fence", "decoration", 90, "common", { layer: "floor", w: 2, h: 1, mirrorable: true, rotatable: false, comfort: 1 }, 3),
+  furn("prop_log", "Tronco-banco", "Log bench", "furniture", 140, "common", { layer: "floor", w: 2, h: 1, mirrorable: true, rotatable: false, comfort: 2, interactions: [{ kind: "sit", dx: 0, dy: 0, capacity: 2 }] }, 1),
+  furn("prop_rock_moss", "Rocas con musgo", "Mossy rocks", "decoration", 110, "common", { layer: "floor", w: 2, h: 1, mirrorable: true, rotatable: false, comfort: 1 }, 2),
+  furn("prop_stump", "Tocón-mesa", "Stump table", "furniture", 150, "common", { layer: "floor", w: 2, h: 1, mirrorable: true, rotatable: false, comfort: 1 }, 1),
+  furn("prop_lantern", "Farol del bosque", "Forest lantern", "lighting", 220, "common", { layer: "floor", w: 1, h: 1, mirrorable: true, rotatable: false, comfort: 2 }, 2),
+  furn("prop_mushroom_red", "Seta roja", "Red toadstool", "decoration", 160, "common", { layer: "floor", w: 1, h: 1, mirrorable: true, rotatable: false, comfort: 1 }, 2),
+  furn("prop_mushroom_cyan", "Seta luminosa", "Glowing mushroom", "lighting", 260, "uncommon", { layer: "floor", w: 1, h: 1, mirrorable: true, rotatable: false, comfort: 2 }, 2),
+  furn("prop_crystal_amber", "Cristal ámbar", "Amber crystal", "lighting", 300, "uncommon", { layer: "floor", w: 1, h: 1, mirrorable: true, rotatable: false, comfort: 2 }, 1),
+  furn("prop_crystal_blue", "Cristal azul", "Blue crystal", "lighting", 300, "uncommon", { layer: "floor", w: 1, h: 1, mirrorable: true, rotatable: false, comfort: 2 }, 1),
+  furn("prop_crystal_purple", "Cristal violeta", "Violet crystal", "lighting", 350, "uncommon", { layer: "floor", w: 1, h: 1, mirrorable: true, rotatable: false, comfort: 2 }, 1),
+  furn("prop_banner_royal", "Estandarte del clan", "Clan banner", "decoration", 200, "uncommon", { layer: "wall", w: 1, h: 2, mirrorable: false, rotatable: false, comfort: 1 }, 2),
+  furn("prop_pond", "Estanque de nenúfares", "Lily pond", "decoration", 480, "rare", { layer: "rug", w: 3, h: 2, mirrorable: true, rotatable: false, comfort: 3 }, 1),
+  furn("prop_tree_orange", "Árbol otoñal", "Autumn tree", "decoration", 600, "rare", { layer: "floor", w: 2, h: 1, mirrorable: true, rotatable: false, comfort: 3 }, 1),
+  furn("prop_tree_pink", "Cerezo en flor", "Blossom tree", "decoration", 650, "rare", { layer: "floor", w: 2, h: 1, mirrorable: true, rotatable: false, comfort: 3 }, 1),
+  furn("prop_waterfall", "Fuente cascada", "Waterfall fountain", "decoration", 900, "rare", { layer: "floor", w: 2, h: 1, mirrorable: true, rotatable: false, comfort: 3 }, 1),
   furn("gym_dumbbells", "Mancuernas", "Dumbbells", "equipment", 0, "common", { layer: "floor", w: 2, h: 1, mirrorable: true, rotatable: false, interactions: [{ kind: "train", dx: 0, dy: 0, capacity: 1 }] }, 1),
   furn("study_desk", "Escritorio de estudio", "Study desk", "equipment", 0, "common", { layer: "floor", w: 2, h: 1, mirrorable: true, rotatable: false, interactions: [{ kind: "study", dx: 0, dy: 0, capacity: 1 }] }, 1),
 ];
@@ -111,7 +129,7 @@ export const ACCESSORIES: CatalogItem[] = [
 ];
 
 /** Caretaker level needed to buy each item (unlock progression, PLAN_MEJORAS A2). */
-export const ITEM_LEVELS: Record<string, number> = {"furn_poster_stars": 3, "furn_poster_sea": 2, "furn_poster_mountains": 4, "furn_poster_aurora": 8, "furn_poster_waterfall": 5, "furn_poster_desert": 6, "furn_plant_fern": 2, "furn_brazier": 7, "wall_logs": 2, "wall_moss": 5, "wall_leaves": 3, "wall_treeheart": 9, "floor_moss": 3, "floor_stone": 5, "floor_rings": 8, "food_roast_skewer": 3, "furn_toy_ball": 2, "furn_stove_clay": 2, "furn_litter_moss": 4, "furn_tub_wood": 4, "furn_toy_spinner": 6};
+export const ITEM_LEVELS: Record<string, number> = {"furn_poster_stars": 3, "furn_poster_sea": 2, "furn_poster_mountains": 4, "furn_poster_aurora": 8, "furn_poster_waterfall": 5, "furn_poster_desert": 6, "furn_plant_fern": 2, "furn_brazier": 7, "wall_logs": 2, "wall_moss": 5, "wall_leaves": 3, "wall_treeheart": 9, "floor_moss": 3, "floor_stone": 5, "floor_rings": 8, "food_roast_skewer": 3, "furn_toy_ball": 2, "furn_stove_clay": 2, "furn_litter_moss": 4, "furn_tub_wood": 4, "furn_toy_spinner": 6, "prop_lantern": 2, "prop_mushroom_red": 2, "prop_mushroom_cyan": 3, "prop_crystal_amber": 3, "prop_crystal_blue": 4, "prop_crystal_purple": 5, "prop_banner_royal": 4, "prop_pond": 6, "prop_tree_orange": 6, "prop_tree_pink": 7, "prop_waterfall": 8, "prop_stump": 2};
 for (const it of [...FURNITURE, ...WALL_FINISHES, ...FLOOR_FINISHES, ...Object.values(FOODS).map((f) => f.item)]) it.level = ITEM_LEVELS[it.id] ?? 1;
 
 export const SLICE_CATALOG = validateCatalog([...FURNITURE, ...WALL_FINISHES, ...FLOOR_FINISHES, ...Object.values(FOODS).map((f) => f.item), ...ACCESSORIES]);
@@ -129,6 +147,9 @@ export const STARTER_ITEMS: Record<string, number> = {
   study_desk: 1,
   food_berry_bun: 3,
   food_ember_pepper: 2,
+  prop_mushroom_cyan: 1,
+  prop_crystal_blue: 1,
+  prop_rock_moss: 1,
 };
 
 export const STARTER_COINS = 300;

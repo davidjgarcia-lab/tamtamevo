@@ -68,7 +68,7 @@ try {
   await page.mouse.click(b.x + b.width / 2, b.y + b.height * 0.72);
   await page.waitForTimeout(500);
   await shot("02-egg-cracking");
-  await page.getByText("¡Ha nacido un Brasálido!").waitFor({ timeout: 5000 });
+  await page.getByText(/^¡Ha nacido un /).waitFor({ timeout: 5000 });
   await page.waitForTimeout(600);
   await shot("03-naming-in-room");
   check("E2E-02", "El huevo se abre en la habitación (sin pantalla aparte)", await page.getByTestId("stage").isVisible());
@@ -327,6 +327,12 @@ try {
     if (i === 0) await shot("23b-battle-replay-revenge");
     await page.getByTestId("battle-exit").click();
     await page.waitForTimeout(400);
+  }
+  if (!(await page.getByTestId("arena-cards").isVisible().catch(() => false))) {
+    // Lost every fight (random starter): not enough Arena XP yet — level up from the debug panel to test the cards.
+    await dev("dbg-arena-level");
+    await page.getByTestId("tab-arena").click();
+    await page.waitForTimeout(500);
   }
   const cardsShown = await page.getByTestId("arena-cards").isVisible().catch(() => false);
   if (cardsShown) {

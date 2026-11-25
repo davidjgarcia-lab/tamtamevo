@@ -51,7 +51,7 @@ namespace TamTam.EditorTools.Evolution
                 ti.textureType = TextureImporterType.Sprite; ti.spriteImportMode = SpriteImportMode.Single;
                 ti.mipmapEnabled = true; ti.alphaIsTransparency = true; ti.textureCompression = TextureImporterCompression.CompressedHQ;
                 var st = new TextureImporterSettings(); ti.ReadTextureSettings(st);
-                float height = parts[1] == "final" ? 3.0f : parts[1] == "intermediate" ? 2.7f : 2.5f;
+                float height = parts[1] == "final" ? 3.0f : parts[1] == "intermediate" ? 2.7f : parts[1].StartsWith("baby") ? 2.2f : 2.5f;
                 // QA fix: the sheets have transparent margins, so "bottom centre" left the creatures floating.
                 // Size by the visible body and put the pivot on the lowest opaque row (the feet).
                 var body = OpaqueBounds(tex);
@@ -66,7 +66,7 @@ namespace TamTam.EditorTools.Evolution
             art.material = PaintedMaterial();
             EditorUtility.SetDirty(art);
             AssetDatabase.SaveAssets();
-            Debug.Log($"TamTam: painted family art imported ({art.entries.Count} sprites, expected 30).");
+            Debug.Log($"TamTam: painted family art imported ({art.entries.Count} sprites, expected 41: 11 starters + 30 stages).");
             return art;
         }
 
@@ -271,6 +271,7 @@ namespace TamTam.EditorTools.Evolution
             var presenter = go.AddComponent<TamtamPresenter>();
             presenter.catalog = catalog;
             presenter.familyArt = AssetDatabase.LoadAssetAtPath<FamilyArt>(FamilyArtPath) ?? ImportFamilyArt();
+            presenter.catalogJson = AssetDatabase.LoadAssetAtPath<TextAsset>($"{DataDir}/catalog.json");
             var habitat = new GameObject("HabitatBackdrop").AddComponent<HabitatBackdrop>();
             habitat.presenter = presenter; habitat.backdrop = bg; habitat.cam = cam;
             HabitatBackdrop.Fit(bg, cam);

@@ -1,3 +1,4 @@
+using System.Linq;
 using TamTam.Core;
 using UnityEngine;
 
@@ -10,6 +11,18 @@ namespace TamTam.Evolution
         public EvolutionCatalog catalog;
         [Tooltip("Painted family art (10 families × 3 stages). When set, evolved forms use it; the vector forms are the fallback.")]
         public FamilyArt familyArt;
+        [Tooltip("Data/Evolution/catalog.json: starters (personality, eyes) and the motion of each family/stage.")]
+        public TextAsset catalogJson;
+        CatalogJson data;
+        CatalogJson Data => data ??= catalogJson ? JsonUtility.FromJson<CatalogJson>(catalogJson.text) : null;
+
+        /// Starter whose look this genome has (pure genome of a starter family/variant), if any.
+        public StarterJson StarterFor(Genome g)
+        {
+            if (Data?.starters == null || g == null || g.parts.Distinct().Count() != 1) return null;
+            return Data.starters.FirstOrDefault(s => s.family == g.parts[0].ToString() && s.variant == g.variant[0])
+                ?? Data.starters.FirstOrDefault(s => s.family == g.parts[0].ToString());
+        }
         [Tooltip("Where the creature is placed (defaults to this transform).")]
         public Transform anchor;
         public float emission = 1;
@@ -25,21 +38,29 @@ namespace TamTam.Evolution
         // Same as STAGE_SCALE in apps/mobile/src/creature/useCreature.ts.
         public static float StageScale(string stage) => stage switch { "child" => 1.1f, "juvenile" => 1.22f, "adult" => 1.34f, _ => 1f };
 
-        public void Show(Genome genome, string stage = "baby")
+        public void Show(Genome genome, string stage = "baby", Family? line = null)
         {
             if (Current) Destroy(Current);
             var parent = anchor ? anchor : transform;
-            var art = genome != null && stage != "baby" && familyArt ? familyArt.Get(genome, stage) : null;
-            CurrentGenome = stage == "baby" ? null : genome;
+            var art = genome != null && familyArt ? familyArt.Get(genome, stage, line) : null;
+            CurrentGenome = genome;
             if (art)
             {
                 var pc = familyArt.Spawn(art, parent, "Tamtam_" + art.name);
                 Current = pc.gameObject;
                 Current.transform.localScale = Vector3.one * StageScale(stage);
-                var fam = FamilyArt.Dominant(genome);
-                pc.floating = fam == Family.shadow || fam == Family.light || fam == Family.plasma;
+                var artStage = FamilyArt.ArtStage(stage);
+                var fam = artStage == "baby" ? FamilyArt.Dominant(genome) : line ?? FamilyArt.Dominant(genome);
+                var starter = artStage == "baby" ? StarterFor(genome) : null;
+                // Physics: evolved forms move with their LEGS' family (web: motionFor(parts.legs, stage)).
+                var legs = genome[PartSlot.legs].ToString();
+                var mj = starter?.motion ?? Data?.motions?.FirstOrDefault(x => x.family == legs && x.stage == artStage)?.motion;
+                if (mj != null) pc.motion = mj;
                 pc.SetMutation(genome.mutation);
-                CurrentName = Genetics.FormName(genome, 1);
+                if (starter?.eye != null && !string.IsNullOrEmpty(starter.eye.lid)) pc.SetEye(starter.eye);
+                var sec = artStage == "baby" ? null : FamilyArt.Secondary(genome, fam);
+                if (sec.HasValue) pc.SetAura(GenomePalette.Hex(Genetics.Defs[sec.Value].Glow));
+                CurrentName = starter != null ? starter.species : Genetics.FormName(genome, 1);
                 CurrentIsExact = true;
                 Shown?.Invoke();
                 return;

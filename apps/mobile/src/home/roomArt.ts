@@ -1,4 +1,5 @@
 import { BlurStyle, ClipOp, createPicture, PaintStyle, Skia, StrokeCap, StrokeJoin, TileMode, vec, type SkCanvas, type SkPicture } from "@shopify/react-native-skia";
+import { PROP_IMAGES } from "./props";
 import { footprint, SLICE_CATALOG, type Placement, type RoomLayout } from "@tamtam/core";
 
 /**
@@ -205,6 +206,23 @@ export function drawFurniture(c: SkCanvas, itemId: string, r: { x: number; y: nu
   const { x, y, w, h } = r;
   const base = y + h; // floor contact line
   const cx = x + w / 2;
+  const prop = PROP_IMAGES[itemId];
+  if (prop) {
+    // Painted prop: fit the footprint width, stand on the contact line (rugs lie inside it, wall items hang in it).
+    const ar = prop.height() / prop.width();
+    const fs = SLICE_CATALOG.get(itemId)?.furniture;
+    const layer = fs?.layer;
+    let dw = w * (fs?.w === 1 && layer === "floor" ? 1.45 : 1.12), dh = dw * ar;
+    if (layer === "wall" && dh > h) { dh = h; dw = dh / ar; }
+    if (layer === "rug" && dh > h * 1.4) { dh = h * 1.4; dw = dh / ar; }
+    const dy = layer === "wall" ? y + (h - dh) / 2 : layer === "rug" ? y + (h - dh) / 2 : base - dh + u * 0.12;
+    if (layer !== "wall") shadow(c, cx, base, dw * 0.42, u * 0.16);
+    const p = Skia.Paint();
+    p.setAntiAlias(true);
+    c.drawImageRect(prop, Skia.XYWHRect(0, 0, prop.width(), prop.height()), Skia.XYWHRect(cx - dw / 2, dy, dw, dh), p);
+    c.restore();
+    return;
+  }
   if (itemId.startsWith("furn_poster_")) {
     painting(c, itemId === "furn_poster_volcano" && variant === "night" ? "stars" : itemId.slice("furn_poster_".length), r, u);
     c.restore();

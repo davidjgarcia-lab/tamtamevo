@@ -27,6 +27,8 @@ export interface Tamtam {
   genome?: import("../genetics/genome").Genome;
   /** Generated form name (e.g. "Ferrino"). */
   formName?: string;
+  /** Starter it hatched as (personality, favourite food, voice). Absent for the legacy Chispín. */
+  starterId?: string;
 }
 
 export class NameRejected extends Error {
