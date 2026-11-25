@@ -83,10 +83,10 @@ export function useCreature(alleleId: string, look: Look = DEFAULT_LOOK, genome?
       rig: model.rig,
       clips: model.clips,
       painted: usePainted ? buildPainted(paintedImg!, eyesImg!, alleleId, look.emissive) : null,
-      sprite: useSprite ? buildSprite(spriteImg!, genome!, model.rig.boneIds.indexOf("body")) : null,
+      sprite: useSprite ? buildSprite(spriteImg!, genome!, model.rig.boneIds, stage) : null,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [model, palette, look, usePainted, useSprite, spriteImg, alleleId],
+    [model, palette, look, usePainted, useSprite, spriteImg, alleleId, stage],
   );
   const particleMul = look.particles;
   const clock = useSharedValue(0);

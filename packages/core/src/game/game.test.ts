@@ -9,7 +9,7 @@ const H = 3_600_000;
 const T0 = Date.UTC(2026, 10, 20, 9, 0); // 10:00 local (UTC+1)
 
 function hatched(name = "Pimpollo"): GameState {
-  const s = newGame(T0, { tamtamId: "tt-1" });
+  const s = newGame(T0, { tamtamId: "tt-6" });
   hatch(s, T0 + 8_000);
   nameNewTamtam(s, name, T0 + 21_000);
   return s;

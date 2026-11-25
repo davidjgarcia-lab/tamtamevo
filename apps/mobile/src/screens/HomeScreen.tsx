@@ -4,6 +4,7 @@ import {
   buy, careAction, checkPlacement, readyToEvolve, setFinish, mopPoop, finishBath, peekLife, solveProblem, speechFor, quantity, cloneData, eggProgress, feedFood, FOODS, hatch, lustre, mirror, mood, move, napCooldownLeft, place, PlacementRejected, poopSpot, PROBLEMS,
   SLICE_CATALOG, unplace, ROOMS, ROOM_ORDER, roomUnlocked, switchRoom, toggleLights, takePhoto, peekHouse, roomEffects, type CareKind, type CareReaction, type CatalogItem, type Placement,
 } from "@tamtam/core";
+import { starterGenome, starterOf } from "@tamtam/core";
 import { transformPoint } from "@tamtam/rig";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View, type GestureResponderEvent, type LayoutChangeEvent } from "react-native";
@@ -101,7 +102,10 @@ export function HomeScreen({
   const liveTier = t ? lustre(state.care, t).tier : "plain";
   const formTier = !t || t.stage === "baby" ? liveTier : t.formQuality ?? liveTier;
   const look = useMemo(() => composeLook(formTier, liveTier), [formTier, liveTier]);
-  const creature = useCreature(t ? state.alleleId : state.egg?.alleleId ?? state.alleleId, look, t?.genome, t?.stage);
+  // While naming, the newborn starter is already visible in the room.
+  const newborn = !t && state.phase === "naming" ? starterOf(state.egg?.formId) : undefined;
+  const shownGenome = t?.genome ?? (newborn ? starterGenome(newborn) : undefined);
+  const creature = useCreature(t ? state.alleleId : state.egg?.alleleId ?? state.alleleId, look, shownGenome, t?.stage ?? "baby");
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [food, setFood] = useState(false);
   const [mode, setMode] = useState<Mode>({ kind: "play" });

@@ -2,6 +2,7 @@ import { advanceCare, bathe, type CareReaction } from "../care/needs";
 import { credit } from "../economy/wallet";
 import { GameRuleError, type GameState } from "./game";
 import { roomBathBonus } from "./house";
+import { starterById } from "../genetics/starters";
 
 /**
  * "Feels alive" layer (references batch 2, PLAN_MEJORAS phase A):
@@ -193,6 +194,9 @@ export function speechFor(s: Readonly<GameState>, now: number): { mood: SpeechMo
   else if (n.energy < 25) mood = "tired";
   else if (n.affection < 35) mood = "lonely";
   else if (n.happiness < 40 || n.activity < 30) mood = "bored";
-  const list = SPEECH[mood];
+  // Personality: the starter's own lines mix with the common ones.
+  const st = starterById(s.tamtam?.starterId ?? "");
+  const own = st && (mood === "happy" || mood === "bored" || mood === "hungry" || mood === "lonely") ? st.lines[mood] : [];
+  const list = [...own, ...SPEECH[mood]];
   return { mood, text: list[Math.floor(now / 60_000) % list.length]! };
 }

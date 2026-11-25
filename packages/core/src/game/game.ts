@@ -14,6 +14,7 @@ import { FOODS, GYM, SLICE_CATALOG, STARTER_COINS, STARTER_ITEMS } from "./conte
 import { newArenaState, type ArenaState } from "./arena";
 import { FORM_QUALITY, formQuality, lustre } from "../appearance/appearance";
 import { payCare, tickLife } from "./life";
+import { pickStarter, starterById, starterGenome, starterOf } from "../genetics/starters";
 import { placedEverywhere, roomFoodBonus, tickHouse } from "./house";
 
 /**
@@ -70,7 +71,7 @@ export function newGame(now: number, ids: { tamtamId: string }, alleleId = "bras
     schemaVersion: SCHEMA_VERSION,
     createdAt: now,
     phase: "egg",
-    egg: { tamtamId: ids.tamtamId, speciesId: "fire", formId: "fire_baby_chispin", laidAt: now, hatchAt: now + FIRST_EGG_INCUBATION_MS, alleleId },
+    egg: newEgg(ids.tamtamId, now, alleleId),
     tamtam: null,
     alleleId,
     care: newCareState(now),
@@ -105,17 +106,30 @@ export function hatch(s: GameState, now: number): void {
   s.phase = "naming";
 }
 
-export function nameNewTamtam(s: GameState, requestedName: string, now: number): Tamtam {
-  if (s.phase !== "naming" || !s.egg) throw new GameRuleError("not_naming");
+/** A new egg: it will hatch one of the starters at random (deterministic per egg id). */
+export function newEgg(tamtamId: string, now: number, alleleId: string): NonNullable<GameState["egg"]> {
+  const st = pickStarter(tamtamId);
+  return { tamtamId, speciesId: st.family, formId: `starter_${st.id}`, laidAt: now, hatchAt: now + FIRST_EGG_INCUBATION_MS, alleleId };
+}
+
+/** Tamtam that comes out of an egg: a starter with its genome and personality (or the legacy Chispín). */
+function hatchFromEgg(egg: NonNullable<GameState["egg"]>, requestedName: string, now: number): Tamtam {
+  const st = starterOf(egg.formId);
   const t = hatchTamtam({
-    id: s.egg.tamtamId,
-    speciesId: s.egg.speciesId,
-    formId: s.egg.formId,
+    id: egg.tamtamId,
+    speciesId: egg.speciesId,
+    formId: egg.formId,
     requestedName,
     bornAt: now,
-    personality: ["playful", "glutton"],
-    affinity: { primary: "fire", secondary: "fire" },
+    personality: st ? st.traits : ["playful", "glutton"],
+    affinity: { primary: st?.family ?? "fire", secondary: st?.family ?? "fire" },
   });
+  return st ? { ...t, genome: starterGenome(st), formName: st.species, starterId: st.id } : t;
+}
+
+export function nameNewTamtam(s: GameState, requestedName: string, now: number): Tamtam {
+  if (s.phase !== "naming" || !s.egg) throw new GameRuleError("not_naming");
+  const t = hatchFromEgg(s.egg, requestedName, now);
   s.tamtam = t;
   s.alleleId = s.egg.alleleId;
   s.egg = null;
@@ -163,7 +177,10 @@ export function feedFood(s: GameState, foodId: string, now: number): CareReactio
   if (!food) throw new GameRuleError("unknown_food");
   if (quantity(s.economy.inventory, foodId) < 1) throw new GameRuleError("no_food");
   const bonus = roomFoodBonus(s);
-  const r = feed(s.care, bonus === 1 ? food : { ...food, hunger: Math.round(food.hunger * bonus) }, s.tamtam.speciesId, now);
+  // The starter's own favourite food also counts as a favourite (personality).
+  const fav = starterById(s.tamtam.starterId ?? "")?.favoriteFood === foodId;
+  const tuned = { ...food, hunger: Math.round(food.hunger * bonus), favoriteOf: fav ? [...food.favoriteOf, s.tamtam.speciesId] : food.favoriteOf };
+  const r = feed(s.care, tuned, s.tamtam.speciesId, now);
   if (r === "refuse_full" || r === "already_asleep") return r;
   removeItem(s.economy.inventory, foodId, 1);
   payCare(s, "feed", now);
@@ -306,12 +323,12 @@ export function debugGrantAll(s: GameState, now: number): void {
 export function debugNewEgg(s: GameState, now: number, tamtamId: string, alleleId: string): void {
   // With a Tamtam at home, the newborn goes to the farm (Granja); otherwise it is the egg in the room.
   if (s.tamtam) {
-    const t = hatchTamtam({ id: tamtamId, speciesId: "fire", formId: "fire_baby_chispin", requestedName: "", bornAt: now, personality: ["curious"], affinity: { primary: "fire", secondary: "fire" } });
+    const t = hatchFromEgg(newEgg(tamtamId, now, alleleId), "", now);
     s.farm.push({ tamtam: t, care: newCareState(now), alleleId });
     return;
   }
   s.phase = "egg";
-  s.egg = { tamtamId, speciesId: "fire", formId: "fire_baby_chispin", laidAt: now, hatchAt: now + FIRST_EGG_INCUBATION_MS, alleleId };
+  s.egg = newEgg(tamtamId, now, alleleId);
 }
 
 /**

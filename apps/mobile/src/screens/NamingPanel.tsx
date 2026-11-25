@@ -1,4 +1,4 @@
-import { DEFAULT_NAMES, nameNewTamtam, validateName, type NameError } from "@tamtam/core";
+import { DEFAULT_NAMES, nameNewTamtam, starterOf, validateName, type NameError } from "@tamtam/core";
 import { useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import { useGame } from "../game/GameProvider";
@@ -16,7 +16,8 @@ const ERRORS: Record<NameError, string> = {
 
 /** Naming happens right in the room, under the newborn Tamtam (no separate screen). */
 export function NamingPanel() {
-  const { act, now } = useGame();
+  const { act, now, state } = useGame();
+  const starter = starterOf(state.egg?.formId);
   const [name, setName] = useState("");
   const [touched, setTouched] = useState(false);
   const result = validateName(name);
@@ -24,7 +25,8 @@ export function NamingPanel() {
   const bad = touched && !result.ok && name !== "";
 
   const suggest = () => {
-    const list = DEFAULT_NAMES.fire!;
+    const key = ({ plant: "nature", shadow: "dark", rock: "earth", plasma: "cosmos" } as Record<string, string>)[starter?.family ?? ""] ?? starter?.family ?? "fire";
+    const list = DEFAULT_NAMES[key] ?? DEFAULT_NAMES.fire!;
     setName(list[Math.floor(Math.random() * list.length)]!);
     setTouched(true);
   };
@@ -36,7 +38,8 @@ export function NamingPanel() {
 
   return (
     <View style={st.form}>
-      <Text style={st.kicker}>¡Ha nacido un Brasálido!</Text>
+      <Text style={st.kicker}>{starter ? `¡Ha nacido un ${starter.species}!` : "¡Ha nacido un Brasálido!"}</Text>
+      {starter && <Text style={st.label}>{starter.title} · {starter.traitLabels.join(", ")}</Text>}
       <Text style={st.label} nativeID="nameLabel">¿Cómo se llamará tu Tamtam?</Text>
       <TextInput
         value={name}

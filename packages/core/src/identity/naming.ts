@@ -88,11 +88,15 @@ export const DEFAULT_NAMES: Record<string, string[]> = {
   light: ["Lumi", "Aurora", "Sol", "Halo", "Albor", "Perla", "Miel", "Prisma"],
   earth: ["Guijarro", "Canto", "Arcilla", "Geoda", "Ocre", "Pedrusco", "Cuarzo", "Mica"],
   cosmos: ["Nebulosa", "Orbe", "Cometa", "Estrella", "Luna", "Astro", "Quasar", "Polvo"],
+  crystal: ["Gema", "Zafiro", "Cuarzo", "Brillo", "Diamante", "Ópalo", "Escarcha", "Topacio"],
+  mystic: ["Runa", "Arcano", "Sueño", "Enigma", "Oráculo", "Lirio", "Sibila", "Merlín"],
 };
+/** Family ids of the genetics → name lists. */
+const NAME_LIST_OF: Record<string, string> = { plant: "nature", shadow: "dark", rock: "earth", plasma: "cosmos" };
 
 /** Deterministic default name for a Tamtam (stable for the same id). */
 export function defaultName(familyId: string, tamtamId: string): string {
-  const list = DEFAULT_NAMES[familyId] ?? DEFAULT_NAMES.fire!;
+  const list = DEFAULT_NAMES[familyId] ?? DEFAULT_NAMES[NAME_LIST_OF[familyId] ?? ""] ?? DEFAULT_NAMES.fire!;
   let h = 2166136261;
   for (let i = 0; i < tamtamId.length; i++) h = Math.imul(h ^ tamtamId.charCodeAt(i), 16777619);
   return list[(h >>> 0) % list.length]!;
